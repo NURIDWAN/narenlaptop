@@ -7,6 +7,7 @@ use App\Models\ArticleCategory;
 use App\Models\Media;
 use App\Models\Page;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\Service;
 use App\Models\Slider;
 use App\Services\PageBuilderService;
@@ -161,7 +162,10 @@ class PageController extends Controller
             'products' => Product::query()
                 ->orderBy('order')
                 ->orderBy('name')
-                ->get(['id', 'name', 'slug', 'is_active']),
+                ->get(['id', 'name', 'slug', 'category_id', 'is_active']),
+            'productCategories' => ProductCategory::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug']),
             'sliders' => Slider::query()
                 ->orderBy('order')
                 ->orderBy('title')

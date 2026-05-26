@@ -164,9 +164,11 @@ class PageSectionDataResolver
     private function products(array $settings): array
     {
         $limit = $this->limit(Arr::get($settings, 'limit', 8), 1, 24);
+        $categoryId = (int) Arr::get($settings, 'category_id');
 
         return [
             'items' => Product::active()
+                ->when($categoryId > 0, fn ($query) => $query->where('category_id', $categoryId))
                 ->take($limit)
                 ->get(['id', 'name', 'slug', 'description', 'price', 'discount_price', 'badge', 'image', 'images', 'cta_url'])
                 ->map(function (Product $product) {

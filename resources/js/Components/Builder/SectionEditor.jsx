@@ -494,7 +494,11 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
 function ProductsEditor({ settings, onChange, builderData = {} }) {
     const set = (key, val) => onChange({ ...settings, [key]: val });
     const items = settings.items || [];
-    const productCount = builderData.products?.length || 0;
+    const categories = builderData.productCategories || [];
+    const selectedCategoryId = String(settings.category_id || '');
+    const productCount = (builderData.products || [])
+        .filter((product) => product.is_active && (!selectedCategoryId || String(product.category_id || '') === selectedCategoryId))
+        .length;
 
     function updateItem(index, key, val) {
         set('items', items.map((item, i) => i === index ? { ...item, [key]: val } : item));
@@ -518,10 +522,26 @@ function ProductsEditor({ settings, onChange, builderData = {} }) {
             </SectionGroup>
             <Separator />
             <SourceSelector settings={settings} onChange={onChange} description="Mode database mengambil produk aktif dari menu Produk.">
-                <Field label="Jumlah Produk" type="number" value={settings.limit || 8} onChange={(v) => set('limit', v)} />
+                <div className="grid gap-3 md:grid-cols-2">
+                    <SelectField
+                        label="Kategori Produk"
+                        value={settings.category_id || ''}
+                        onChange={(v) => set('category_id', v)}
+                        options={[
+                            { value: '', label: 'Semua kategori' },
+                            ...categories.map((category) => ({ value: String(category.id), label: category.name })),
+                        ]}
+                    />
+                    <Field label="Jumlah Produk" type="number" value={settings.limit || 8} onChange={(v) => set('limit', v)} />
+                </div>
                 <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
-                    {productCount} produk tersedia di database. Hanya produk aktif yang tampil di halaman publik.
+                    {productCount} produk tersedia untuk pilihan ini. Hanya produk aktif yang tampil di halaman publik.
                 </p>
+                {categories.length === 0 && (
+                    <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
+                        Belum ada kategori produk. Section tetap bisa menampilkan semua produk.
+                    </p>
+                )}
             </SourceSelector>
             {(settings.source || 'manual') !== 'database' && (
                 <>

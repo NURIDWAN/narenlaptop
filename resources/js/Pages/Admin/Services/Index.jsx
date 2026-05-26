@@ -1,116 +1,219 @@
 import { router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowUpDown, PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-export default function ServicesIndex({ services }) {
-    const [editingId, setEditingId] = useState(null);
-    const { data, setData, post, put, processing, reset } = useForm({
-        title: '',
-        description: '',
-        icon: '',
-        order: 0,
-        is_active: true,
-    });
+export default function ServicesIndex({ services, filters = {} }) {
+    const [search, setSearch] = useState(filters.search || '');
+    const [editing, setEditing] = useState(null);
+    const items = services.data || [];
 
-    function edit(service) {
-        setEditingId(service.id);
-        setData({
-            title: service.title || '',
-            description: service.description || '',
-            icon: service.icon || '',
-            order: service.order || 0,
-            is_active: Boolean(service.is_active),
-        });
+    function applyFilters(patch) {
+        router.get('/admin/services', { ...filters, ...patch }, { preserveState: true, replace: true });
     }
 
-    function clear() {
-        setEditingId(null);
-        reset();
-    }
-
-    function submit(event) {
+    function handleSearch(event) {
         event.preventDefault();
-        const options = { preserveScroll: true, onSuccess: clear };
+        applyFilters({ search, page: undefined });
+    }
 
-        editingId ? put(`/admin/services/${editingId}`, options) : post('/admin/services', options);
+    function toggleSort(col) {
+        const dir = filters.sort === col && filters.direction === 'asc' ? 'desc' : 'asc';
+        applyFilters({ sort: col, direction: dir, page: undefined });
+    }
+
+    function handleDelete(id) {
+        if (!confirm('Hapus layanan ini?')) return;
+        router.delete(`/admin/services/${id}`, { preserveScroll: true });
     }
 
     return (
         <AdminLayout title="Layanan">
-            <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-                <form onSubmit={submit} className="space-y-4 rounded-lg border bg-white p-4 shadow-sm">
-                    <div>
-                        <h2 className="text-lg font-semibold">{editingId ? 'Edit Layanan' : 'Tambah Layanan'}</h2>
-                        <p className="text-sm text-slate-500">Data aktif bisa dipakai oleh section Layanan mode database.</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <form onSubmit={handleSearch} className="flex gap-2">
+                    <div className="relative">
+                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <Input className="w-56 pl-9" placeholder="Cari layanan..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
-                    <Field label="Nama Layanan" value={data.title} onChange={(value) => setData('title', value)} required />
-                    <Textarea label="Deskripsi" value={data.description} onChange={(value) => setData('description', value)} />
-                    <div className="grid gap-3 md:grid-cols-2">
-                        <Field label="Icon" value={data.icon} onChange={(value) => setData('icon', value)} placeholder="wrench" />
-                        <Field label="Urutan" type="number" value={data.order} onChange={(value) => setData('order', value)} />
+                    <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.active ?? ''} onChange={(e) => applyFilters({ active: e.target.value !== '' ? e.target.value : undefined, page: undefined })}>
+                        <option value="">Semua</option>
+                        <option value="1">Aktif</option>
+                        <option value="0">Nonaktif</option>
+                    </select>
+                </form>
+                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+            </div>
+
+            <Card className="mt-4 overflow-hidden p-0">
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="border-b bg-muted/50 text-muted-foreground">
+                                <tr>
+                                    <SortHeader label="Layanan" col="title" current={filters} onSort={toggleSort} />
+                                    <th className="px-4 py-3 font-medium">Icon</th>
+                                    <SortHeader label="Urutan" col="order" current={filters} onSort={toggleSort} />
+                                    <SortHeader label="Status" col="is_active" current={filters} onSort={toggleSort} />
+                                    <th className="px-4 py-3 text-right font-medium">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                                {items.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada layanan.</td>
+                                    </tr>
+                                )}
+                                {items.map((service) => (
+                                    <tr key={service.id} className="transition hover:bg-muted/30">
+                                        <td className="px-4 py-3">
+                                            <span className="font-medium text-foreground">{service.title}</span>
+                                            <span className="text-muted-foreground mt-1 block max-w-xl text-xs leading-5">{service.description || '-'}</span>
+                                        </td>
+                                        <td className="px-4 py-3 text-muted-foreground">{service.icon || '-'}</td>
+                                        <td className="px-4 py-3 text-muted-foreground">{service.order}</td>
+                                        <td className="px-4 py-3">
+                                            <Badge variant={service.is_active ? 'default' : 'secondary'}>{service.is_active ? 'Aktif' : 'Nonaktif'}</Badge>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex justify-end gap-1">
+                                                <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setEditing(service.id)}>
+                                                    <PenLine className="size-4" />
+                                                </Button>
+                                                <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(service.id)}>
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
+                </CardContent>
+            </Card>
+
+            {services.last_page > 1 && <Pagination links={services.links} />}
+
+            <ServiceFormModal
+                open={!!editing}
+                onOpenChange={(open) => !open && setEditing(null)}
+                data={editing === 'new' ? null : items.find((item) => item.id === editing)}
+            />
+        </AdminLayout>
+    );
+}
+
+function ServiceFormModal({ open, onOpenChange, data }) {
+    const isEdit = !!data;
+    const form = useForm({
+        title: data?.title || '',
+        description: data?.description || '',
+        icon: data?.icon || '',
+        order: data?.order || 0,
+        is_active: data?.is_active ?? true,
+    });
+
+    useEffect(() => {
+        if (!open) return;
+        form.setData({
+            title: data?.title || '',
+            description: data?.description || '',
+            icon: data?.icon || '',
+            order: data?.order || 0,
+            is_active: data?.is_active ?? true,
+        });
+    }, [open, data?.id]);
+
+    function close() {
+        onOpenChange(false);
+        form.reset();
+        form.clearErrors();
+    }
+
+    function submit(event) {
+        event.preventDefault();
+        const options = { preserveScroll: true, onSuccess: close };
+        if (isEdit) {
+            form.put(`/admin/services/${data.id}`, options);
+            return;
+        }
+        form.post('/admin/services', options);
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onOpenChange={(nextOpen) => {
+                if (!nextOpen) {
+                    close();
+                    return;
+                }
+                onOpenChange(true);
+            }}
+        >
+            <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                    <DialogTitle>{isEdit ? 'Edit Layanan' : 'Tambah Layanan'}</DialogTitle>
+                    <DialogDescription>Data aktif bisa dipakai oleh section Layanan mode database.</DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={submit} className="space-y-4">
+                    <Field label="Nama Layanan" value={form.data.title} onChange={(value) => form.setData('title', value)} required />
+                    <Textarea label="Deskripsi" value={form.data.description} onChange={(value) => form.setData('description', value)} />
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="Icon" value={form.data.icon} onChange={(value) => form.setData('icon', value)} placeholder="wrench" />
+                        <Field label="Urutan" type="number" value={form.data.order} onChange={(value) => form.setData('order', Number(value) || 0)} />
+                    </div>
+
                     <label className="flex items-center gap-2 text-sm">
-                        <input type="checkbox" checked={data.is_active} onChange={(event) => setData('is_active', event.target.checked)} />
+                        <input type="checkbox" checked={form.data.is_active} onChange={(event) => form.setData('is_active', event.target.checked)} />
                         Aktif
                     </label>
+
                     <div className="flex gap-2">
-                        <Button type="submit" disabled={processing}>
-                            <Plus className="size-4" />
-                            {editingId ? 'Simpan' : 'Tambah'}
-                        </Button>
-                        {editingId && <Button type="button" variant="outline" onClick={clear}>Batal</Button>}
+                        <Button type="submit" size="sm" disabled={form.processing}>{isEdit ? 'Simpan' : 'Tambah'}</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={close}>Batal</Button>
                     </div>
                 </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
-                <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-slate-600">
-                            <tr>
-                                <th className="px-4 py-3">Layanan</th>
-                                <th className="px-4 py-3">Urutan</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {services.data.map((service) => (
-                                <tr key={service.id}>
-                                    <td className="px-4 py-3">
-                                        <button type="button" onClick={() => edit(service)} className="text-left">
-                                            <span className="font-medium text-slate-950">{service.title}</span>
-                                            <span className="mt-1 block max-w-xl text-xs leading-5 text-slate-500">{service.description || '-'}</span>
-                                        </button>
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-600">{service.order}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`rounded px-2 py-1 text-xs font-semibold ${service.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}`}>
-                                            {service.is_active ? 'Aktif' : 'Nonaktif'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end gap-2">
-                                            <Button type="button" variant="outline" size="sm" onClick={() => edit(service)}>Edit</Button>
-                                            <Button type="button" variant="outline" size="icon" onClick={() => router.delete(`/admin/services/${service.id}`, { preserveScroll: true })}>
-                                                <Trash2 className="size-4 text-red-600" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {services.data.length === 0 && (
-                                <tr>
-                                    <td colSpan="4" className="px-4 py-10 text-center text-sm text-slate-500">Belum ada layanan.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </AdminLayout>
+function SortHeader({ label, col, current, onSort }) {
+    const active = current.sort === col;
+    return (
+        <th className="px-4 py-3 font-medium">
+            <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(col)}>
+                {label}
+                <ArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
+            </button>
+        </th>
+    );
+}
+
+function Pagination({ links }) {
+    return (
+        <div className="mt-4 flex flex-wrap justify-center gap-1">
+            {links.map((link, i) => (
+                <Button
+                    key={i}
+                    variant={link.active ? 'default' : 'outline'}
+                    size="sm"
+                    disabled={!link.url}
+                    onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
+                >
+                    <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                </Button>
+            ))}
+        </div>
     );
 }
 

@@ -87,6 +87,7 @@ const defaults = {
         subtitle: '',
         source: 'database',
         limit: 8,
+        category_id: '',
         link_text: 'Lihat Semua',
         link_url: '/produk',
         items: [

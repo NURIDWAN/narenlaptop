@@ -26,9 +26,11 @@ const mainNavGroups: { title: string; items: NavItem[] }[] = [
         title: 'Konten',
         items: [
             { title: 'Halaman', href: '/admin/pages', icon: FileText },
+            { title: 'Slider', href: '/admin/sliders', icon: Images },
             { title: 'Artikel', href: '/admin/articles', icon: Newspaper },
             { title: 'Kategori Artikel', href: '/admin/article-categories', icon: Tag },
-            { title: 'Slider', href: '/admin/sliders', icon: Images },
+            { title: 'Layanan', href: '/admin/services', icon: Wrench },
+            { title: 'Kategori Produk', href: '/admin/product-categories', icon: Tag },
             { title: 'Produk', href: '/admin/products', icon: ShoppingBag },
             { title: 'Testimoni', href: '/admin/testimonials', icon: Star },
             { title: 'Tim', href: '/admin/team', icon: Users },

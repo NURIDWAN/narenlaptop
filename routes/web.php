@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\ArticleCategoryController as AdminArticleCategoryController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Admin\ProductCategoryController as AdminProductCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
@@ -70,6 +71,7 @@ Route::middleware(['auth', 'verified'])
         Route::resource('articles', AdminArticleController::class);
         Route::resource('article-categories', AdminArticleCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('services', AdminServiceController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('product-categories', AdminProductCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('products', AdminProductController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sliders', AdminSliderController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('media', \App\Http\Controllers\Admin\MediaController::class)->only(['index', 'store', 'update', 'destroy']);

@@ -11,7 +11,7 @@ import ImageField from '@/components/admin/ImageField';
 import { PenLine, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-export default function ProductsIndex({ products }) {
+export default function ProductsIndex({ products, categories = [] }) {
     const [search, setSearch] = useState('');
     const [editing, setEditing] = useState(null);
     const items = products.data || [];
@@ -20,7 +20,7 @@ export default function ProductsIndex({ products }) {
         const q = search.trim().toLowerCase();
         if (!q) return items;
         return items.filter((item) => {
-            const haystack = [item.name, stripHtml(item.description), item.badge, item.price, item.discount_price].join(' ').toLowerCase();
+            const haystack = [item.name, item.category?.name, stripHtml(item.description), item.badge, item.price, item.discount_price].join(' ').toLowerCase();
             return haystack.includes(q);
         });
     }, [items, search]);
@@ -47,6 +47,7 @@ export default function ProductsIndex({ products }) {
                             <thead className="border-b bg-muted/50 text-muted-foreground">
                                 <tr>
                                     <th className="px-4 py-3 font-medium">Produk</th>
+                                    <th className="px-4 py-3 font-medium">Kategori</th>
                                     <th className="px-4 py-3 font-medium">Harga</th>
                                     <th className="px-4 py-3 font-medium">Harga Diskon</th>
                                     <th className="px-4 py-3 font-medium">Urutan</th>
@@ -57,7 +58,7 @@ export default function ProductsIndex({ products }) {
                             <tbody className="divide-y">
                                 {filtered.length === 0 && (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Belum ada produk.</td>
+                                        <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Belum ada produk.</td>
                                     </tr>
                                 )}
                                 {filtered.map((product) => (
@@ -75,6 +76,7 @@ export default function ProductsIndex({ products }) {
                                                 </div>
                                             </div>
                                         </td>
+                                        <td className="px-4 py-3 text-muted-foreground">{product.category?.name || '-'}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{product.price || '-'}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{product.discount_price || '-'}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{product.order}</td>
@@ -103,16 +105,18 @@ export default function ProductsIndex({ products }) {
                 open={!!editing}
                 onOpenChange={(open) => !open && setEditing(null)}
                 data={editing === 'new' ? null : items.find((item) => item.id === editing)}
+                categories={categories}
             />
         </AdminLayout>
     );
 }
 
-function ProductFormModal({ open, onOpenChange, data }) {
+function ProductFormModal({ open, onOpenChange, data, categories = [] }) {
     const isEdit = !!data;
     const initialImages = normalizeImages(data);
     const form = useForm({
         name: data?.name || '',
+        category_id: data?.category_id || '',
         description: data?.description || '',
         price: data?.price || '',
         discount_price: data?.discount_price || '',
@@ -130,6 +134,7 @@ function ProductFormModal({ open, onOpenChange, data }) {
         const images = normalizeImages(data);
         form.setData({
             name: data?.name || '',
+            category_id: data?.category_id || '',
             description: data?.description || '',
             price: data?.price || '',
             discount_price: data?.discount_price || '',
@@ -179,6 +184,7 @@ function ProductFormModal({ open, onOpenChange, data }) {
         form.transform((data) => ({
             ...data,
             ...(isEdit ? { _method: 'put' } : {}),
+            category_id: data.category_id || '',
             images: cleanedImages,
             image: cleanedImages[0] || '',
         }));
@@ -205,6 +211,20 @@ function ProductFormModal({ open, onOpenChange, data }) {
 
                 <form onSubmit={submit} className="space-y-4">
                     <Field label="Nama Produk" value={form.data.name} onChange={(v) => form.setData('name', v)} required />
+                    <label className="space-y-2">
+                        <Label>Kategori Produk</Label>
+                        <select
+                            className="border-input bg-background h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            value={form.data.category_id || ''}
+                            onChange={(event) => form.setData('category_id', event.target.value)}
+                        >
+                            <option value="">Tanpa kategori</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>{category.name}</option>
+                            ))}
+                        </select>
+                        {form.errors.category_id && <p className="text-xs text-red-600">{form.errors.category_id}</p>}
+                    </label>
                     <div className="space-y-2">
                         <Label>Deskripsi</Label>
                         <RichTextEditor value={form.data.description} onChange={(v) => form.setData('description', v)} minHeightClass="min-h-44" />

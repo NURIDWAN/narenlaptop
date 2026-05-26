@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,9 +18,13 @@ class ProductController extends Controller
     {
         return Inertia::render('Admin/Products/Index', [
             'products' => Product::query()
+                ->with('category:id,name,slug')
                 ->orderBy('order')
                 ->orderBy('name')
                 ->paginate(20),
+            'categories' => ProductCategory::query()
+                ->orderBy('name')
+                ->get(['id', 'name']),
         ]);
     }
 
@@ -55,6 +60,7 @@ class ProductController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:180'],
             'slug' => ['nullable', 'string', 'max:180', 'unique:products,slug,'.($request->route('product')?->id ?? 'NULL')],
+            'category_id' => ['nullable', 'integer', 'exists:product_categories,id'],
             'description' => ['nullable', 'string', 'max:20000'],
             'price' => ['nullable', 'string', 'max:120'],
             'discount_price' => ['nullable', 'string', 'max:120'],
