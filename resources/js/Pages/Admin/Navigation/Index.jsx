@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ExternalLink, Globe, GripVertical, Link2, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, ExternalLink, Globe, GripVertical, Link2, PenLine, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Index({ headerMenus, footerMenus, pages = [] }) {
     return (
@@ -25,6 +25,7 @@ export default function Index({ headerMenus, footerMenus, pages = [] }) {
 
 function MenuSection({ title, location, items, pages }) {
     const [open, setOpen] = useState(false);
+    const [editing, setEditing] = useState(null);
     const [orderedItems, setOrderedItems] = useState(items);
     const ids = orderedItems.map(item => String(item.id));
 
@@ -65,10 +66,10 @@ function MenuSection({ title, location, items, pages }) {
                     <SortableContext items={ids} strategy={verticalListSortingStrategy}>
                         {orderedItems.map((item) => (
                             <div key={item.id}>
-                                <SortableMenuItem item={item} onDelete={handleDelete} />
+                                <SortableMenuItem item={item} onDelete={handleDelete} onEdit={setEditing} />
                                 {(item.children || []).map((child) => (
                                     <div key={child.id} className="ml-8 mt-1">
-                                        <MenuItem item={child} onDelete={handleDelete} isChild />
+                                        <MenuItem item={child} onDelete={handleDelete} onEdit={setEditing} isChild />
                                     </div>
                                 ))}
                             </div>
@@ -77,12 +78,13 @@ function MenuSection({ title, location, items, pages }) {
                 </DndContext>
             </CardContent>
 
-            <AddMenuDialog open={open} onOpenChange={setOpen} location={location} pages={pages} />
+            <MenuDialog open={open} onOpenChange={setOpen} location={location} pages={pages} />
+            <MenuDialog open={!!editing} onOpenChange={(nextOpen) => !nextOpen && setEditing(null)} location={location} pages={pages} data={editing} />
         </Card>
     );
 }
 
-function SortableMenuItem({ item, onDelete }) {
+function SortableMenuItem({ item, onDelete, onEdit }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: String(item.id) });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -96,6 +98,9 @@ function SortableMenuItem({ item, onDelete }) {
             </div>
             <div className="flex items-center gap-1">
                 {item.open_in_new_tab && <ExternalLink className="text-muted-foreground size-3.5" />}
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => onEdit(item)}>
+                    <PenLine className="size-3.5" />
+                </Button>
                 <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => onDelete(item.id)}>
                     <Trash2 className="size-3.5" />
                 </Button>
@@ -104,16 +109,21 @@ function SortableMenuItem({ item, onDelete }) {
     );
 }
 
-function MenuItem({ item, onDelete, isChild }) {
+function MenuItem({ item, onDelete, onEdit, isChild }) {
     return (
         <div className="flex items-center justify-between rounded-lg border bg-background px-4 py-2.5">
             <div className="flex items-center gap-3">
                 <div className="w-4" />
                 <MenuLabel item={item} />
             </div>
-            <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => onDelete(item.id)}>
-                <Trash2 className="size-3.5" />
-            </Button>
+            <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => onEdit(item)}>
+                    <PenLine className="size-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => onDelete(item.id)}>
+                    <Trash2 className="size-3.5" />
+                </Button>
+            </div>
         </div>
     );
 }
@@ -134,11 +144,33 @@ function MenuLabel({ item }) {
     );
 }
 
-function AddMenuDialog({ open, onOpenChange, location, pages }) {
-    const [linkType, setLinkType] = useState('page');
+function MenuDialog({ open, onOpenChange, location, pages, data = null }) {
+    const isEdit = Boolean(data);
+    const [linkType, setLinkType] = useState(typeFromMenu(data));
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
     const form = useForm({ location, label: '', url: '', open_in_new_tab: false, badge: '', children: [] });
+
+    useEffect(() => {
+        if (!open) return;
+
+        const type = typeFromMenu(data);
+        setLinkType(type);
+        setErrors({});
+        setProcessing(false);
+        form.setData({
+            location,
+            label: data?.label || '',
+            url: data?.url || '',
+            open_in_new_tab: data?.open_in_new_tab ?? false,
+            badge: data?.badge || '',
+            children: (data?.children || []).map((child) => ({
+                id: child.id,
+                label: child.label,
+                url: child.url,
+            })),
+        });
+    }, [open, data?.id, location]);
 
     function selectPage(slug) {
         const url = slug === 'beranda' ? '/' : `/${slug}`;
@@ -182,7 +214,10 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
         setProcessing(true);
         setErrors({});
 
-        router.post('/admin/navigation', payload, {
+        router.post(isEdit ? `/admin/navigation/${data.id}` : '/admin/navigation', {
+            ...payload,
+            ...(isEdit ? { _method: 'put' } : {}),
+        }, {
             preserveScroll: true,
             onSuccess: () => { reset(); onOpenChange(false); },
             onError: setErrors,
@@ -194,7 +229,7 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Tambah Menu</DialogTitle>
+                    <DialogTitle>{isEdit ? 'Edit Menu' : 'Tambah Menu'}</DialogTitle>
                     <DialogDescription>Pilih tipe menu lalu isi detail.</DialogDescription>
                 </DialogHeader>
 
@@ -276,12 +311,19 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Batal</Button>
-                        <Button type="submit" disabled={processing || (linkType === 'dropdown' && form.data.children.length === 0)}>Simpan</Button>
+                        <Button type="submit" disabled={processing || (linkType === 'dropdown' && form.data.children.length === 0)}>{isEdit ? 'Simpan' : 'Tambah'}</Button>
                     </div>
                 </form>
             </DialogContent>
         </Dialog>
     );
+}
+
+function typeFromMenu(item) {
+    if (!item) return 'page';
+    if ((item.children || []).length > 0 || item.url === '#') return 'dropdown';
+    if (item.url?.startsWith('http')) return 'external';
+    return 'page';
 }
 
 function TypeBtn({ active, onClick, icon: Icon, label }) {

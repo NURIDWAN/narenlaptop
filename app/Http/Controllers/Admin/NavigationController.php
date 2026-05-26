@@ -59,12 +59,60 @@ class NavigationController extends Controller
 
     public function update(Request $request, NavigationMenu $navigation): RedirectResponse
     {
-        $navigation->update($request->validate([
+        $data = $request->validate([
             'label' => ['required', 'string', 'max:100'],
             'url' => ['required', 'string', 'max:500'],
             'open_in_new_tab' => ['boolean'],
             'badge' => ['nullable', 'string', 'max:30'],
-        ]));
+            'children' => ['nullable', 'array'],
+            'children.*.id' => ['nullable', 'integer', 'exists:navigation_menus,id'],
+            'children.*.label' => ['required', 'string', 'max:100'],
+            'children.*.url' => ['required', 'string', 'max:500'],
+        ]);
+
+        $children = $data['children'] ?? [];
+        unset($data['children']);
+
+        $navigation->update($data);
+
+        if ($data['url'] !== '#') {
+            $navigation->children()->delete();
+
+            return back()->with('success', 'Menu diperbarui.');
+        }
+
+        $keptChildIds = collect($children)
+            ->pluck('id')
+            ->filter()
+            ->all();
+
+        if (empty($keptChildIds)) {
+            $navigation->children()->delete();
+        } else {
+            $navigation->children()->whereNotIn('id', $keptChildIds)->delete();
+        }
+
+        foreach ($children as $order => $child) {
+            if (! empty($child['id'])) {
+                $navigation->children()->where('id', $child['id'])->update([
+                    'label' => $child['label'],
+                    'url' => $child['url'],
+                    'order' => $order,
+                    'open_in_new_tab' => false,
+                    'badge' => null,
+                ]);
+
+                continue;
+            }
+
+            NavigationMenu::create([
+                'location' => $navigation->location,
+                'label' => $child['label'],
+                'url' => $child['url'],
+                'parent_id' => $navigation->id,
+                'order' => $order,
+            ]);
+        }
 
         return back()->with('success', 'Menu diperbarui.');
     }
