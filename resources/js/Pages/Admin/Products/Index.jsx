@@ -1,0 +1,208 @@
+import { router, useForm } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import RichTextEditor from '@/Components/Editor/RichTextEditor';
+import ImageField from '@/components/admin/ImageField';
+import { PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+
+export default function ProductsIndex({ products }) {
+    const [search, setSearch] = useState('');
+    const [editing, setEditing] = useState(null);
+    const items = products.data || [];
+
+    const filtered = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return items;
+        return items.filter((item) => {
+            const haystack = [item.name, stripHtml(item.description), item.badge, item.price, item.discount_price].join(' ').toLowerCase();
+            return haystack.includes(q);
+        });
+    }, [items, search]);
+
+    function handleDelete(id) {
+        if (!confirm('Hapus produk ini?')) return;
+        router.delete(`/admin/products/${id}`, { preserveScroll: true });
+    }
+
+    return (
+        <AdminLayout title="Produk">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative">
+                    <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                    <Input className="w-64 pl-9" placeholder="Cari produk..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                </div>
+                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+            </div>
+
+            <Card className="mt-4 overflow-hidden p-0">
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="border-b bg-muted/50 text-muted-foreground">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium">Produk</th>
+                                    <th className="px-4 py-3 font-medium">Harga</th>
+                                    <th className="px-4 py-3 font-medium">Harga Diskon</th>
+                                    <th className="px-4 py-3 font-medium">Urutan</th>
+                                    <th className="px-4 py-3 font-medium">Status</th>
+                                    <th className="px-4 py-3 text-right font-medium">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                                {filtered.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Belum ada produk.</td>
+                                    </tr>
+                                )}
+                                {filtered.map((product) => (
+                                    <tr key={product.id} className="transition hover:bg-muted/30">
+                                        <td className="px-4 py-3">
+                                            <span className="font-medium text-foreground">{product.name}</span>
+                                            <span className="text-muted-foreground mt-1 block max-w-xl truncate text-xs">{stripHtml(product.description) || '-'}</span>
+                                        </td>
+                                        <td className="px-4 py-3 text-muted-foreground">{product.price || '-'}</td>
+                                        <td className="px-4 py-3 text-muted-foreground">{product.discount_price || '-'}</td>
+                                        <td className="px-4 py-3 text-muted-foreground">{product.order}</td>
+                                        <td className="px-4 py-3">
+                                            <Badge variant={product.is_active ? 'default' : 'secondary'}>{product.is_active ? 'Aktif' : 'Nonaktif'}</Badge>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex justify-end gap-1">
+                                                <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setEditing(product.id)}>
+                                                    <PenLine className="size-4" />
+                                                </Button>
+                                                <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(product.id)}>
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <ProductFormModal
+                open={!!editing}
+                onOpenChange={(open) => !open && setEditing(null)}
+                data={editing === 'new' ? null : items.find((item) => item.id === editing)}
+            />
+        </AdminLayout>
+    );
+}
+
+function ProductFormModal({ open, onOpenChange, data }) {
+    const isEdit = !!data;
+    const form = useForm({
+        name: data?.name || '',
+        description: data?.description || '',
+        price: data?.price || '',
+        discount_price: data?.discount_price || '',
+        badge: data?.badge || '',
+        image: data?.image || '',
+        image_file: null,
+        cta_url: data?.cta_url || '',
+        order: data?.order || 0,
+        is_active: data?.is_active ?? true,
+    });
+
+    useEffect(() => {
+        if (!open) return;
+        form.setData({
+            name: data?.name || '',
+            description: data?.description || '',
+            price: data?.price || '',
+            discount_price: data?.discount_price || '',
+            badge: data?.badge || '',
+            image: data?.image || '',
+            image_file: null,
+            cta_url: data?.cta_url || '',
+            order: data?.order || 0,
+            is_active: data?.is_active ?? true,
+        });
+    }, [open, data?.id]);
+
+    function close() {
+        onOpenChange(false);
+        form.reset();
+        form.clearErrors();
+    }
+
+    function submit(e) {
+        e.preventDefault();
+        const options = { preserveScroll: true, onSuccess: close, forceFormData: true };
+        if (isEdit) form.put(`/admin/products/${data.id}`, options);
+        else form.post('/admin/products', options);
+    }
+    return (
+        <Dialog
+            open={open}
+            onOpenChange={(nextOpen) => {
+                if (!nextOpen) {
+                    close();
+                    return;
+                }
+                onOpenChange(true);
+            }}
+        >
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>{isEdit ? 'Edit Produk' : 'Tambah Produk'}</DialogTitle>
+                    <DialogDescription>Data aktif bisa dipakai oleh section Produk mode database.</DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={submit} className="space-y-4">
+                    <Field label="Nama Produk" value={form.data.name} onChange={(v) => form.setData('name', v)} required />
+                    <div className="space-y-2">
+                        <Label>Deskripsi</Label>
+                        <RichTextEditor value={form.data.description} onChange={(v) => form.setData('description', v)} minHeightClass="min-h-44" />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        <Field label="Harga" value={form.data.price} onChange={(v) => form.setData('price', v)} placeholder="Rp 12.000.000" />
+                        <Field label="Harga Diskon" value={form.data.discount_price} onChange={(v) => form.setData('discount_price', v)} placeholder="Rp 10.999.000" />
+                        <Field label="Badge" value={form.data.badge} onChange={(v) => form.setData('badge', v)} placeholder="Best Seller" />
+                    </div>
+
+                    <ImageField label="Gambar Produk" value={form.data.image} onChange={(v) => form.setData('image', v)} placeholder="/storage/media/produk.jpg" />
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="URL CTA" value={form.data.cta_url} onChange={(v) => form.setData('cta_url', v)} placeholder="/kontak" />
+                        <Field label="Urutan" type="number" value={form.data.order} onChange={(v) => form.setData('order', Number(v) || 0)} />
+                    </div>
+
+                    <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={form.data.is_active} onChange={(e) => form.setData('is_active', e.target.checked)} />
+                        Aktif
+                    </label>
+
+                    <div className="flex gap-2">
+                        <Button type="submit" size="sm" disabled={form.processing}>{isEdit ? 'Simpan' : 'Tambah'}</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={close}>Batal</Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function Field({ label, value, onChange, ...props }) {
+    return (
+        <label className="space-y-2">
+            <Label>{label}</Label>
+            <Input {...props} value={value ?? ''} onChange={(event) => onChange(event.target.value)} />
+        </label>
+    );
+}
+
+function stripHtml(content = '') {
+    return String(content).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
