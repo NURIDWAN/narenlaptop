@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileText, FolderGit2, Image, Images, Inbox, LayoutGrid, Menu, Newspaper, Settings, ShoppingBag, Star, Users, Wrench } from 'lucide-react';
+import { BookOpen, FileText, FolderGit2, Image, Images, Inbox, LayoutGrid, Menu, Newspaper, Settings, ShoppingBag, Star, Tag, Users, Wrench } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -27,6 +27,7 @@ const mainNavGroups: { title: string; items: NavItem[] }[] = [
         items: [
             { title: 'Halaman', href: '/admin/pages', icon: FileText },
             { title: 'Artikel', href: '/admin/articles', icon: Newspaper },
+            { title: 'Kategori Artikel', href: '/admin/article-categories', icon: Tag },
             { title: 'Slider', href: '/admin/sliders', icon: Images },
             { title: 'Produk', href: '/admin/products', icon: ShoppingBag },
             { title: 'Testimoni', href: '/admin/testimonials', icon: Star },

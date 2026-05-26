@@ -499,58 +499,66 @@ function Services({ settings, data = {} }) {
 /* ─── Products ─── */
 function Products({ settings, data = {} }) {
     const items = data.items?.length ? data.items : (settings.items || []);
+    const title = String(settings.title ?? '').trim() || 'Produk Unggulan';
+    const subtitle = String(settings.subtitle ?? '').trim();
+    const linkText = String(settings.link_text ?? '').trim() || 'Lihat Semua';
+    const linkUrl = String(settings.link_url ?? '').trim() || '/produk';
 
     return (
         <section id="produk" className="bg-slate-100 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex items-end justify-between gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Produk Unggulan'}</h2>
-                        {settings.subtitle && <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                        <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{title}</h2>
+                        {subtitle && <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">{subtitle}</p>}
                     </div>
-                    {settings.link_url && (
-                        <a href={settings.link_url} className="hidden items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 sm:inline-flex">
-                            {settings.link_text || 'Lihat Semua'} <ArrowRight className="h-3.5 w-3.5" />
-                        </a>
-                    )}
+                    <a href={linkUrl} className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700">
+                        {linkText} <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
                 </div>
                 <StaggerChildren className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {items.map((item, index) => (
-                        <StaggerItem key={item.name || index}>
-                            <article className="group h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-300/60">
-                                <div className="relative overflow-hidden rounded-lg bg-slate-100">
-                                    {item.image ? (
-                                        <img src={item.image} alt={item.name || 'Produk'} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
-                                    ) : (
-                                        <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                            <Laptop className="h-10 w-10" />
+                    {items.map((item, index) => {
+                        const href = item.slug ? `/produk/${item.slug}` : (item.cta_url || linkUrl || '/kontak');
+
+                        return (
+                            <StaggerItem key={item.name || index}>
+                                <article className="group h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-300/60">
+                                    <a href={href} className="block">
+                                        <div className="relative overflow-hidden rounded-lg bg-slate-100">
+                                            {item.image ? (
+                                                <img src={item.image} alt={item.name || 'Produk'} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                                            ) : (
+                                                <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
+                                                    <Laptop className="h-10 w-10" />
+                                                </div>
+                                            )}
+                                            {item.badge && (
+                                                <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                                                    {item.badge}
+                                                </span>
+                                            )}
                                         </div>
-                                    )}
-                                    {item.badge && (
-                                        <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </div>
-                                <h3 className="mt-4 text-base font-semibold text-slate-950">{item.name}</h3>
-                                {item.description && (
-                                    <div
-                                        className="mt-2 min-h-12 max-h-20 overflow-hidden text-xs leading-5 text-slate-500 [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
-                                        dangerouslySetInnerHTML={{ __html: item.description }}
-                                    />
-                                )}
-                                <div className="mt-5 flex items-center justify-between gap-3">
-                                    <div>
-                                        {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{item.price}</p>}
-                                        {(item.discount_price || item.price) && <p className="text-xs font-bold text-blue-600">{item.discount_price || item.price}</p>}
-                                    </div>
-                                    <a href={item.cta_url || settings.link_url || '/kontak'} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white" aria-label={`Lihat ${item.name || 'produk'}`}>
-                                        <ShoppingCart className="h-4 w-4" />
+                                        <h3 className="mt-4 break-words text-base font-semibold text-slate-950 transition group-hover:text-blue-700">{item.name}</h3>
                                     </a>
-                                </div>
-                            </article>
-                        </StaggerItem>
-                    ))}
+                                    {item.description && (
+                                        <div
+                                            className="mt-2 min-h-12 max-h-20 overflow-hidden text-xs leading-5 text-slate-500 [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
+                                            dangerouslySetInnerHTML={{ __html: item.description }}
+                                        />
+                                    )}
+                                    <div className="mt-5 flex items-center justify-between gap-3">
+                                        <div>
+                                            {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{item.price}</p>}
+                                            {(item.discount_price || item.price) && <p className="text-xs font-bold text-blue-600">{item.discount_price || item.price}</p>}
+                                        </div>
+                                        <a href={href} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white" aria-label={`Lihat ${item.name || 'produk'}`}>
+                                            <ShoppingCart className="h-4 w-4" />
+                                        </a>
+                                    </div>
+                                </article>
+                            </StaggerItem>
+                        );
+                    })}
                 </StaggerChildren>
             </div>
         </section>
@@ -689,21 +697,20 @@ function Stats({ settings }) {
 /* ─── Testimonials ─── */
 function Testimonials({ settings, data = {} }) {
     const items = data.items?.length ? data.items : (settings.items || []);
+    const displayItems = items.length === 1 ? [items[0], items[0], items[0]] : items;
     const [active, setActive] = useState(0);
 
     if (!items.length) return null;
 
-    const goTo = (index) => setActive((index + items.length) % items.length);
+    const goTo = (index) => setActive((index + displayItems.length) % displayItems.length);
 
     useEffect(() => {
-        if (items.length <= 1) return undefined;
-
         const intervalId = window.setInterval(() => {
-            setActive((prev) => (prev + 1) % items.length);
+            setActive((prev) => (prev + 1) % displayItems.length);
         }, 4500);
 
         return () => window.clearInterval(intervalId);
-    }, [items.length]);
+    }, [displayItems.length]);
 
     return (
         <section className="bg-slate-50 py-16 sm:py-20">
@@ -719,9 +726,9 @@ function Testimonials({ settings, data = {} }) {
                             animate={{ x: `-${active * 100}%` }}
                             transition={{ duration: 0.45, ease: 'easeOut' }}
                         >
-                            {items.map((item, i) => (
-                                <div key={i} className="w-full flex-none px-1 sm:px-2">
-                                    <blockquote className="mx-auto h-full max-w-4xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                            {displayItems.map((item, i) => (
+                                <div key={`${item.name || 'testimoni'}-${i}`} className="w-full flex-none px-1 sm:px-2">
+                                    <blockquote className="mx-auto h-full max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                                         <Quote className="mb-4 h-5 w-5 text-slate-300" />
                                         <div className="flex gap-0.5 text-amber-400">
                                             {Array.from({ length: item.rating || 5 }).map((_, s) => <Star key={s} className="h-4 w-4 fill-current" />)}
@@ -742,7 +749,7 @@ function Testimonials({ settings, data = {} }) {
                         </motion.div>
                     </div>
 
-                    {items.length > 1 && (
+                    {displayItems.length > 1 && (
                         <>
                             <button
                                 type="button"
@@ -760,17 +767,28 @@ function Testimonials({ settings, data = {} }) {
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </button>
-                            <div className="mt-6 flex items-center justify-center gap-2">
-                                {items.map((_, index) => (
+                            {items.length > 1 && (
+                                <div className="mt-6 flex items-center justify-center gap-2">
+                                    {items.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            type="button"
+                                            onClick={() => goTo(index)}
+                                            className={`h-2.5 rounded-full transition ${index === (active % items.length) ? 'w-7 bg-blue-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}`}
+                                            aria-label={`Buka testimoni ${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                            {items.length === 1 && (
+                                <div className="mt-6 flex items-center justify-center gap-2">
                                     <button
-                                        key={index}
                                         type="button"
-                                        onClick={() => goTo(index)}
-                                        className={`h-2.5 rounded-full transition ${index === active ? 'w-7 bg-blue-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}`}
-                                        aria-label={`Buka testimoni ${index + 1}`}
+                                        className="h-2.5 w-7 rounded-full bg-blue-600"
+                                        aria-label="Testimoni aktif"
                                     />
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

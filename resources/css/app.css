@@ -132,6 +132,20 @@
     }
 }
 
+@layer components {
+    .admin-form-flat input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    .admin-form-flat textarea,
+    .admin-form-flat select {
+        @apply border-0 bg-slate-50 shadow-none outline-none transition;
+    }
+
+    .admin-form-flat input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
+    .admin-form-flat textarea:focus,
+    .admin-form-flat select:focus {
+        @apply bg-white ring-2 ring-blue-100;
+    }
+}
+
 /* TipTap Editor */
 .tiptap {
     outline: none;

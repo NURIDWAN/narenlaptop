@@ -509,8 +509,8 @@ function ProductsEditor({ settings, onChange, builderData = {} }) {
     return (
         <div className="space-y-5">
             <SectionGroup title="Header">
-                <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
-                <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
+                <Field label="Judul Section" value={settings.title} onChange={(v) => set('title', v)} placeholder="Produk Unggulan" />
+                <TextareaField label="Subtitle Section" value={settings.subtitle} onChange={(v) => set('subtitle', v)} placeholder="Teks singkat di bawah judul section produk." />
                 <div className="grid gap-3 md:grid-cols-2">
                     <Field label="Teks Link" value={settings.link_text} onChange={(v) => set('link_text', v)} placeholder="Lihat Semua" />
                     <Field label="URL Link" value={settings.link_url} onChange={(v) => set('link_url', v)} placeholder="/produk" />

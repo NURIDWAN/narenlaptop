@@ -5,6 +5,8 @@ import { Save } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ArticleEditor({ article, categories = [] }) {
+    const controlClass = 'mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100';
+
     const [form, setForm] = useState({
         title: article.title || '',
         slug: article.slug || '',
@@ -52,14 +54,14 @@ export default function ArticleEditor({ article, categories = [] }) {
                     <Panel title="Publikasi">
                         <label className="block text-sm font-medium text-slate-700">
                             Kategori
-                            <select className="mt-1 w-full rounded-lg border-slate-300" value={form.category_id} onChange={(event) => setForm({ ...form, category_id: event.target.value })}>
+                            <select className={controlClass} value={form.category_id} onChange={(event) => setForm({ ...form, category_id: event.target.value })}>
                                 <option value="">Tanpa kategori</option>
                                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                             </select>
                         </label>
                         <label className="block text-sm font-medium text-slate-700">
                             Status
-                            <select className="mt-1 w-full rounded-lg border-slate-300" value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
+                            <select className={controlClass} value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
                                 <option value="draft">Draft</option>
                                 <option value="published">Published</option>
                                 <option value="scheduled">Scheduled</option>
@@ -71,7 +73,7 @@ export default function ArticleEditor({ article, categories = [] }) {
                             <input
                                 type="file"
                                 accept="image/*"
-                                className="mt-1 w-full rounded-lg border-slate-300"
+                                className={controlClass}
                                 onChange={(event) => setForm({ ...form, thumbnail_file: event.target.files?.[0] || null })}
                             />
                         </label>
@@ -92,7 +94,7 @@ export default function ArticleEditor({ article, categories = [] }) {
                         <Field label="OG image URL" value={form.og_image} onChange={(value) => setForm({ ...form, og_image: value })} />
                         <label className="block text-sm font-medium text-slate-700">
                             Schema
-                            <select className="mt-1 w-full rounded-lg border-slate-300" value={form.schema_type} onChange={(event) => setForm({ ...form, schema_type: event.target.value })}>
+                            <select className={controlClass} value={form.schema_type} onChange={(event) => setForm({ ...form, schema_type: event.target.value })}>
                                 <option value="Article">Article</option>
                                 <option value="HowTo">HowTo</option>
                                 <option value="FAQPage">FAQPage</option>
@@ -122,7 +124,12 @@ function Field({ label, value, onChange, ...props }) {
     return (
         <label className="block text-sm font-medium text-slate-700">
             {label}
-            <input {...props} className="mt-1 w-full rounded-lg border-slate-300" value={value || ''} onChange={(event) => onChange(event.target.value)} />
+            <input
+                {...props}
+                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100"
+                value={value || ''}
+                onChange={(event) => onChange(event.target.value)}
+            />
         </label>
     );
 }
@@ -131,7 +138,12 @@ function Textarea({ label, value, onChange, rows = 4 }) {
     return (
         <label className="block text-sm font-medium text-slate-700">
             {label}
-            <textarea rows={rows} className="mt-1 w-full rounded-lg border-slate-300" value={value || ''} onChange={(event) => onChange(event.target.value)} />
+            <textarea
+                rows={rows}
+                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100"
+                value={value || ''}
+                onChange={(event) => onChange(event.target.value)}
+            />
         </label>
     );
 }

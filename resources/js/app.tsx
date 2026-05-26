@@ -1,7 +1,7 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { toast } from 'sonner';
@@ -22,14 +22,35 @@ createInertiaApp({
         const root = createRoot(el);
 
         function Root() {
-            const flash = props.initialPage.props.flash as
-                | { success?: string; error?: string }
-                | undefined;
+            const showMessages = (pageProps?: Record<string, unknown>) => {
+                const flash = (pageProps?.flash ?? {}) as
+                    | { success?: string; error?: string }
+                    | undefined;
+                const errors = (pageProps?.errors ?? {}) as Record<
+                    string,
+                    string
+                >;
 
-            useEffect(() => {
                 if (flash?.success) toast.success(flash.success);
                 if (flash?.error) toast.error(flash.error);
-            }, [flash?.success, flash?.error]);
+
+                const firstError = Object.values(errors).find(Boolean);
+                if (firstError) toast.error(firstError);
+            };
+
+            useEffect(() => {
+                showMessages(props.initialPage.props as Record<string, unknown>);
+
+                const removeSuccessListener = router.on('success', (event) => {
+                    showMessages(
+                        event.detail.page.props as Record<string, unknown>,
+                    );
+                });
+
+                return () => {
+                    removeSuccessListener();
+                };
+            }, []);
 
             return (
                 <TooltipProvider delayDuration={0}>

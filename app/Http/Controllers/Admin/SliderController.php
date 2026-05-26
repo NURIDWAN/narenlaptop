@@ -26,14 +26,14 @@ class SliderController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        Slider::create($this->validatedData($request));
+        Slider::create($this->normalizedData($request));
 
         return back()->with('success', 'Slider berhasil ditambahkan.');
     }
 
     public function update(Request $request, Slider $slider): RedirectResponse
     {
-        $slider->update($this->validatedData($request));
+        $slider->update($this->normalizedData($request));
 
         return back()->with('success', 'Slider berhasil diperbarui.');
     }
@@ -51,11 +51,33 @@ class SliderController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'subtitle' => ['nullable', 'string', 'max:1000'],
             'image' => ['nullable', 'string', 'max:500'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'string', 'max:500'],
             'badge' => ['nullable', 'string', 'max:80'],
             'cta_text' => ['nullable', 'string', 'max:80'],
             'cta_url' => ['nullable', 'string', 'max:500'],
             'is_active' => ['boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
         ]);
+    }
+
+    private function normalizedData(Request $request): array
+    {
+        $data = $this->validatedData($request);
+
+        $images = collect($data['images'] ?? [])
+            ->map(fn ($image) => trim((string) $image))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($images) && ! empty($data['image'])) {
+            $images = [trim((string) $data['image'])];
+        }
+
+        $data['images'] = $images;
+        $data['image'] = $images[0] ?? ($data['image'] ?? null);
+
+        return $data;
     }
 }

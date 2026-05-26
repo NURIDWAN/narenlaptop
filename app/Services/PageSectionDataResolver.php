@@ -67,20 +67,34 @@ class PageSectionDataResolver
     {
         $limit = $this->limit(Arr::get($settings, 'limit', 5), 1, 12);
 
-        return [
-            'slides' => Slider::active()
-                ->take($limit)
-                ->get(['id', 'title', 'subtitle', 'image', 'badge', 'cta_text', 'cta_url'])
-                ->map(fn (Slider $slider) => [
-                    'id' => $slider->id,
+        $slides = Slider::active()
+            ->take($limit)
+            ->get(['id', 'title', 'subtitle', 'image', 'images', 'badge', 'cta_text', 'cta_url'])
+            ->flatMap(function (Slider $slider) {
+                $images = collect($slider->images ?? [])
+                    ->filter()
+                    ->values()
+                    ->all();
+
+                if (empty($images) && $slider->image) {
+                    $images = [$slider->image];
+                }
+
+                return collect($images)->map(fn (string $image, int $index) => [
+                    'id' => $slider->id.'-'.$index,
                     'title' => $slider->title,
                     'subtitle' => $slider->subtitle,
-                    'image' => $slider->image,
+                    'image' => $image,
                     'badge' => $slider->badge,
                     'cta_text' => $slider->cta_text,
                     'cta_url' => $slider->cta_url,
-                ])
-                ->all(),
+                ]);
+            })
+            ->values()
+            ->all();
+
+        return [
+            'slides' => $slides,
         ];
     }
 
@@ -154,17 +168,27 @@ class PageSectionDataResolver
         return [
             'items' => Product::active()
                 ->take($limit)
-                ->get(['id', 'name', 'description', 'price', 'discount_price', 'badge', 'image', 'cta_url'])
-                ->map(fn (Product $product) => [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $product->price,
-                    'discount_price' => $product->discount_price,
-                    'badge' => $product->badge,
-                    'image' => $product->image,
-                    'cta_url' => $product->cta_url,
-                ])
+                ->get(['id', 'name', 'slug', 'description', 'price', 'discount_price', 'badge', 'image', 'images', 'cta_url'])
+                ->map(function (Product $product) {
+                    $images = collect($product->images ?? [])->filter()->values()->all();
+
+                    if (empty($images) && $product->image) {
+                        $images = [$product->image];
+                    }
+
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'discount_price' => $product->discount_price,
+                        'badge' => $product->badge,
+                        'image' => $images[0] ?? null,
+                        'images' => $images,
+                        'cta_url' => $product->cta_url,
+                    ];
+                })
                 ->all(),
         ];
     }

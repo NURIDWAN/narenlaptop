@@ -161,7 +161,7 @@ class PageController extends Controller
             'products' => Product::query()
                 ->orderBy('order')
                 ->orderBy('name')
-                ->get(['id', 'name', 'is_active']),
+                ->get(['id', 'name', 'slug', 'is_active']),
             'sliders' => Slider::query()
                 ->orderBy('order')
                 ->orderBy('title')

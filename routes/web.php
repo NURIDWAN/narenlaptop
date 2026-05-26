@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Admin\ArticleCategoryController as AdminArticleCategoryController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
@@ -8,10 +9,12 @@ use App\Http\Controllers\Admin\SliderController as AdminSliderController;
 use App\Http\Controllers\ContactSubmissionController;
 use App\Http\Controllers\Frontend\ArticleController;
 use App\Http\Controllers\Frontend\PageController;
+use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Article;
 use App\Models\ContactSubmission;
 use App\Models\Page;
+use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Route;
@@ -22,12 +25,16 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/kategori/{slug}', [ArticleController::class, 'category'])->name('blog.category');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');
+Route::get('/produk', [ProductController::class, 'index'])->name('products.index');
+Route::get('/produk/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::post('/kontak', [ContactSubmissionController::class, 'store'])->middleware('throttle:10,1')->name('contact.store');
 
 Route::get('/sitemap.xml', function () {
     $urls = collect()
         ->merge(Page::query()->published()->get()->map(fn (Page $page) => url($page->slug === 'beranda' ? '/' : '/'.$page->slug)))
-        ->merge(Article::query()->published()->get()->map(fn (Article $article) => route('blog.show', $article->slug)));
+        ->merge(Article::query()->published()->get()->map(fn (Article $article) => route('blog.show', $article->slug)))
+        ->push(route('products.index'))
+        ->merge(Product::query()->active()->whereNotNull('slug')->get()->map(fn (Product $product) => route('products.show', $product->slug)));
 
     $xml = view('sitemap', ['urls' => $urls])->render();
 
@@ -61,6 +68,7 @@ Route::middleware(['auth', 'verified'])
     ->group(function () {
         Route::resource('pages', AdminPageController::class);
         Route::resource('articles', AdminArticleController::class);
+        Route::resource('article-categories', AdminArticleCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('services', AdminServiceController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('products', AdminProductController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sliders', AdminSliderController::class)->only(['index', 'store', 'update', 'destroy']);

@@ -8,11 +8,13 @@ class Product extends Model
 {
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
         'discount_price',
         'badge',
         'image',
+        'images',
         'cta_url',
         'order',
         'is_active',
@@ -22,6 +24,7 @@ class Product extends Model
     {
         return [
             'is_active' => 'boolean',
+            'images' => 'array',
         ];
     }
 

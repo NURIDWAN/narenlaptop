@@ -10,6 +10,7 @@ class Slider extends Model
         'title',
         'subtitle',
         'image',
+        'images',
         'badge',
         'cta_text',
         'cta_url',
@@ -21,6 +22,7 @@ class Slider extends Model
     {
         return [
             'is_active' => 'boolean',
+            'images' => 'array',
         ];
     }
 

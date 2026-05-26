@@ -136,7 +136,8 @@ function MenuLabel({ item }) {
 
 function AddMenuDialog({ open, onOpenChange, location, pages }) {
     const [linkType, setLinkType] = useState('page');
-    const [children, setChildren] = useState([]);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
     const form = useForm({ location, label: '', url: '', open_in_new_tab: false, badge: '', children: [] });
 
     function selectPage(slug) {
@@ -150,30 +151,42 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
         const page = pages.find(p => p.slug === slug);
         if (!page) return;
         const url = slug === 'beranda' ? '/' : `/${slug}`;
-        if (children.find(c => c.url === url)) return;
-        setChildren([...children, { label: page.title, url }]);
+        if (form.data.children.find(c => c.url === url)) return;
+        form.setData('children', [...form.data.children, { label: page.title, url }]);
     }
 
     function removeChild(index) {
-        setChildren(children.filter((_, i) => i !== index));
+        form.setData('children', form.data.children.filter((_, i) => i !== index));
     }
 
     function reset() {
         form.reset();
-        setChildren([]);
+        setErrors({});
+        setProcessing(false);
         setLinkType('page');
     }
 
     function submit(e) {
         e.preventDefault();
-        const payload = { ...form.data };
+        const payload = {
+            ...form.data,
+            location,
+            children: linkType === 'dropdown' ? form.data.children : [],
+            open_in_new_tab: linkType !== 'dropdown' ? form.data.open_in_new_tab : false,
+        };
+
         if (linkType === 'dropdown') {
             payload.url = '#';
-            payload.children = children;
         }
-        form.transform(() => payload).post('/admin/navigation', {
+
+        setProcessing(true);
+        setErrors({});
+
+        router.post('/admin/navigation', payload, {
             preserveScroll: true,
             onSuccess: () => { reset(); onOpenChange(false); },
+            onError: setErrors,
+            onFinish: () => setProcessing(false),
         });
     }
 
@@ -201,6 +214,7 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
                                 <option value="">— Pilih halaman —</option>
                                 {pages.map(p => <option key={p.id} value={p.slug}>{p.title} ({p.slug === 'beranda' ? '/' : `/${p.slug}`})</option>)}
                             </select>
+                            {errors.url && <p className="text-xs text-destructive">{errors.url}</p>}
                         </div>
                     )}
 
@@ -209,6 +223,7 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
                         <div className="space-y-2">
                             <Label>URL</Label>
                             <Input value={form.data.url} onChange={e => form.setData('url', e.target.value)} placeholder="https://..." required />
+                            {errors.url && <p className="text-xs text-destructive">{errors.url}</p>}
                         </div>
                     )}
 
@@ -219,14 +234,14 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
                                 <Label>Isi Dropdown</Label>
                                 <select className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value="" onChange={e => addChild(e.target.value)}>
                                     <option value="">+ Tambah halaman...</option>
-                                    {pages.filter(p => !children.find(c => c.url === (p.slug === 'beranda' ? '/' : `/${p.slug}`))).map(p => (
+                                    {pages.filter(p => !form.data.children.find(c => c.url === (p.slug === 'beranda' ? '/' : `/${p.slug}`))).map(p => (
                                         <option key={p.id} value={p.slug}>{p.title}</option>
                                     ))}
                                 </select>
                             </div>
-                            {children.length > 0 && (
+                            {form.data.children.length > 0 && (
                                 <div className="space-y-1 rounded-md border p-2">
-                                    {children.map((child, i) => (
+                                    {form.data.children.map((child, i) => (
                                         <div key={i} className="flex items-center justify-between rounded px-3 py-1.5 hover:bg-muted/50">
                                             <span className="text-sm">{child.label} <span className="text-muted-foreground text-xs">{child.url}</span></span>
                                             <Button type="button" variant="ghost" size="icon" className="size-6 text-destructive" onClick={() => removeChild(i)}><Trash2 className="size-3" /></Button>
@@ -234,7 +249,8 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
                                     ))}
                                 </div>
                             )}
-                            {children.length === 0 && <p className="text-xs text-muted-foreground">Tambahkan halaman yang muncul saat dropdown dibuka.</p>}
+                            {form.data.children.length === 0 && <p className="text-xs text-muted-foreground">Tambahkan halaman yang muncul saat dropdown dibuka.</p>}
+                            {errors.children && <p className="text-xs text-destructive">{errors.children}</p>}
                         </div>
                     )}
 
@@ -243,6 +259,7 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
                         <div className="space-y-2">
                             <Label>Label</Label>
                             <Input value={form.data.label} onChange={e => form.setData('label', e.target.value)} placeholder={linkType === 'dropdown' ? 'Nama dropdown' : 'Label menu'} required />
+                            {errors.label && <p className="text-xs text-destructive">{errors.label}</p>}
                         </div>
                         <div className="space-y-2">
                             <Label>Badge</Label>
@@ -259,7 +276,7 @@ function AddMenuDialog({ open, onOpenChange, location, pages }) {
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Batal</Button>
-                        <Button type="submit" disabled={form.processing || (linkType === 'dropdown' && children.length === 0)}>Simpan</Button>
+                        <Button type="submit" disabled={processing || (linkType === 'dropdown' && form.data.children.length === 0)}>Simpan</Button>
                     </div>
                 </form>
             </DialogContent>

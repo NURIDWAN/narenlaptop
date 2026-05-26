@@ -51,9 +51,14 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
                         </select>
                     )}
                 </form>
-                <Button asChild>
-                    <Link href="/admin/articles/create"><FilePlus2 className="size-4" /> Buat Artikel</Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/admin/article-categories">Kelola Kategori</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/admin/articles/create"><FilePlus2 className="size-4" /> Buat Artikel</Link>
+                    </Button>
+                </div>
             </div>
 
             {/* Table */}

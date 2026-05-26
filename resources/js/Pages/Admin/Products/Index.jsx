@@ -63,8 +63,17 @@ export default function ProductsIndex({ products }) {
                                 {filtered.map((product) => (
                                     <tr key={product.id} className="transition hover:bg-muted/30">
                                         <td className="px-4 py-3">
-                                            <span className="font-medium text-foreground">{product.name}</span>
-                                            <span className="text-muted-foreground mt-1 block max-w-xl truncate text-xs">{stripHtml(product.description) || '-'}</span>
+                                            <div className="flex items-center gap-3">
+                                                {(product.images?.[0] || product.image) ? (
+                                                    <img src={product.images?.[0] || product.image} alt={product.name} className="h-12 w-16 rounded-md object-cover" />
+                                                ) : (
+                                                    <div className="h-12 w-16 rounded-md bg-muted" />
+                                                )}
+                                                <div className="min-w-0">
+                                                    <span className="font-medium text-foreground">{product.name}</span>
+                                                    <span className="text-muted-foreground mt-1 block max-w-xl truncate text-xs">{stripHtml(product.description) || '-'}</span>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3 text-muted-foreground">{product.price || '-'}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{product.discount_price || '-'}</td>
@@ -101,13 +110,15 @@ export default function ProductsIndex({ products }) {
 
 function ProductFormModal({ open, onOpenChange, data }) {
     const isEdit = !!data;
+    const initialImages = normalizeImages(data);
     const form = useForm({
         name: data?.name || '',
         description: data?.description || '',
         price: data?.price || '',
         discount_price: data?.discount_price || '',
         badge: data?.badge || '',
-        image: data?.image || '',
+        image: initialImages[0] || '',
+        images: initialImages,
         image_file: null,
         cta_url: data?.cta_url || '',
         order: data?.order || 0,
@@ -116,13 +127,15 @@ function ProductFormModal({ open, onOpenChange, data }) {
 
     useEffect(() => {
         if (!open) return;
+        const images = normalizeImages(data);
         form.setData({
             name: data?.name || '',
             description: data?.description || '',
             price: data?.price || '',
             discount_price: data?.discount_price || '',
             badge: data?.badge || '',
-            image: data?.image || '',
+            image: images[0] || '',
+            images,
             image_file: null,
             cta_url: data?.cta_url || '',
             order: data?.order || 0,
@@ -136,10 +149,41 @@ function ProductFormModal({ open, onOpenChange, data }) {
         form.clearErrors();
     }
 
+    function addImage() {
+        form.setData('images', [...form.data.images, '']);
+    }
+
+    function updateImage(index, value) {
+        const next = [...form.data.images];
+        next[index] = value;
+        form.setData({
+            ...form.data,
+            images: next,
+            image: next[0] || '',
+        });
+    }
+
+    function removeImage(index) {
+        const next = form.data.images.filter((_, i) => i !== index);
+        const normalized = next.length ? next : [''];
+        form.setData({
+            ...form.data,
+            images: normalized,
+            image: normalized[0] || '',
+        });
+    }
+
     function submit(e) {
         e.preventDefault();
+        const cleanedImages = form.data.images.map((value) => value.trim()).filter(Boolean);
+        form.transform((data) => ({
+            ...data,
+            ...(isEdit ? { _method: 'put' } : {}),
+            images: cleanedImages,
+            image: cleanedImages[0] || '',
+        }));
         const options = { preserveScroll: true, onSuccess: close, forceFormData: true };
-        if (isEdit) form.put(`/admin/products/${data.id}`, options);
+        if (isEdit) form.post(`/admin/products/${data.id}`, options);
         else form.post('/admin/products', options);
     }
     return (
@@ -172,7 +216,39 @@ function ProductFormModal({ open, onOpenChange, data }) {
                         <Field label="Badge" value={form.data.badge} onChange={(v) => form.setData('badge', v)} placeholder="Best Seller" />
                     </div>
 
-                    <ImageField label="Gambar Produk" value={form.data.image} onChange={(v) => form.setData('image', v)} placeholder="/storage/media/produk.jpg" />
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <Label>Gambar Produk</Label>
+                            <Button type="button" variant="outline" size="sm" onClick={addImage}>
+                                <Plus className="size-4" />
+                                Tambah Gambar
+                            </Button>
+                        </div>
+                        <div className="space-y-3">
+                            {form.data.images.map((image, index) => (
+                                <div key={index} className="rounded-lg border border-slate-200 p-3">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <p className="text-xs font-medium text-slate-600">Gambar {index + 1}</p>
+                                        {form.data.images.length > 1 && (
+                                            <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={() => removeImage(index)}>
+                                                Hapus
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <ImageField
+                                        label=""
+                                        value={image}
+                                        onChange={(v) => updateImage(index, v)}
+                                        placeholder="/storage/media/produk.jpg"
+                                    />
+                                    {form.errors[`images.${index}`] && (
+                                        <p className="mt-2 text-xs text-red-600">{form.errors[`images.${index}`]}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {form.errors.images && <p className="text-xs text-red-600">{form.errors.images}</p>}
+                    </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="URL CTA" value={form.data.cta_url} onChange={(v) => form.setData('cta_url', v)} placeholder="/kontak" />
@@ -205,4 +281,13 @@ function Field({ label, value, onChange, ...props }) {
 
 function stripHtml(content = '') {
     return String(content).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeImages(data) {
+    if (!data) return [''];
+    if (Array.isArray(data.images) && data.images.length) {
+        return data.images.filter(Boolean);
+    }
+    if (data.image) return [data.image];
+    return [''];
 }
