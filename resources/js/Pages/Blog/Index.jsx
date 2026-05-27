@@ -16,7 +16,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
             <section className="bg-slate-50">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                     <div className="max-w-3xl">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">Insights & News</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Insights & News</p>
                         <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
                             {activeCategory?.name || 'Artikel'}
                         </h1>
@@ -43,7 +43,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                         <Link href={`/blog/${featured.slug}`} className="mt-10 block overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-2xl">
                             <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
                                 <div className="order-2 p-6 sm:p-8 lg:order-1">
-                                    <div className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                                    <div className="inline-flex rounded-full bg-accent/30 px-3 py-1 text-xs font-semibold text-primary/90">
                                         Featured Guide
                                     </div>
                                     <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -56,7 +56,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                         <MetaItem icon={CalendarDays} label={formatDate(featured.published_at)} />
                                         <MetaItem icon={Clock3} label={`${featured.reading_time || 1} menit baca`} />
                                     </div>
-                                    <div className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
+                                    <div className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary">
                                         Baca artikel <ArrowRight className="h-4 w-4" />
                                     </div>
                                 </div>
@@ -75,7 +75,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
 
                     <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {rest.map((article) => (
-                            <Link key={article.id} href={`/blog/${article.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
+                            <Link key={article.id} href={`/blog/${article.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
                                 <div className="overflow-hidden bg-slate-100">
                                     {article.thumbnail ? (
                                         <img src={article.thumbnail} alt={article.title} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
@@ -86,10 +86,10 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                     )}
                                 </div>
                                 <div className="p-5">
-                                    <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
+                                    <p className="text-xs font-semibold uppercase tracking-widest text-primary">
                                         {article.category?.name || 'Artikel'}
                                     </p>
-                                    <h2 className="mt-3 text-lg font-semibold text-slate-950 transition group-hover:text-blue-700">
+                                    <h2 className="mt-3 text-lg font-semibold text-slate-950 transition group-hover:text-primary/90">
                                         {article.title}
                                     </h2>
                                     <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-3">
@@ -112,7 +112,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                     Ikuti artikel terbaru seputar teknologi, service, dan tips perawatan laptop.
                                 </p>
                             </div>
-                            <a href="/kontak" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                            <a href="/kontak" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
                                 <NotebookText className="h-4 w-4" />
                                 Kontak Kami
                             </a>
@@ -129,9 +129,9 @@ function FilterPill({ label, active, onClick }) {
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition sm:py-1.5 ${
                 active
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
             }`}
         >

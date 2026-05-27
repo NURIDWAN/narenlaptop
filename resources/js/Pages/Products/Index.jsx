@@ -21,7 +21,7 @@ export default function ProductIndex({ products, filters = {}, seo }) {
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-3xl">
-                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">Katalog Produk</p>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Katalog Produk</p>
                             <h1 className="mt-4 text-4xl font-extrabold tracking-normal text-slate-950 sm:text-5xl">Semua Produk</h1>
                             <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
                                 Pilihan laptop dan perangkat unggulan yang siap membantu kebutuhan kerja, belajar, dan bisnis.
@@ -34,11 +34,11 @@ export default function ProductIndex({ products, filters = {}, seo }) {
                                 <input
                                     value={search}
                                     onChange={(event) => setSearch(event.target.value)}
-                                    className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+                                    className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                                     placeholder="Cari produk..."
                                 />
                             </div>
-                            <button type="submit" className="inline-flex h-11 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700">
+                            <button type="submit" className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary/90">
                                 Cari
                             </button>
                         </form>
@@ -65,7 +65,7 @@ export default function ProductIndex({ products, filters = {}, seo }) {
 
 function ProductCard({ product }) {
     return (
-        <Link href={`/produk/${product.slug}`} className="group overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
+        <Link href={`/produk/${product.slug}`} className="group overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
             <div className="relative overflow-hidden rounded-lg bg-slate-100">
                 {product.image ? (
                     <img src={product.image} alt={product.name} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
@@ -74,9 +74,9 @@ function ProductCard({ product }) {
                         <Laptop className="h-10 w-10" />
                     </div>
                 )}
-                {product.badge && <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-2.5 py-1 text-[10px] font-semibold text-white">{product.badge}</span>}
+                {product.badge && <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white">{product.badge}</span>}
             </div>
-            <h2 className="mt-4 line-clamp-2 break-words text-base font-semibold text-slate-950 transition group-hover:text-blue-700">{product.name}</h2>
+            <h2 className="mt-4 line-clamp-2 break-words text-base font-semibold text-slate-950 transition group-hover:text-primary/90">{product.name}</h2>
             {product.description && (
                 <div
                     className="mt-2 line-clamp-3 text-xs leading-5 text-slate-500 [&_p]:m-0"
@@ -86,9 +86,9 @@ function ProductCard({ product }) {
             <div className="mt-5 flex items-center justify-between gap-3">
                 <div>
                     {product.discount_price && product.price && <p className="text-[11px] text-slate-400 line-through">{product.price}</p>}
-                    {(product.discount_price || product.price) && <p className="text-sm font-bold text-blue-600">{product.discount_price || product.price}</p>}
+                    {(product.discount_price || product.price) && <p className="text-sm font-bold text-primary">{product.discount_price || product.price}</p>}
                 </div>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-primary transition group-hover:bg-primary group-hover:text-white">
                     <ShoppingCart className="h-4 w-4" />
                 </span>
             </div>
@@ -107,8 +107,8 @@ function Pagination({ links }) {
                     onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true, preserveState: true })}
                     className={`inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-3 text-sm font-semibold transition ${
                         link.active
-                            ? 'border-blue-600 bg-blue-600 text-white'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50'
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-primary/30 hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
                     }`}
                 >
                     <span dangerouslySetInnerHTML={{ __html: link.label }} />

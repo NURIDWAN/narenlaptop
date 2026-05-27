@@ -8,6 +8,8 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
     const whatsappNumber = '6281234567890';
     const whatsappText = encodeURIComponent(`Halo, saya ingin konsultasi tentang artikel "${article.title}"`);
     const articleUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const thumbnailUrl = normalizeMediaUrl(article.thumbnail);
+    const contentHtml = normalizeArticleContent(article.content);
 
     return (
         <FrontendLayout>
@@ -18,7 +20,7 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
                         <div className="mx-auto max-w-5xl text-center">
                             <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold">
-                                <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-700">{article.category?.name || 'Artikel'}</span>
+                                <span className="rounded-full bg-accent/30 px-3 py-1 text-primary/90">{article.category?.name || 'Artikel'}</span>
                                 {article.schema_type && <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{article.schema_type}</span>}
                             </div>
                             <h1 className="mt-5 break-words text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
@@ -34,11 +36,11 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                             </div>
 
                             <div className="mt-8 flex flex-wrap justify-center gap-3">
-                                <a href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                                <a href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
                                     <MessageCircle className="h-4 w-4" />
                                     Konsultasi
                                 </a>
-                                <a href="#related" className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700">
+                                <a href="#related" className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary/90">
                                     <NotebookText className="h-4 w-4" />
                                     Baca Terkait
                                 </a>
@@ -47,10 +49,10 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
 
                         <div className="relative mx-auto mt-10 max-w-4xl">
                             <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/70">
-                                {article.thumbnail ? (
-                                    <img src={article.thumbnail} alt={article.title} className="aspect-[16/9] max-h-[420px] w-full object-cover" loading="eager" />
+                                {thumbnailUrl ? (
+                                    <img src={thumbnailUrl} alt={article.title} className="aspect-[16/9] max-h-[420px] w-full object-cover" loading="eager" />
                                 ) : (
-                                    <div className="flex aspect-[16/9] max-h-[420px] items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-300">
+                                    <div className="flex aspect-[16/9] max-h-[420px] items-center justify-center bg-gradient-to-br from-slate-100 to-primary/5 text-slate-300">
                                         <Link2 className="h-20 w-20" />
                                     </div>
                                 )}
@@ -68,8 +70,8 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                         <div className="space-y-6">
                             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                                 <div
-                                    className="prose prose-slate prose-headings:break-words prose-headings:tracking-tight prose-p:break-words prose-li:break-words prose-a:text-blue-600 prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
-                                    dangerouslySetInnerHTML={{ __html: article.content || '' }}
+                                    className="article-content"
+                                    dangerouslySetInnerHTML={{ __html: contentHtml }}
                                 />
                             </div>
 
@@ -109,13 +111,13 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                                 </div>
                             </div>
 
-                            <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6 shadow-sm">
-                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">Butuh Bantuan</p>
+                            <div className="rounded-3xl border border-accent/35 bg-accent/15 p-6 shadow-sm">
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground">Butuh Bantuan</p>
                                 <h2 className="mt-3 text-xl font-bold tracking-tight text-slate-950">Konsultasi sebelum service</h2>
                                 <p className="mt-3 text-sm leading-7 text-slate-600">
                                     Kirim gejala perangkat Anda dan tim kami akan bantu arahan awal sebelum pengerjaan.
                                 </p>
-                                <a href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+                                <a href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90">
                                     <MessageCircle className="h-4 w-4" />
                                     Chat WhatsApp
                                 </a>
@@ -132,31 +134,14 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                                     <h2 className="text-3xl font-bold tracking-tight text-slate-950">Artikel Terkait</h2>
                                     <p className="mt-2 text-sm leading-7 text-slate-500">Artikel lain yang relevan dengan topik ini.</p>
                                 </div>
-                                <Link href="/blog" className="hidden items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 sm:inline-flex">
+                                <Link href="/blog" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary/90 sm:inline-flex">
                                     Lihat Blog <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </div>
 
                             <div className="mt-8 grid gap-5 md:grid-cols-3">
                                 {relatedArticles.map((related) => (
-                                    <Link key={related.id} href={`/blog/${related.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg">
-                                        <div className="overflow-hidden bg-slate-100">
-                                            {related.thumbnail ? (
-                                                <img src={related.thumbnail} alt={related.title} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
-                                            ) : (
-                                                <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                                    <Link2 className="h-10 w-10" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-5">
-                                            <div className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-                                                {related.category?.name || 'Artikel'}
-                                            </div>
-                                            <h3 className="mt-3 line-clamp-2 break-words text-lg font-semibold text-slate-950 transition group-hover:text-blue-700">{related.title}</h3>
-                                            <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-3">{related.excerpt}</p>
-                                        </div>
-                                    </Link>
+                                    <RelatedArticleCard key={related.id} article={related} />
                                 ))}
                             </div>
                         </div>
@@ -164,6 +149,31 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                 )}
             </article>
         </FrontendLayout>
+    );
+}
+
+function RelatedArticleCard({ article }) {
+    const thumbnailUrl = normalizeMediaUrl(article.thumbnail);
+
+    return (
+        <Link href={`/blog/${article.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
+            <div className="overflow-hidden bg-slate-100">
+                {thumbnailUrl ? (
+                    <img src={thumbnailUrl} alt={article.title} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                ) : (
+                    <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
+                        <Link2 className="h-10 w-10" />
+                    </div>
+                )}
+            </div>
+            <div className="p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest text-primary">
+                    {article.category?.name || 'Artikel'}
+                </div>
+                <h3 className="mt-3 line-clamp-2 break-words text-lg font-semibold text-slate-950 transition group-hover:text-primary/90">{article.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-3">{article.excerpt}</p>
+            </div>
+        </Link>
     );
 }
 
@@ -177,7 +187,7 @@ function MetaItem({ icon: Icon, label }) {
 }
 
 function ShareButton({ label, icon: Icon, href, onClick }) {
-    const sharedClass = 'inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700';
+    const sharedClass = 'inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-primary/40 hover:bg-accent/15 hover:text-primary/90';
 
     if (href) {
         return (
@@ -214,4 +224,33 @@ function formatDate(value) {
 
 function formatNumber(value) {
     return new Intl.NumberFormat('id-ID').format(Number(value) || 0);
+}
+
+function normalizeMediaUrl(value) {
+    const url = String(value || '').trim();
+    if (!url) return '';
+    if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:') || url.startsWith('blob:')) return url;
+    if (url.startsWith('/')) return url;
+    if (url.startsWith('storage/')) return `/${url}`;
+    return `/${url.replace(/^\/+/, '')}`;
+}
+
+function normalizeArticleContent(value) {
+    const content = String(value || '').trim();
+    if (!content) return '';
+    if (/<[a-z][\s\S]*>/i.test(content)) return content;
+
+    return content
+        .split(/\n{2,}/)
+        .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+        .join('');
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }

@@ -58,19 +58,19 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: #1800AC;
+    --primary-foreground: #ffffff;
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --accent: #D3AF37;
+    --accent-foreground: #1f1f1f;
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
+    --ring: #1800AC;
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
@@ -162,9 +162,107 @@
 .tiptap pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 0.5em; overflow-x: auto; margin: 0.75em 0; font-size: 0.875em; }
 .tiptap code { background: #f1f5f9; padding: 0.15em 0.3em; border-radius: 0.25em; font-size: 0.875em; }
 .tiptap pre code { background: none; padding: 0; }
-.tiptap a { color: #2563eb; text-decoration: underline; }
+.tiptap a { color: #1800AC; text-decoration: underline; }
 .tiptap img { max-width: 100%; height: auto; border-radius: 0.5em; margin: 1em 0; }
 .tiptap hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5em 0; }
 .tiptap table { border-collapse: collapse; width: 100%; margin: 1em 0; }
 .tiptap th, .tiptap td { border: 1px solid #e2e8f0; padding: 0.5em 0.75em; text-align: left; }
 .tiptap th { background: #f8fafc; font-weight: 600; }
+
+/* Public article content from TipTap */
+.article-content {
+    color: #0f172a;
+    font-size: 1rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+.article-content > *:first-child { margin-top: 0; }
+.article-content > *:last-child { margin-bottom: 0; }
+.article-content p { margin: 1em 0; }
+.article-content h1,
+.article-content h2,
+.article-content h3 {
+    color: #020617;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 1.5em 0 0.65em;
+}
+.article-content h1 { font-size: 2rem; }
+.article-content h2 { font-size: 1.55rem; }
+.article-content h3 { font-size: 1.25rem; }
+.article-content ul,
+.article-content ol {
+    margin: 1em 0;
+    padding-left: 1.5rem;
+}
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li { margin: 0.35em 0; padding-left: 0.2rem; }
+.article-content a {
+    color: #1800AC;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.article-content blockquote {
+    margin: 1.4em 0;
+    border-left: 4px solid #1800AC;
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: #f5f2e3;
+    padding: 1rem 1.25rem;
+    color: #334155;
+}
+.article-content img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5em auto;
+    border-radius: 1rem;
+    box-shadow: 0 18px 45px rgb(15 23 42 / 0.14);
+}
+.article-content hr {
+    margin: 2em 0;
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+}
+.article-content pre {
+    margin: 1.4em 0;
+    overflow-x: auto;
+    border-radius: 1rem;
+    background: #0f172a;
+    padding: 1rem;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+.article-content code {
+    border-radius: 0.35rem;
+    background: #f1f5f9;
+    padding: 0.15rem 0.35rem;
+    color: #0f172a;
+    font-size: 0.9em;
+}
+.article-content pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+.article-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 1.4em 0;
+}
+.article-content th,
+.article-content td {
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 0.9rem;
+    text-align: left;
+    vertical-align: top;
+}
+.article-content th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+}

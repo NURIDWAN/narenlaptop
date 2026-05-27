@@ -7,7 +7,7 @@ export default function Page({ page, sections = [], latestArticles = [], seo, pr
         <FrontendLayout>
             <SEOHead seo={seo} />
             {preview && (
-                <div className="bg-amber-100 px-4 py-3 text-center text-sm font-medium text-amber-900">
+                <div className="bg-accent/25 px-4 py-3 text-center text-sm font-medium text-slate-900">
                     Preview draft: {page.title}
                 </div>
             )}
