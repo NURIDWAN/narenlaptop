@@ -15,25 +15,25 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
 
             <article className="bg-slate-50">
                 <section className="border-b border-slate-200 bg-white">
-                    <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-12">
-                        <div className="flex flex-col justify-center">
-                            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+                        <div className="mx-auto max-w-5xl text-center">
+                            <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold">
                                 <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-700">{article.category?.name || 'Artikel'}</span>
                                 {article.schema_type && <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{article.schema_type}</span>}
                             </div>
-                            <h1 className="mt-4 max-w-3xl break-words text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+                            <h1 className="mt-5 break-words text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
                                 {article.title}
                             </h1>
-                            {article.excerpt && <p className="mt-5 max-w-2xl break-words text-base leading-8 text-slate-600">{article.excerpt}</p>}
+                            {article.excerpt && <p className="mx-auto mt-5 max-w-3xl break-words text-base leading-8 text-slate-600 sm:text-lg">{article.excerpt}</p>}
 
-                            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
                                 <MetaItem icon={User} label={article.author?.name || 'Lumina Tech'} />
                                 <MetaItem icon={CalendarDays} label={publishedDate} />
                                 <MetaItem icon={Clock3} label={`${article.reading_time || 1} menit baca`} />
                                 <MetaItem icon={Eye} label={`${formatNumber(article.view_count || 0)} views`} />
                             </div>
 
-                            <div className="mt-8 flex flex-wrap gap-3">
+                            <div className="mt-8 flex flex-wrap justify-center gap-3">
                                 <a href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                                     <MessageCircle className="h-4 w-4" />
                                     Konsultasi
@@ -43,13 +43,42 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                                     Baca Terkait
                                 </a>
                             </div>
+                        </div>
 
-                            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="relative mx-auto mt-10 max-w-4xl">
+                            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/70">
+                                {article.thumbnail ? (
+                                    <img src={article.thumbnail} alt={article.title} className="aspect-[16/9] max-h-[420px] w-full object-cover" loading="eager" />
+                                ) : (
+                                    <div className="flex aspect-[16/9] max-h-[420px] items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-300">
+                                        <Link2 className="h-20 w-20" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="absolute bottom-5 right-5 hidden max-w-sm rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur sm:block">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Artikel</p>
+                                <p className="mt-1 line-clamp-2 break-words text-sm font-semibold text-slate-950">{article.title}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-10 sm:py-14">
+                    <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+                        <div className="space-y-6">
+                            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                                <div
+                                    className="prose prose-slate prose-headings:break-words prose-headings:tracking-tight prose-p:break-words prose-li:break-words prose-a:text-blue-600 prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: article.content || '' }}
+                                />
+                            </div>
+
+                            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                                     <Share2 className="h-4 w-4 text-slate-400" />
                                     Bagikan artikel
                                 </div>
-                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="mt-4 flex flex-wrap gap-2 sm:mt-0 sm:justify-end">
                                     <ShareButton
                                         label="Copy Link"
                                         icon={Copy}
@@ -67,33 +96,6 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/70">
-                                {article.thumbnail ? (
-                                    <img src={article.thumbnail} alt={article.title} className="aspect-[4/3] w-full object-cover" loading="eager" />
-                                ) : (
-                                    <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-300">
-                                        <Link2 className="h-20 w-20" />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="absolute -bottom-5 right-5 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
-                                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Artikel</p>
-                                <p className="mt-1 line-clamp-2 break-words text-sm font-semibold text-slate-950">{article.title}</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-10 sm:py-14">
-                    <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
-                        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                            <div
-                                className="prose prose-slate prose-headings:break-words prose-headings:tracking-tight prose-p:break-words prose-li:break-words prose-a:text-blue-600 prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
-                                dangerouslySetInnerHTML={{ __html: article.content || '' }}
-                            />
                         </div>
 
                         <aside className="space-y-5">

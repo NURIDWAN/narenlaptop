@@ -690,13 +690,13 @@ function ContactEditor({ settings, onChange }) {
             <Separator />
             <SectionGroup title="Map">
                 <Field
-                    label="Map Embed URL"
+                    label="Override Map Embed URL"
                     value={settings.map_embed_url}
                     onChange={(v) => set('map_embed_url', v)}
                     placeholder="https://www.google.com/maps/embed?pb=..."
                 />
                 <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
-                    Masukkan URL embed dari Google Maps (menu Share -&gt; Embed a map).
+                    Kosongkan untuk memakai Google Maps Embed dari Pengaturan. Isi field ini jika section ini butuh map berbeda.
                 </p>
             </SectionGroup>
         </div>

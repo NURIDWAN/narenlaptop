@@ -104,7 +104,7 @@ export default function SectionRenderer({ section, latestArticles = [] }) {
     if (section.type === 'image_compare') return <ImageCompare settings={settings} />;
     if (section.type === 'cta') return <CTA settings={settings} />;
     if (section.type === 'faq') return <FAQ settings={settings} />;
-    if (section.type === 'contact') return <Contact settings={settings} />;
+    if (section.type === 'contact') return <Contact settings={settings} data={data} />;
     if (section.type === 'blog_list') return <BlogList settings={settings} articles={data.articles || latestArticles} />;
     if (section.type === 'rich_text') return <RichText settings={settings} />;
     if (section.type === 'custom_html') return <section dangerouslySetInnerHTML={{ __html: settings.html || '' }} />;
@@ -899,9 +899,11 @@ function FAQ({ settings }) {
 }
 
 /* ─── Contact ─── */
-function Contact({ settings }) {
+function Contact({ settings, data = {} }) {
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
     const [sent, setSent] = useState(false);
+    const contactSettings = data.settings || {};
+    const mapEmbedUrl = settings.map_embed_url || contactSettings.google_maps_embed || '';
 
     function submit(event) {
         event.preventDefault();
@@ -928,10 +930,10 @@ function Contact({ settings }) {
                             Atau hubungi via WhatsApp
                         </div>
                     </div>
-                    {settings.map_embed_url && (
+                    {mapEmbedUrl && (
                         <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
                             <iframe
-                                src={settings.map_embed_url}
+                                src={mapEmbedUrl}
                                 title="Map lokasi"
                                 className="h-64 w-full"
                                 loading="lazy"

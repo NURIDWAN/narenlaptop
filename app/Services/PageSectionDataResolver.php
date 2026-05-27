@@ -198,7 +198,7 @@ class PageSectionDataResolver
     private function contactSettings(): array
     {
         $settings = Setting::query()
-            ->whereIn('key', ['whatsapp_number', 'whatsapp_message_default', 'email', 'address'])
+            ->whereIn('key', ['whatsapp_number', 'whatsapp_message_default', 'email', 'address', 'google_maps_embed'])
             ->pluck('value', 'key')
             ->all();
 
