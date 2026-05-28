@@ -25,6 +25,24 @@ function useOrganizationSchema(settings) {
     return schema;
 }
 
+function normalizeGoogleMapsEmbedUrl(value = '') {
+    const rawValue = String(value || '').trim();
+    if (!rawValue) return '';
+
+    const srcMatch = rawValue.match(/src=["']([^"']+)["']/i);
+    const mapValue = (srcMatch?.[1] || rawValue).replaceAll('&amp;', '&').trim();
+
+    if (mapValue.startsWith('!')) {
+        return `https://www.google.com/maps/embed?pb=${mapValue}`;
+    }
+
+    if (mapValue.startsWith('pb=')) {
+        return `https://www.google.com/maps/embed?${mapValue}`;
+    }
+
+    return mapValue;
+}
+
 export default function FrontendLayout({ children }) {
     const { settings = {}, navigation = {} } = usePage().props;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,6 +54,7 @@ export default function FrontendLayout({ children }) {
     const headerMenus = navigation.header || [];
     const footerMenus = navigation.footer || [];
     const orgSchema = useOrganizationSchema(settings);
+    const mapEmbedUrl = normalizeGoogleMapsEmbedUrl(settings.google_maps_embed);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -119,19 +138,19 @@ export default function FrontendLayout({ children }) {
                 </button>
             </div>
 
-            <footer className="border-t border-slate-200 bg-white">
-                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 text-sm text-slate-600 sm:px-6 md:grid-cols-4 lg:px-8">
+            <footer className="border-t border-white/10 bg-[#000411] text-slate-300">
+                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 text-sm sm:px-6 md:grid-cols-4 lg:px-8">
                     <div>
-                        <p className="text-base font-bold text-primary">{siteName}</p>
-                        <p className="mt-3 max-w-xs text-xs leading-6">{settings.footer_tagline || 'Premium laptop solutions.'}</p>
-                        <p className="mt-8 text-xs">© {new Date().getFullYear()} {siteName}</p>
+                        <p className="text-base font-bold text-white">{siteName}</p>
+                        <p className="mt-3 max-w-xs text-xs leading-6 text-slate-400">{settings.footer_tagline || 'Premium laptop solutions.'}</p>
+                        <p className="mt-8 text-xs text-slate-500">© {new Date().getFullYear()} {siteName}</p>
                     </div>
                     <div>
-                        <p className="mb-3 text-xs font-semibold text-slate-950">Explore</p>
+                        <p className="mb-3 text-xs font-semibold text-white">Explore</p>
                         {footerMenus.length > 0 && (
                             <nav className="space-y-2">
                                 {footerMenus.map((item) => (
-                                    <a key={item.id} href={item.url} className="block text-xs hover:text-primary/90" target={item.open_in_new_tab ? '_blank' : undefined} rel={item.open_in_new_tab ? 'noopener noreferrer' : undefined}>
+                                    <a key={item.id} href={item.url} className="block text-xs text-slate-400 transition hover:text-accent" target={item.open_in_new_tab ? '_blank' : undefined} rel={item.open_in_new_tab ? 'noopener noreferrer' : undefined}>
                                         {item.label}
                                     </a>
                                 ))}
@@ -139,22 +158,34 @@ export default function FrontendLayout({ children }) {
                         )}
                         {footerMenus.length === 0 && (
                             <>
-                                <p className="font-semibold text-slate-950">Kontak</p>
-                                <p className="mt-2">{settings.email || 'halo@example.com'}</p>
+                                <p className="font-semibold text-white">Kontak</p>
+                                <p className="mt-2 text-slate-400">{settings.email || 'halo@example.com'}</p>
                             </>
                         )}
                     </div>
                     <div>
-                        <p className="mb-3 text-xs font-semibold text-slate-950">Contact</p>
-                        <p className="text-xs">+{whatsapp}</p>
-                        <p className="mt-2 text-xs">{settings.email || 'halo@example.com'}</p>
-                        <p className="mt-2 text-xs">{settings.address || 'Jl. Teknologi Premium No. 1'}</p>
+                        <p className="mb-3 text-xs font-semibold text-white">Contact</p>
+                        <p className="text-xs text-slate-400">+{whatsapp}</p>
+                        <p className="mt-2 text-xs text-slate-400">{settings.email || 'halo@example.com'}</p>
+                        <p className="mt-2 text-xs leading-5 text-slate-400">{settings.address || 'Jl. Teknologi Premium No. 1'}</p>
                     </div>
                     <div>
-                        <p className="mb-3 text-xs font-semibold text-slate-950">Location</p>
-                        <div className="flex h-28 items-center justify-center rounded-lg bg-slate-100 text-primary">
-                            <LuSearch className="h-5 w-5" />
-                        </div>
+                        <p className="mb-3 text-xs font-semibold text-white">Location</p>
+                        {mapEmbedUrl ? (
+                            <div className="overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                                <iframe
+                                    src={mapEmbedUrl}
+                                    title="Lokasi"
+                                    className="h-32 w-full"
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex h-28 items-center justify-center rounded-lg bg-white/5 text-accent">
+                                <LuSearch className="h-5 w-5" />
+                            </div>
+                        )}
                     </div>
                 </div>
             </footer>

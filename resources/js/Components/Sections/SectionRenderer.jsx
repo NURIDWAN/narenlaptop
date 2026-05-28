@@ -980,7 +980,7 @@ function Contact({ settings, data = {} }) {
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
     const [sent, setSent] = useState(false);
     const contactSettings = data.settings || {};
-    const mapEmbedUrl = normalizeGoogleMapsEmbedUrl(settings.map_embed_url || contactSettings.google_maps_embed || '');
+    const mapEmbedUrl = normalizeGoogleMapsEmbedUrl(settings.map_embed_url || contactSettings.google_maps_embed || siteSettings.google_maps_embed || '');
     const whatsappNumber = String(siteSettings.whatsapp_number || contactSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
 
     function whatsappUrl(payload) {
