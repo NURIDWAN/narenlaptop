@@ -79,7 +79,7 @@ export default function Dashboard({
 
                 {/* Stats Grid */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    <StatCard icon={LuLayoutTemplate} label="Halaman" value={stats.pages} accent="bg-blue-500/10 text-blue-600" />
+                    <StatCard icon={LuLayoutTemplate} label="Halaman" value={stats.pages} accent="bg-primary/10 text-primary" />
                     <StatCard icon={LuGlobe2} label="Published" value={stats.publishedPages} accent="bg-emerald-500/10 text-emerald-600" />
                     <StatCard icon={LuNewspaper} label="Artikel" value={stats.articles} accent="bg-violet-500/10 text-violet-600" />
                     <StatCard icon={LuFileText} label="Artikel Live" value={stats.publishedArticles} accent="bg-amber-500/10 text-amber-600" />

@@ -132,7 +132,7 @@ export default function RichTextEditor({
                             title={item.title}
                             className={`rounded-md border p-1.5 transition ${
                                 item.active
-                                    ? 'border-blue-300 bg-blue-100 text-blue-700'
+                                    ? 'border-primary/30 bg-primary/10 text-primary'
                                     : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                             }`}
                         >

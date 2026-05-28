@@ -994,7 +994,7 @@ function Contact({ settings, data = {} }) {
     return (
         <section id="kontak" className="relative overflow-hidden bg-slate-950 py-24 text-white">
             <div className="absolute inset-0 opacity-30">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(59,130,246,0.3),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(190,151,78,0.3),transparent_60%)]" />
             </div>
             <div className="relative mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-5 lg:px-8">
                 <div className="lg:col-span-2">

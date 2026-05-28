@@ -132,11 +132,11 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
                             {media.map((item) => (
-                                <button key={item.id} type="button" onClick={() => pick(item.url)} className="group overflow-hidden rounded-lg border text-left transition hover:border-blue-400">
+                                <button key={item.id} type="button" onClick={() => pick(item.url)} className="group overflow-hidden rounded-lg border text-left transition hover:border-primary/40">
                                     <img src={item.url} alt={item.alt || item.filename} className="aspect-square w-full object-cover" loading="lazy" />
                                     <div className="flex items-center justify-between p-2">
                                         <span className="truncate text-xs text-muted-foreground">{item.filename}</span>
-                                        <span className="text-[10px] font-semibold text-blue-600 opacity-0 transition group-hover:opacity-100">Pilih</span>
+                                        <span className="text-[10px] font-semibold text-primary opacity-0 transition group-hover:opacity-100">Pilih</span>
                                     </div>
                                 </button>
                             ))}

@@ -16,7 +16,7 @@ const groups = [
             { key: 'site_name', label: 'Nama Website' },
             { key: 'site_logo', label: 'Logo Website', type: 'image' },
             { key: 'favicon', label: 'Favicon', type: 'image' },
-            { key: 'primary_color', label: 'Warna Utama', placeholder: '#2563eb' },
+            { key: 'primary_color', label: 'Warna Utama', placeholder: '#040B20' },
         ],
     },
     {

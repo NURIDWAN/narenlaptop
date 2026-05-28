@@ -58,19 +58,19 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: #1800AC;
+    --primary: #040B20;
     --primary-foreground: #ffffff;
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
-    --accent: #D3AF37;
+    --accent: #BE974E;
     --accent-foreground: #1f1f1f;
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: #1800AC;
+    --ring: #040B20;
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
@@ -142,7 +142,7 @@
     .admin-form-flat input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
     .admin-form-flat textarea:focus,
     .admin-form-flat select:focus {
-        @apply bg-white ring-2 ring-blue-100;
+        @apply bg-white ring-2 ring-primary/20;
     }
 }
 
@@ -162,7 +162,7 @@
 .tiptap pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 0.5em; overflow-x: auto; margin: 0.75em 0; font-size: 0.875em; }
 .tiptap code { background: #f1f5f9; padding: 0.15em 0.3em; border-radius: 0.25em; font-size: 0.875em; }
 .tiptap pre code { background: none; padding: 0; }
-.tiptap a { color: #1800AC; text-decoration: underline; }
+.tiptap a { color: #040B20; text-decoration: underline; }
 .tiptap img { max-width: 100%; height: auto; border-radius: 0.5em; margin: 1em 0; }
 .tiptap hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5em 0; }
 .tiptap table { border-collapse: collapse; width: 100%; margin: 1em 0; }
@@ -199,14 +199,14 @@
 .article-content ol { list-style: decimal; }
 .article-content li { margin: 0.35em 0; padding-left: 0.2rem; }
 .article-content a {
-    color: #1800AC;
+    color: #040B20;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .article-content blockquote {
     margin: 1.4em 0;
-    border-left: 4px solid #1800AC;
+    border-left: 4px solid #BE974E;
     border-radius: 0 0.75rem 0.75rem 0;
     background: #f5f2e3;
     padding: 1rem 1.25rem;

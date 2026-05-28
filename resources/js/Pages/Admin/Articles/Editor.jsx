@@ -5,7 +5,7 @@ import { LuSave } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function ArticleEditor({ article, categories = [] }) {
-    const controlClass = 'mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100';
+    const controlClass = 'mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-primary/20';
 
     const [form, setForm] = useState({
         title: article.title || '',
@@ -101,7 +101,7 @@ export default function ArticleEditor({ article, categories = [] }) {
                             </select>
                         </label>
                     </Panel>
-                    <button disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+                    <button disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60">
                         <LuSave className="h-4 w-4" />
                         {saving ? 'Menyimpan...' : 'Simpan Artikel'}
                     </button>
@@ -126,7 +126,7 @@ function Field({ label, value, onChange, ...props }) {
             {label}
             <input
                 {...props}
-                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-primary/20"
                 value={value || ''}
                 onChange={(event) => onChange(event.target.value)}
             />
@@ -140,7 +140,7 @@ function Textarea({ label, value, onChange, rows = 4 }) {
             {label}
             <textarea
                 rows={rows}
-                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-lg border-0 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 focus:ring-primary/20"
                 value={value || ''}
                 onChange={(event) => onChange(event.target.value)}
             />
