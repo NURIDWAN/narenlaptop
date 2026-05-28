@@ -24,15 +24,16 @@ class GenerateArticleSEOJob implements ShouldQueue
         $this->article->refresh();
         $plainText = trim(strip_tags($this->article->content ?? ''));
 
-        // If no API key or content too short, fallback to rule-based generation
-        $apiKey = config('services.claude.api_key');
+        $settings = \App\Models\Setting::query()->whereIn('key', ['ai_api_key', 'ai_base_url', 'ai_model'])->pluck('value', 'key');
+        $apiKey = $settings['ai_api_key'] ?? config('services.claude.api_key');
+
         if (! $apiKey || strlen($plainText) < 100) {
             $this->article->update($seoGenerator->generateForArticle($this->article));
             return;
         }
 
         try {
-            $generated = $this->generateWithClaude($apiKey, $plainText);
+            $generated = $this->generateWithAI($apiKey, $settings['ai_base_url'] ?? config('services.claude.base_url', 'https://openrouter.ai/api/v1'), $settings['ai_model'] ?? config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'), $plainText);
             $this->article->update(array_filter([
                 'meta_title' => $generated['meta_title'] ?? null,
                 'meta_description' => $generated['meta_description'] ?? null,
@@ -41,20 +42,19 @@ class GenerateArticleSEOJob implements ShouldQueue
                 'reading_time' => max(1, (int) ceil(str_word_count($plainText) / 200)),
             ]));
         } catch (\Throwable $e) {
-            Log::warning('Claude SEO generation failed, using fallback', ['error' => $e->getMessage()]);
+            Log::warning('AI SEO generation failed, using fallback', ['error' => $e->getMessage()]);
             $this->article->update($seoGenerator->generateForArticle($this->article));
         }
     }
 
-    private function generateWithClaude(string $apiKey, string $content): array
+    private function generateWithAI(string $apiKey, string $baseUrl, string $model, string $content): array
     {
         $truncated = mb_substr($content, 0, 3000);
-        $baseUrl = config('services.claude.base_url', 'https://openrouter.ai/api/v1');
 
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$apiKey}",
         ])->timeout(30)->post("{$baseUrl}/chat/completions", [
-            'model' => config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'),
+            'model' => $model,
             'max_tokens' => 512,
             'messages' => [[
                 'role' => 'user',

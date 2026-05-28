@@ -59,6 +59,15 @@ const groups = [
             { key: 'footer_scripts', label: 'Footer Scripts', multiline: true },
         ],
     },
+    {
+        title: 'AI Configuration',
+        description: 'Pengaturan API untuk generate artikel otomatis (OpenRouter/OpenAI compatible)',
+        fields: [
+            { key: 'ai_base_url', label: 'Base URL API', placeholder: 'https://openrouter.ai/api/v1' },
+            { key: 'ai_api_key', label: 'API Key', placeholder: 'sk-or-v1-xxxxx' },
+            { key: 'ai_model', label: 'Model', placeholder: 'anthropic/claude-sonnet-4-20250514' },
+        ],
+    },
 ];
 
 export default function Index({ settings }) {
@@ -115,6 +124,9 @@ export default function Index({ settings }) {
                                     )}
                                 </div>
                             ))}
+                            {group.title === 'AI Configuration' && (
+                                <VerifyAiButton baseUrl={form.ai_base_url} apiKey={form.ai_api_key} model={form.ai_model} />
+                            )}
                         </CardContent>
                     </Card>
                 ))}
@@ -125,6 +137,37 @@ export default function Index({ settings }) {
                 </Button>
             </form>
         </AdminLayout>
+    );
+}
+
+function VerifyAiButton({ baseUrl, apiKey, model }) {
+    const [status, setStatus] = useState(null); // null | 'loading' | 'ok' | 'error'
+    const [message, setMessage] = useState('');
+
+    async function verify() {
+        setStatus('loading');
+        setMessage('');
+        try {
+            const { data } = await axios.post('/admin/settings/verify-ai', { base_url: baseUrl, api_key: apiKey, model });
+            setStatus(data.ok ? 'ok' : 'error');
+            setMessage(data.message);
+        } catch {
+            setStatus('error');
+            setMessage('Gagal menghubungi server.');
+        }
+    }
+
+    return (
+        <div className="space-y-2 pt-2">
+            <Button type="button" variant="outline" onClick={verify} disabled={status === 'loading'}>
+                {status === 'loading' ? 'Menghubungkan...' : 'Verifikasi Koneksi AI'}
+            </Button>
+            {message && (
+                <p className={`text-sm font-medium ${status === 'ok' ? 'text-green-600' : 'text-destructive'}`}>
+                    {status === 'ok' ? '✓' : '✗'} {message}
+                </p>
+            )}
+        </div>
     );
 }
 

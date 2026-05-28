@@ -126,6 +126,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('media/picker', [\App\Http\Controllers\Admin\MediaController::class, 'picker'])->name('media.picker');
         Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/verify-ai', [\App\Http\Controllers\Admin\SettingController::class, 'verifyAi'])->name('settings.verify-ai');
         Route::resource('messages', \App\Http\Controllers\Admin\ContactSubmissionController::class)->only(['index', 'show', 'destroy']);
         Route::resource('navigation', \App\Http\Controllers\Admin\NavigationController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('navigation/reorder', [\App\Http\Controllers\Admin\NavigationController::class, 'reorder'])->name('navigation.reorder');

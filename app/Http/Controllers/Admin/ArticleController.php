@@ -195,18 +195,20 @@ class ArticleController extends Controller
     {
         $request->validate(['topic' => 'required|string|max:500']);
 
-        $apiKey = config('services.claude.api_key');
+        $settings = \App\Models\Setting::query()->whereIn('key', ['ai_api_key', 'ai_base_url', 'ai_model'])->pluck('value', 'key');
+        $apiKey = $settings['ai_api_key'] ?? config('services.claude.api_key');
         if (! $apiKey) {
-            return response()->json(['error' => 'API key belum dikonfigurasi.'], 422);
+            return response()->json(['error' => 'API key belum dikonfigurasi di Pengaturan.'], 422);
         }
 
-        $baseUrl = config('services.claude.base_url', 'https://openrouter.ai/api/v1');
+        $baseUrl = $settings['ai_base_url'] ?? config('services.claude.base_url', 'https://openrouter.ai/api/v1');
+        $model = $settings['ai_model'] ?? config('services.claude.model', 'anthropic/claude-sonnet-4-20250514');
         $topic = $request->input('topic');
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
             'Authorization' => "Bearer {$apiKey}",
         ])->timeout(60)->post("{$baseUrl}/chat/completions", [
-            'model' => config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'),
+            'model' => $model,
             'max_tokens' => 2048,
             'messages' => [[
                 'role' => 'user',

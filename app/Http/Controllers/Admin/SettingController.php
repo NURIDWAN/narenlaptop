@@ -17,6 +17,7 @@ class SettingController extends Controller
         'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube',
         'ga_tracking_id', 'gtm_id', 'header_scripts', 'footer_scripts',
         'google_site_verification', 'robots_txt', 'business_hours',
+        'ai_base_url', 'ai_api_key', 'ai_model',
     ];
 
     public function index(): Response
@@ -43,5 +44,34 @@ class SettingController extends Controller
         }
 
         return back()->with('success', 'Pengaturan berhasil disimpan.');
+    }
+
+    public function verifyAi(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $baseUrl = trim($request->input('base_url', ''));
+        $apiKey = trim($request->input('api_key', ''));
+        $model = trim($request->input('model', ''));
+
+        if (! $baseUrl || ! $apiKey || ! $model) {
+            return response()->json(['ok' => false, 'message' => 'Semua field harus diisi.']);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => "Bearer {$apiKey}",
+            ])->timeout(15)->post("{$baseUrl}/chat/completions", [
+                'model' => $model,
+                'max_tokens' => 10,
+                'messages' => [['role' => 'user', 'content' => 'Hi']],
+            ]);
+
+            if ($response->successful() && $response->json('choices.0.message.content')) {
+                return response()->json(['ok' => true, 'message' => 'Koneksi berhasil!']);
+            }
+
+            return response()->json(['ok' => false, 'message' => 'Gagal: '.$response->json('error.message', 'Response tidak valid.')]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => 'Error: '.$e->getMessage()]);
+        }
     }
 }
