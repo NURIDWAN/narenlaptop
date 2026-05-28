@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays, Clock3, Copy, Eye, Link2, MessageCircle, Note
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function Article({ article, relatedArticles = [], schema, seo }) {
+export default function Article({ article, relatedArticles = [], schema, seo, breadcrumbs }) {
     const publishedDate = formatDate(article.published_at);
     const whatsappNumber = '6281234567890';
     const whatsappText = encodeURIComponent(`Halo, saya ingin konsultasi tentang artikel "${article.title}"`);
@@ -13,7 +13,7 @@ export default function Article({ article, relatedArticles = [], schema, seo }) 
 
     return (
         <FrontendLayout>
-            <SEOHead seo={seo} schema={schema} />
+            <SEOHead seo={seo} schema={schema} breadcrumbs={breadcrumbs} />
 
             <article className="bg-slate-50">
                 <section className="border-b border-slate-200 bg-white">

@@ -36,11 +36,14 @@ class PageController extends Controller
                 'seo' => [
                     'title' => config('app.name'),
                     'description' => 'Company profile service laptop dan gadget.',
+                    'canonical' => url('/'),
+                    'og_type' => 'website',
                 ],
+                'breadcrumbs' => [['name' => 'Home', 'url' => url('/')]],
             ]);
         }
 
-        return $this->show($page->slug);
+        return $this->renderPage($page, true);
     }
 
     public function show(string $slug): Response
@@ -51,6 +54,14 @@ class PageController extends Controller
             ->with('visibleSections')
             ->firstOrFail();
 
+        return $this->renderPage($page, false);
+    }
+
+    private function renderPage(Page $page, bool $isHome): Response
+    {
+        $page->loadMissing('visibleSections');
+        $url = $isHome ? url('/') : url('/'.$page->slug);
+
         return Inertia::render('Frontend/Page', [
             'page' => $page,
             'sections' => $this->sectionData->resolve($page->visibleSections),
@@ -59,7 +70,12 @@ class PageController extends Controller
                 'title' => $page->meta_title ?: $page->title,
                 'description' => $page->meta_description,
                 'og_image' => $page->meta_og_image,
+                'canonical' => $url,
+                'og_type' => 'website',
             ],
+            'breadcrumbs' => $isHome
+                ? [['name' => 'Home', 'url' => url('/')]]
+                : [['name' => 'Home', 'url' => url('/')], ['name' => $page->title, 'url' => $url]],
         ]);
     }
 }

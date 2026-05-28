@@ -33,7 +33,12 @@ class ArticleController extends Controller
             'seo' => [
                 'title' => $selectedCategory?->meta_title ?: ($selectedCategory?->name ?: 'Blog'),
                 'description' => $selectedCategory?->meta_description ?: ($selectedCategory?->description ?: 'Artikel terbaru seputar service laptop, gadget, dan solusi IT.'),
+                'canonical' => $selectedCategory ? route('blog.index', ['category' => $selectedCategory->slug]) : route('blog.index'),
+                'og_type' => 'website',
             ],
+            'breadcrumbs' => $selectedCategory
+                ? [['name' => 'Home', 'url' => url('/')], ['name' => 'Blog', 'url' => route('blog.index')], ['name' => $selectedCategory->name, 'url' => route('blog.index', ['category' => $selectedCategory->slug])]]
+                : [['name' => 'Home', 'url' => url('/')], ['name' => 'Blog', 'url' => route('blog.index')]],
         ]);
     }
 
@@ -68,6 +73,13 @@ class ArticleController extends Controller
                 'title' => $article->meta_title ?: $article->title,
                 'description' => $article->meta_description ?: $article->excerpt,
                 'og_image' => $article->og_image ?: $article->thumbnail,
+                'canonical' => route('blog.show', $article->slug),
+                'og_type' => 'article',
+            ],
+            'breadcrumbs' => [
+                ['name' => 'Home', 'url' => url('/')],
+                ['name' => 'Blog', 'url' => route('blog.index')],
+                ['name' => $article->title, 'url' => route('blog.show', $article->slug)],
             ],
         ]);
     }

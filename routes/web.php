@@ -31,11 +31,53 @@ Route::get('/produk/{slug}', [ProductController::class, 'show'])->name('products
 Route::post('/kontak', [ContactSubmissionController::class, 'store'])->middleware('throttle:10,1')->name('contact.store');
 
 Route::get('/sitemap.xml', function () {
-    $urls = collect()
-        ->merge(Page::query()->published()->get()->map(fn (Page $page) => url($page->slug === 'beranda' ? '/' : '/'.$page->slug)))
-        ->merge(Article::query()->published()->get()->map(fn (Article $article) => route('blog.show', $article->slug)))
-        ->push(route('products.index'))
-        ->merge(Product::query()->active()->whereNotNull('slug')->get()->map(fn (Product $product) => route('products.show', $product->slug)));
+    $urls = collect();
+
+    // Pages
+    Page::query()->published()->get()->each(function (Page $page) use ($urls) {
+        $urls->push([
+            'loc' => url($page->slug === 'beranda' ? '/' : '/'.$page->slug),
+            'lastmod' => $page->updated_at->toDateString(),
+            'changefreq' => $page->slug === 'beranda' ? 'daily' : 'weekly',
+            'priority' => $page->slug === 'beranda' ? '1.0' : '0.8',
+        ]);
+    });
+
+    // Blog index
+    $urls->push([
+        'loc' => route('blog.index'),
+        'lastmod' => Article::query()->published()->max('updated_at') ? \Carbon\Carbon::parse(Article::query()->published()->max('updated_at'))->toDateString() : now()->toDateString(),
+        'changefreq' => 'daily',
+        'priority' => '0.8',
+    ]);
+
+    // Articles
+    Article::query()->published()->get()->each(function (Article $article) use ($urls) {
+        $urls->push([
+            'loc' => route('blog.show', $article->slug),
+            'lastmod' => $article->updated_at->toDateString(),
+            'changefreq' => 'weekly',
+            'priority' => '0.6',
+        ]);
+    });
+
+    // Products index
+    $urls->push([
+        'loc' => route('products.index'),
+        'lastmod' => Product::query()->active()->max('updated_at') ? \Carbon\Carbon::parse(Product::query()->active()->max('updated_at'))->toDateString() : now()->toDateString(),
+        'changefreq' => 'daily',
+        'priority' => '0.8',
+    ]);
+
+    // Products
+    Product::query()->active()->whereNotNull('slug')->get()->each(function (Product $product) use ($urls) {
+        $urls->push([
+            'loc' => route('products.show', $product->slug),
+            'lastmod' => $product->updated_at->toDateString(),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ]);
+    });
 
     $xml = view('sitemap', ['urls' => $urls])->render();
 
@@ -43,10 +85,14 @@ Route::get('/sitemap.xml', function () {
 })->name('sitemap');
 
 Route::get('/robots.txt', function () {
-    $robots = Setting::query()->where('key', 'robots_txt')->value('value');
+    $value = Setting::query()->where('key', 'robots_txt')->value('value');
+    $content = is_array($value) ? ($value['content'] ?? '') : (string) ($value ?? '');
 
-    return response($robots['content'] ?? "User-agent: *\nAllow: /\nSitemap: ".url('/sitemap.xml')."\n", 200)
-        ->header('Content-Type', 'text/plain');
+    if (trim($content) === '') {
+        $content = "User-agent: *\nAllow: /\nSitemap: ".url('/sitemap.xml')."\n";
+    }
+
+    return response($content, 200)->header('Content-Type', 'text/plain');
 })->name('robots');
 
 Route::get('/dashboard', fn () => Inertia::render('Dashboard', [

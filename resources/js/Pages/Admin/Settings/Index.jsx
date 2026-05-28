@@ -41,6 +41,15 @@ const groups = [
         ],
     },
     {
+        title: 'SEO & Verifikasi',
+        description: 'Google Search Console dan pengaturan SEO',
+        fields: [
+            { key: 'google_site_verification', label: 'Google Site Verification', placeholder: 'Kode verifikasi dari Google Search Console' },
+            { key: 'business_hours', label: 'Jam Operasional', placeholder: 'Mo-Fr 08:00-17:00, Sa 09:00-15:00' },
+            { key: 'robots_txt', label: 'Robots.txt (custom)', multiline: true, placeholder: 'User-agent: *\nAllow: /' },
+        ],
+    },
+    {
         title: 'Analytics & Scripts',
         description: 'Tracking ID dan custom scripts',
         fields: [

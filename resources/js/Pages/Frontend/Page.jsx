@@ -2,10 +2,10 @@ import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 import SectionRenderer from '@/Components/Sections/SectionRenderer';
 
-export default function Page({ page, sections = [], latestArticles = [], seo, preview = false }) {
+export default function Page({ page, sections = [], latestArticles = [], seo, breadcrumbs, preview = false }) {
     return (
         <FrontendLayout>
-            <SEOHead seo={seo} />
+            <SEOHead seo={seo} breadcrumbs={breadcrumbs} />
             {preview && (
                 <div className="bg-accent/25 px-4 py-3 text-center text-sm font-medium text-slate-900">
                     Preview draft: {page.title}

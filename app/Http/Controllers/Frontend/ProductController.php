@@ -31,7 +31,13 @@ class ProductController extends Controller
             'filters' => ['search' => $search],
             'seo' => [
                 'title' => 'Produk',
-                'description' => 'Pilihan laptop dan perangkat unggulan yang tersedia di Lumina Tech.',
+                'description' => 'Pilihan laptop dan perangkat unggulan yang tersedia.',
+                'canonical' => route('products.index'),
+                'og_type' => 'website',
+            ],
+            'breadcrumbs' => [
+                ['name' => 'Home', 'url' => url('/')],
+                ['name' => 'Produk', 'url' => route('products.index')],
             ],
         ]);
     }
@@ -43,6 +49,7 @@ class ProductController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $images = $this->productImages($product);
         $relatedProducts = Product::query()
             ->active()
             ->where('id', '!=', $product->id)
@@ -57,7 +64,27 @@ class ProductController extends Controller
             'seo' => [
                 'title' => $product->name,
                 'description' => str($product->description ?? '')->stripTags()->limit(155)->toString(),
-                'og_image' => $this->productImages($product)[0] ?? null,
+                'og_image' => $images[0] ?? null,
+                'canonical' => route('products.show', $product->slug),
+                'og_type' => 'product',
+            ],
+            'schema' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'Product',
+                'name' => $product->name,
+                'description' => str($product->description ?? '')->stripTags()->limit(200)->toString(),
+                'image' => $images[0] ?? null,
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => $product->discount_price ?: $product->price,
+                    'priceCurrency' => 'IDR',
+                    'availability' => 'https://schema.org/InStock',
+                ],
+            ],
+            'breadcrumbs' => [
+                ['name' => 'Home', 'url' => url('/')],
+                ['name' => 'Produk', 'url' => route('products.index')],
+                ['name' => $product->name, 'url' => route('products.show', $product->slug)],
             ],
         ]);
     }

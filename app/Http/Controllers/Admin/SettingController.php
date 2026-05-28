@@ -16,6 +16,7 @@ class SettingController extends Controller
         'whatsapp_number', 'whatsapp_message_default', 'email', 'address', 'google_maps_embed',
         'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube',
         'ga_tracking_id', 'gtm_id', 'header_scripts', 'footer_scripts',
+        'google_site_verification', 'robots_txt', 'business_hours',
     ];
 
     public function index(): Response

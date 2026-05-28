@@ -4,7 +4,7 @@ import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function ProductShow({ product, relatedProducts = [], seo }) {
+export default function ProductShow({ product, relatedProducts = [], seo, schema, breadcrumbs }) {
     const images = product.images?.length ? product.images : (product.image ? [product.image] : []);
     const [activeImage, setActiveImage] = useState(images[0] || '');
     const { settings = {} } = usePage().props;
@@ -13,7 +13,7 @@ export default function ProductShow({ product, relatedProducts = [], seo }) {
 
     return (
         <FrontendLayout>
-            <SEOHead seo={seo} />
+            <SEOHead seo={seo} schema={schema} breadcrumbs={breadcrumbs} />
 
             <article className="bg-slate-50">
                 <section className="border-b border-slate-200 bg-white">

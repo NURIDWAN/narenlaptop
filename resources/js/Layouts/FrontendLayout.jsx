@@ -1,6 +1,28 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Menu, Search, X } from 'lucide-react';
 import { useState } from 'react';
+
+function useOrganizationSchema(settings) {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        'name': settings.site_name || 'Fenta Computer',
+        'url': window?.location?.origin || '',
+        ...(settings.email && { email: settings.email }),
+        ...(settings.whatsapp_number && { telephone: `+${settings.whatsapp_number}` }),
+        ...(settings.address && { address: { '@type': 'PostalAddress', 'streetAddress': settings.address } }),
+        ...(settings.site_logo && { logo: settings.site_logo }),
+    };
+
+    if (settings.business_hours) {
+        schema.openingHours = settings.business_hours;
+    }
+
+    const sameAs = [settings.social_instagram, settings.social_facebook, settings.social_tiktok, settings.social_youtube].filter(Boolean);
+    if (sameAs.length) schema.sameAs = sameAs;
+
+    return schema;
+}
 
 export default function FrontendLayout({ children }) {
     const { settings = {}, navigation = {} } = usePage().props;
@@ -9,9 +31,13 @@ export default function FrontendLayout({ children }) {
     const whatsapp = settings.whatsapp_number || '6281234567890';
     const headerMenus = navigation.header || [];
     const footerMenus = navigation.footer || [];
+    const orgSchema = useOrganizationSchema(settings);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
+            <Head>
+                <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
+            </Head>
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <Link href="/" className="text-lg font-bold tracking-normal text-primary lg:text-xl">

@@ -1,5 +1,5 @@
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Cpu, HardDrive, Laptop, Mail, MessageSquare, Phone, Quote, RotateCcw, Send, ShieldCheck, ShoppingCart, Star, Wrench } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -498,11 +498,33 @@ function Services({ settings, data = {} }) {
 
 /* ─── Products ─── */
 function Products({ settings, data = {} }) {
+    const { settings: siteSettings = {} } = usePage().props;
     const items = data.items?.length ? data.items : (settings.items || []);
     const title = String(settings.title ?? '').trim() || 'Produk Unggulan';
     const subtitle = String(settings.subtitle ?? '').trim();
     const linkText = String(settings.link_text ?? '').trim() || 'Lihat Semua';
     const linkUrl = String(settings.link_url ?? '').trim() || '/produk';
+    const whatsappNumber = String(siteSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
+
+    const plainText = (value) => String(value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const productWhatsappUrl = (item, href) => {
+        const productUrl = href.startsWith('http')
+            ? href
+            : `${typeof window !== 'undefined' ? window.location.origin : ''}${href}`;
+        const details = [
+            'Halo, saya ingin membeli produk berikut:',
+            `Nama: ${plainText(item.name) || 'Produk'}`,
+            item.discount_price || item.price ? `Harga: ${item.discount_price || item.price}` : null,
+            item.description ? `Detail: ${plainText(item.description)}` : null,
+            `Link produk: ${productUrl}`,
+        ].filter(Boolean);
+
+        return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(details.join('\n'))}`;
+    };
 
     return (
         <section id="produk" className="bg-slate-100 py-16 sm:py-20">
@@ -546,13 +568,20 @@ function Products({ settings, data = {} }) {
                                             dangerouslySetInnerHTML={{ __html: item.description }}
                                         />
                                     )}
-                                    <div className="mt-5 flex items-center justify-between gap-3">
+                                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                                         <div>
                                             {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{item.price}</p>}
                                             {(item.discount_price || item.price) && <p className="text-xs font-bold text-primary">{item.discount_price || item.price}</p>}
                                         </div>
-                                        <a href={href} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary transition hover:bg-primary hover:text-white" aria-label={`Lihat ${item.name || 'produk'}`}>
+                                        <a
+                                            href={productWhatsappUrl(item, href)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary/90"
+                                            aria-label={`Beli ${item.name || 'produk'} sekarang via WhatsApp`}
+                                        >
                                             <ShoppingCart className="h-4 w-4" />
+                                            <span>Beli Sekarang</span>
                                         </a>
                                     </div>
                                 </article>
@@ -900,14 +929,37 @@ function FAQ({ settings }) {
 
 /* ─── Contact ─── */
 function Contact({ settings, data = {} }) {
+    const { settings: siteSettings = {} } = usePage().props;
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
     const [sent, setSent] = useState(false);
     const contactSettings = data.settings || {};
     const mapEmbedUrl = settings.map_embed_url || contactSettings.google_maps_embed || '';
+    const whatsappNumber = String(siteSettings.whatsapp_number || contactSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
+
+    function whatsappUrl(payload) {
+        const message = [
+            'Halo, saya ingin menghubungi Naren Laptop.',
+            `Nama: ${payload.name}`,
+            payload.email ? `Email: ${payload.email}` : null,
+            payload.phone ? `No. HP: ${payload.phone}` : null,
+            `Pesan: ${payload.message}`,
+        ].filter(Boolean).join('\n');
+
+        return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    }
 
     function submit(event) {
         event.preventDefault();
-        router.post('/kontak', form, { preserveScroll: true, onSuccess: () => { setSent(true); setForm({ name: '', email: '', phone: '', message: '' }); } });
+        const submittedForm = { ...form };
+
+        router.post('/kontak', form, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSent(true);
+                window.open(whatsappUrl(submittedForm), '_blank', 'noopener,noreferrer');
+                setForm({ name: '', email: '', phone: '', message: '' });
+            },
+        });
     }
 
     return (

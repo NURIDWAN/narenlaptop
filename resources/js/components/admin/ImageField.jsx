@@ -4,11 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { Copy, ImagePlus, LoaderCircle, Search, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 export default function ImageField({ label = 'Gambar', value, onChange, placeholder = '/storage/media/image.jpg' }) {
+    const reactId = useId();
+    const inputId = `image-field-${reactId.replace(/[^a-z0-9_-]/gi, '')}`;
     const inputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,11 +21,24 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
         const file = event.target.files?.[0];
         if (!file) return;
         setUploading(true);
+        setError('');
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const { data } = await axios.post('/admin/media/upload', formData);
-            if (data?.url) onChange(data.url);
+            const { data } = await axios.post('/admin/media/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            if (data?.url) {
+                onChange(normalizeUrl(data.url));
+                return;
+            }
+            setError('Upload berhasil diproses, tapi URL gambar tidak diterima.');
+        } catch (uploadError) {
+            const message =
+                uploadError?.response?.data?.message ||
+                Object.values(uploadError?.response?.data?.errors || {})?.flat()?.[0] ||
+                'Upload gambar gagal. Pastikan file berupa jpg, png, gif, webp, atau svg maksimal 5MB.';
+            setError(message);
         } finally {
             setUploading(false);
             if (inputRef.current) inputRef.current.value = '';
@@ -31,9 +47,12 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
 
     async function fetchMedia(keyword = '') {
         setLoading(true);
+        setError('');
         try {
             const { data } = await axios.get('/admin/media/picker', { params: { search: keyword } });
             setMedia(data?.items || []);
+        } catch {
+            setError('Gagal memuat media. Coba buka ulang picker.');
         } finally {
             setLoading(false);
         }
@@ -53,8 +72,9 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
             if (parsed.pathname.startsWith('/storage/')) {
                 return `${parsed.pathname}${parsed.search || ''}`;
             }
+            return rawUrl;
         } catch {
-            // keep original value when URL parsing fails
+            if (rawUrl.startsWith('storage/')) return `/${rawUrl}`;
         }
 
         return rawUrl;
@@ -65,12 +85,14 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
         setOpen(false);
     }
 
+    const normalizedValue = normalizeUrl(value || '');
+
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
+            {label && <Label htmlFor={inputId}>{label}</Label>}
             <div className="flex min-h-44 items-center justify-center overflow-hidden rounded-lg border bg-muted/30">
-                {value ? (
-                    <img src={normalizeUrl(value)} alt="" className="h-full w-full object-cover" />
+                {normalizedValue ? (
+                    <img src={normalizedValue} alt="" className="h-full w-full object-cover" />
                 ) : (
                     <span className="text-sm text-muted-foreground">Belum ada gambar</span>
                 )}
@@ -90,7 +112,8 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
                     </Button>
                 )}
             </div>
-            <Input value={value || ''} onChange={(event) => onChange(normalizeUrl(event.target.value))} placeholder={placeholder} />
+            {error && <p className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
+            <Input id={inputId} name={inputId} value={normalizedValue} onChange={(event) => onChange(normalizeUrl(event.target.value))} placeholder={placeholder} />
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={upload} />
 
             <Dialog open={open} onOpenChange={setOpen}>

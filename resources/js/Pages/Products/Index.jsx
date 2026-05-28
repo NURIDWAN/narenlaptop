@@ -4,7 +4,7 @@ import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function ProductIndex({ products, filters = {}, seo }) {
+export default function ProductIndex({ products, filters = {}, seo, breadcrumbs }) {
     const items = products.data || [];
     const [search, setSearch] = useState(filters.search || '');
 
@@ -15,7 +15,7 @@ export default function ProductIndex({ products, filters = {}, seo }) {
 
     return (
         <FrontendLayout>
-            <SEOHead seo={seo} />
+            <SEOHead seo={seo} breadcrumbs={breadcrumbs} />
 
             <section className="bg-slate-50">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">

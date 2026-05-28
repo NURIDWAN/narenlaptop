@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays, Clock3, Link2, NotebookText } from 'lucide-re
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function BlogIndex({ articles, categories = [], selectedCategory = '', seo }) {
+export default function BlogIndex({ articles, categories = [], selectedCategory = '', seo, breadcrumbs }) {
     const items = articles.data || [];
     const featured = items[0];
     const rest = items.slice(1);
@@ -11,7 +11,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
 
     return (
         <FrontendLayout>
-            <SEOHead seo={seo} />
+            <SEOHead seo={seo} breadcrumbs={breadcrumbs} />
 
             <section className="bg-slate-50">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
