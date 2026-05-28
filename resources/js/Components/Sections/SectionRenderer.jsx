@@ -110,6 +110,7 @@ export default function SectionRenderer({ section, latestArticles = [] }) {
     if (section.type === 'custom_html') return <section dangerouslySetInnerHTML={{ __html: settings.html || '' }} />;
     if (section.type === 'pricing') return <Pricing settings={settings} />;
     if (section.type === 'team') return <Team settings={settings} data={data} />;
+    if (section.type === 'google_reviews') return <GoogleReviews settings={settings} />;
 
     return <Generic settings={settings} />;
 }
@@ -468,6 +469,17 @@ function Expertise({ settings }) {
 function Services({ settings, data = {} }) {
     const items = data.items?.length ? data.items : (settings.items || []);
 
+    const linkProps = (url) => {
+        const href = String(url || '').trim();
+        if (!href) return {};
+        const external = /^https?:\/\//i.test(href);
+
+        return {
+            href,
+            ...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
+        };
+    };
+
     return (
         <section id="layanan" className="bg-slate-50 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -478,14 +490,30 @@ function Services({ settings, data = {} }) {
                 <StaggerChildren className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, index) => {
                         const Icon = iconSet[index % iconSet.length];
+                        const cta = linkProps(item.cta_url);
                         return (
                             <StaggerItem key={item.title || index}>
-                                <article className="group h-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-slate-200/80">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 text-primary transition group-hover:bg-primary group-hover:text-white">
-                                        <Icon className="h-5 w-5" />
+                                <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-slate-200/80">
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.title || 'Layanan'} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                                    ) : (
+                                        <div className="mx-6 mt-6 flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 text-primary transition group-hover:bg-primary group-hover:text-white">
+                                            <Icon className="h-5 w-5" />
+                                        </div>
+                                    )}
+                                    <div className="flex flex-1 flex-col p-6">
+                                        <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
+                                        <p className="mt-3 flex-1 text-sm leading-6 text-slate-500">{item.description}</p>
+                                        {cta.href && (
+                                            <a
+                                                {...cta}
+                                                className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary/90"
+                                            >
+                                                {item.cta_text || 'Selengkapnya'}
+                                                <ArrowRight className="h-3.5 w-3.5" />
+                                            </a>
+                                        )}
                                     </div>
-                                    <h3 className="mt-5 text-base font-semibold text-slate-950">{item.title}</h3>
-                                    <p className="mt-3 text-sm leading-6 text-slate-500">{item.description}</p>
                                 </article>
                             </StaggerItem>
                         );
@@ -1131,6 +1159,39 @@ function Team({ settings, data = {} }) {
                         </StaggerItem>
                     ))}
                 </StaggerChildren>
+            </div>
+        </section>
+    );
+}
+
+/* ─── Google Reviews ─── */
+function GoogleReviews({ settings }) {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (!settings.embed_code || !containerRef.current) return;
+        containerRef.current.innerHTML = settings.embed_code;
+        const scripts = containerRef.current.querySelectorAll('script');
+        scripts.forEach((oldScript) => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) newScript.src = oldScript.src;
+            else newScript.textContent = oldScript.textContent;
+            newScript.async = true;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+    }, [settings.embed_code]);
+
+    return (
+        <section className="bg-white py-16 sm:py-20">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {settings.title && (
+                    <div className="mb-8 text-center">
+                        <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                        {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                    </div>
+                )}
+                <div ref={containerRef} />
+                {!settings.embed_code && <p className="text-center text-sm text-slate-400">Paste kode embed Trustindex di pengaturan section ini.</p>}
             </div>
         </section>
     );

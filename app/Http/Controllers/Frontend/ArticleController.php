@@ -15,6 +15,7 @@ class ArticleController extends Controller
     public function index(Request $request): Response
     {
         $categorySlug = $request->string('category')->toString();
+        $search = trim((string) $request->query('search', ''));
         $selectedCategory = $categorySlug !== ''
             ? ArticleCategory::query()->where('slug', $categorySlug)->first()
             : null;
@@ -27,9 +28,15 @@ class ArticleController extends Controller
             'articles' => Article::query()
                 ->published()
                 ->when($selectedCategory, fn ($query) => $query->where('category_id', $selectedCategory->id))
+                ->when($search !== '', fn ($query) => $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('excerpt', 'like', "%{$search}%");
+                }))
                 ->with('category')
                 ->latest('published_at')
-                ->paginate(9),
+                ->paginate(9)
+                ->withQueryString(),
+            'filters' => ['search' => $search],
             'seo' => [
                 'title' => $selectedCategory?->meta_title ?: ($selectedCategory?->name ?: 'Blog'),
                 'description' => $selectedCategory?->meta_description ?: ($selectedCategory?->description ?: 'Artikel terbaru seputar service laptop, gadget, dan solusi IT.'),

@@ -150,12 +150,15 @@ class PageSectionDataResolver
         return [
             'items' => Service::active()
                 ->take($limit)
-                ->get(['id', 'title', 'description', 'icon'])
+                ->get(['id', 'title', 'description', 'icon', 'image', 'cta_text', 'cta_url'])
                 ->map(fn (Service $service) => [
                     'id' => $service->id,
                     'title' => $service->title,
                     'description' => $service->description,
                     'icon' => $service->icon,
+                    'image' => $service->image,
+                    'cta_text' => $service->cta_text,
+                    'cta_url' => $service->cta_url,
                 ])
                 ->all(),
         ];

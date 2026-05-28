@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import ImageField from '@/components/admin/ImageField';
 import { ArrowUpDown, PenLine, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -57,7 +58,7 @@ export default function ServicesIndex({ services, filters = {} }) {
                             <thead className="border-b bg-muted/50 text-muted-foreground">
                                 <tr>
                                     <SortHeader label="Layanan" col="title" current={filters} onSort={toggleSort} />
-                                    <th className="px-4 py-3 font-medium">Icon</th>
+                                    <th className="px-4 py-3 font-medium">Media</th>
                                     <SortHeader label="Urutan" col="order" current={filters} onSort={toggleSort} />
                                     <SortHeader label="Status" col="is_active" current={filters} onSort={toggleSort} />
                                     <th className="px-4 py-3 text-right font-medium">Aksi</th>
@@ -75,7 +76,19 @@ export default function ServicesIndex({ services, filters = {} }) {
                                             <span className="font-medium text-foreground">{service.title}</span>
                                             <span className="text-muted-foreground mt-1 block max-w-xl text-xs leading-5">{service.description || '-'}</span>
                                         </td>
-                                        <td className="px-4 py-3 text-muted-foreground">{service.icon || '-'}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                {service.image ? (
+                                                    <img src={service.image} alt="" className="h-12 w-16 rounded-md object-cover" loading="lazy" />
+                                                ) : (
+                                                    <div className="flex h-12 w-16 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">No img</div>
+                                                )}
+                                                <div className="min-w-0 text-xs text-muted-foreground">
+                                                    <span className="block truncate">Icon: {service.icon || '-'}</span>
+                                                    <span className="block truncate">Link: {service.cta_url || '-'}</span>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td className="px-4 py-3 text-muted-foreground">{service.order}</td>
                                         <td className="px-4 py-3">
                                             <Badge variant={service.is_active ? 'default' : 'secondary'}>{service.is_active ? 'Aktif' : 'Nonaktif'}</Badge>
@@ -115,6 +128,9 @@ function ServiceFormModal({ open, onOpenChange, data }) {
         title: data?.title || '',
         description: data?.description || '',
         icon: data?.icon || '',
+        image: data?.image || '',
+        cta_text: data?.cta_text || '',
+        cta_url: data?.cta_url || '',
         order: data?.order || 0,
         is_active: data?.is_active ?? true,
     });
@@ -125,6 +141,9 @@ function ServiceFormModal({ open, onOpenChange, data }) {
             title: data?.title || '',
             description: data?.description || '',
             icon: data?.icon || '',
+            image: data?.image || '',
+            cta_text: data?.cta_text || '',
+            cta_url: data?.cta_url || '',
             order: data?.order || 0,
             is_active: data?.is_active ?? true,
         });
@@ -157,7 +176,7 @@ function ServiceFormModal({ open, onOpenChange, data }) {
                 onOpenChange(true);
             }}
         >
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{isEdit ? 'Edit Layanan' : 'Tambah Layanan'}</DialogTitle>
                     <DialogDescription>Data aktif bisa dipakai oleh section Layanan mode database.</DialogDescription>
@@ -166,10 +185,16 @@ function ServiceFormModal({ open, onOpenChange, data }) {
                 <form onSubmit={submit} className="space-y-4">
                     <Field label="Nama Layanan" value={form.data.title} onChange={(value) => form.setData('title', value)} required />
                     <Textarea label="Deskripsi" value={form.data.description} onChange={(value) => form.setData('description', value)} />
+                    <ImageField label="Foto Layanan" value={form.data.image} onChange={(value) => form.setData('image', value)} placeholder="/storage/media/service.jpg" />
 
                     <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="Icon" value={form.data.icon} onChange={(value) => form.setData('icon', value)} placeholder="wrench" />
                         <Field label="Urutan" type="number" value={form.data.order} onChange={(value) => form.setData('order', Number(value) || 0)} />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="Teks Tombol" value={form.data.cta_text} onChange={(value) => form.setData('cta_text', value)} placeholder="Selengkapnya" />
+                        <Field label="URL Tombol" value={form.data.cta_url} onChange={(value) => form.setData('cta_url', value)} placeholder="/kontak" />
                     </div>
 
                     <label className="flex items-center gap-2 text-sm">

@@ -10,6 +10,9 @@ class Service extends Model
         'title',
         'description',
         'icon',
+        'image',
+        'cta_text',
+        'cta_url',
         'order',
         'is_active',
     ];

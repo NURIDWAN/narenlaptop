@@ -66,6 +66,8 @@ class ArticleController extends Controller
 
         $article = Article::create($data);
 
+        \App\Jobs\GenerateArticleSEOJob::dispatch($article);
+
         return to_route('admin.articles.edit', $article)->with('success', 'Artikel berhasil dibuat.');
     }
 
@@ -96,6 +98,8 @@ class ArticleController extends Controller
         $data = $this->applyGeneratedSeoData($article->replicate()->fill(array_merge($article->toArray(), $data)), $data, $seoGenerator);
 
         $article->update($data);
+
+        \App\Jobs\GenerateArticleSEOJob::dispatch($article);
 
         return back()->with('success', 'Artikel berhasil disimpan.');
     }

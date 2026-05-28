@@ -59,6 +59,9 @@ class ServiceController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:1000'],
             'icon' => ['nullable', 'string', 'max:80'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'cta_text' => ['nullable', 'string', 'max:80'],
+            'cta_url' => ['nullable', 'string', 'max:255'],
             'order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
         ]);

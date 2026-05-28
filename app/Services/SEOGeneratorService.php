@@ -41,6 +41,7 @@ class SEOGeneratorService
         $mainKeyword = Str::lower(trim((string) collect($article->meta_keywords ?? [])->first()));
         $titleOrH1Text = Str::lower(trim(strip_tags(($article->title ?? '').' '.$content)));
         $keywordInHeading = $mainKeyword === '' || str_contains($titleOrH1Text, $mainKeyword);
+        $readability = $this->readabilityScore($content);
 
         $checks = [
             'Panjang judul SEO 50-60 karakter' => strlen($article->meta_title ?? '') >= 50 && strlen($article->meta_title ?? '') <= 60,
@@ -48,6 +49,7 @@ class SEOGeneratorService
             'Keyword utama muncul di judul/H1' => $keywordInHeading,
             'Internal link minimal 1' => str_contains($content, 'href="/') || str_contains($content, url('/')),
             'Alt text pada gambar' => ! str_contains($content, '<img') || preg_match_all('/<img[^>]+alt=["\'][^"\']+["\']/i', $content) > 0,
+            'Readability score baik (≥60)' => $readability >= 60,
         ];
 
         $passed = count(array_filter($checks));
@@ -55,7 +57,42 @@ class SEOGeneratorService
         return [
             'score' => (int) round(($passed / count($checks)) * 100),
             'checks' => $checks,
+            'readability' => $readability,
         ];
+    }
+
+    /**
+     * Simplified Flesch Reading Ease adapted for Indonesian text.
+     * Returns 0-100 (higher = easier to read).
+     */
+    public function readabilityScore(string $html): int
+    {
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($html)));
+        if ($text === '') {
+            return 0;
+        }
+
+        $sentences = max(1, preg_match_all('/[.!?]+/', $text));
+        $words = max(1, str_word_count($text));
+        $syllables = $this->countSyllables($text);
+
+        // Flesch Reading Ease formula
+        $score = 206.835 - (1.015 * ($words / $sentences)) - (84.6 * ($syllables / $words));
+
+        return (int) max(0, min(100, round($score)));
+    }
+
+    private function countSyllables(string $text): int
+    {
+        // Simple Indonesian syllable estimation: count vowel groups
+        $words = preg_split('/\s+/', Str::lower($text));
+        $total = 0;
+        foreach ($words as $word) {
+            $count = preg_match_all('/[aiueo]+/i', $word);
+            $total += max(1, $count);
+        }
+
+        return $total;
     }
 
     public function schemaForArticle(Article $article): array

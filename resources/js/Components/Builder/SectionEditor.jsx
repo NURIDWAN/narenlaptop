@@ -31,6 +31,7 @@ export default function SectionEditor({ type, settings, onChange, builderData = 
         custom_html: CustomHtmlEditor,
         pricing: PricingEditor,
         team: TeamEditor,
+        google_reviews: GoogleReviewsEditor,
     };
     const Editor = editors[type] || GenericEditor;
     return <Editor settings={settings} onChange={onChange} builderData={builderData} />;
@@ -188,6 +189,19 @@ function HeroEditor({ settings, onChange }) {
     const set = (key, val) => onChange({ ...settings, [key]: val });
     return (
         <div className="space-y-5">
+            <SectionGroup title="Variasi" description="Pilih tampilan hero yang berbeda.">
+                <SelectField
+                    label="Variasi Hero"
+                    value={settings.variant || 'default'}
+                    onChange={(v) => set('variant', v)}
+                    options={[
+                        { value: 'default', label: 'Default — 2 kolom dengan gambar' },
+                        { value: 'centered', label: 'Centered — Teks tengah + background image' },
+                        { value: 'minimal', label: 'Minimal — Gradient tanpa gambar' },
+                    ]}
+                />
+            </SectionGroup>
+            <Separator />
             <SectionGroup title="Konten" description="Headline utama yang pertama dilihat pengunjung.">
                 <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} required />
                 <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
@@ -448,7 +462,7 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
         const updated = items.map((item, i) => i === index ? { ...item, [key]: val } : item);
         set('items', updated);
     }
-    function addItem() { set('items', [...items, { title: '', description: '' }]); }
+    function addItem() { set('items', [...items, { title: '', description: '', image: '', cta_text: '', cta_url: '' }]); }
     function removeItem(index) { set('items', items.filter((_, i) => i !== index)); }
 
     return (
@@ -478,6 +492,11 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
                                 </div>
                                 <Field label="Nama Layanan" value={item.title} onChange={(v) => updateItem(i, 'title', v)} />
                                 <TextareaField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} rows={2} />
+                                <ImageField label="Foto Layanan" value={item.image} onChange={(v) => updateItem(i, 'image', v)} />
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <Field label="Teks Tombol" value={item.cta_text} onChange={(v) => updateItem(i, 'cta_text', v)} placeholder="Selengkapnya" />
+                                    <Field label="URL Tombol" value={item.cta_url} onChange={(v) => updateItem(i, 'cta_url', v)} placeholder="/kontak" />
+                                </div>
                             </div>
                         ))}
                         <Button type="button" variant="outline" onClick={addItem}>
@@ -1054,6 +1073,22 @@ function TeamEditor({ settings, onChange }) {
                     <Button type="button" variant="outline" onClick={addMember}><Plus className="size-4" /> Tambah Anggota</Button>
                 </SectionGroup>
             )}
+        </div>
+    );
+}
+
+function GoogleReviewsEditor({ settings, onChange }) {
+    const set = (key, val) => onChange({ ...settings, [key]: val });
+    return (
+        <div className="space-y-5">
+            <SectionGroup title="Konten" description="Judul opsional di atas widget.">
+                <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
+                <Field label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
+            </SectionGroup>
+            <Separator />
+            <SectionGroup title="Embed Trustindex" description="Paste kode embed dari dashboard Trustindex (https://www.trustindex.io). Kode biasanya berupa tag <script> atau <div>.">
+                <TextareaField label="Kode Embed" value={settings.embed_code} onChange={(v) => set('embed_code', v)} rows={5} placeholder='<script src="https://cdn.trustindex.io/loader.js?..."></script>' />
+            </SectionGroup>
         </div>
     );
 }

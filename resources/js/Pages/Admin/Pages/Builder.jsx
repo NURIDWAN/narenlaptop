@@ -81,7 +81,7 @@ const defaults = {
         image: 'https://images.unsplash.com/photo-1581092919535-7146c82b93bd?auto=format&fit=crop&w=1200&q=80',
         bullets: ['Sertifikasi servis multi-brand', 'Diagnosa mikro-elektronik lanjutan', 'Prosedur keamanan data enterprise'],
     },
-    services: { title: 'Layanan', subtitle: '', source: 'database', limit: 6, items: [{ title: 'Service Laptop', description: 'Deskripsi layanan' }] },
+    services: { title: 'Layanan', subtitle: '', source: 'database', limit: 6, items: [{ title: 'Service Laptop', description: 'Deskripsi layanan', image: '', cta_text: '', cta_url: '' }] },
     products: {
         title: 'Produk Unggulan',
         subtitle: '',
@@ -118,6 +118,7 @@ const defaults = {
     custom_html: { html: '<section class="py-12"><div class="mx-auto max-w-5xl px-4">Custom HTML</div></section>' },
     pricing: { title: 'Harga Layanan', subtitle: '', items: [{ name: 'Paket Basic', price: 'Rp 100.000', description: '', features: ['Bersih debu', 'Cek hardware'], featured: false, cta_text: 'Pilih', cta_url: '' }] },
     team: { title: 'Tim Kami', subtitle: '', members: [{ name: 'Nama', role: 'Teknisi', photo: '' }] },
+    google_reviews: { title: 'Apa Kata Pelanggan Kami', subtitle: '', embed_code: '' },
 };
 
 const sectionMeta = {
@@ -143,6 +144,7 @@ const sectionMeta = {
     blog_list: { label: 'Blog List', description: 'Artikel terbaru dari database.', icon: BookOpen, category: 'dynamic', dataKey: 'articleCategories', sourceLabel: 'Artikel' },
     rich_text: { label: 'Rich Text', description: 'Konten visual dengan editor lengkap.', icon: FileText, category: 'static' },
     contact: { label: 'Kontak', description: 'Form kontak, data dari Pengaturan.', icon: MessageCircle, category: 'dynamic', sourceLabel: 'Settings' },
+    google_reviews: { label: 'Google Reviews', description: 'Widget Trustindex / embed Google Reviews.', icon: Star, category: 'static' },
 };
 
 export default function Builder({ page, sectionTypes, builderData = {} }) {

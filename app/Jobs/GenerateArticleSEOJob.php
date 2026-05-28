@@ -6,24 +6,70 @@ use App\Models\Article;
 use App\Services\SEOGeneratorService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GenerateArticleSEOJob implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
+    public int $tries = 2;
+
     public function __construct(public Article $article)
     {
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(SEOGeneratorService $seoGenerator): void
     {
         $this->article->refresh();
-        $this->article->update($seoGenerator->generateForArticle($this->article));
+        $plainText = trim(strip_tags($this->article->content ?? ''));
+
+        // If no API key or content too short, fallback to rule-based generation
+        $apiKey = config('services.claude.api_key');
+        if (! $apiKey || strlen($plainText) < 100) {
+            $this->article->update($seoGenerator->generateForArticle($this->article));
+            return;
+        }
+
+        try {
+            $generated = $this->generateWithClaude($apiKey, $plainText);
+            $this->article->update(array_filter([
+                'meta_title' => $generated['meta_title'] ?? null,
+                'meta_description' => $generated['meta_description'] ?? null,
+                'meta_keywords' => $generated['meta_keywords'] ?? null,
+                'excerpt' => $this->article->excerpt ?: ($generated['excerpt'] ?? null),
+                'reading_time' => max(1, (int) ceil(str_word_count($plainText) / 200)),
+            ]));
+        } catch (\Throwable $e) {
+            Log::warning('Claude SEO generation failed, using fallback', ['error' => $e->getMessage()]);
+            $this->article->update($seoGenerator->generateForArticle($this->article));
+        }
+    }
+
+    private function generateWithClaude(string $apiKey, string $content): array
+    {
+        $truncated = mb_substr($content, 0, 3000);
+        $baseUrl = config('services.claude.base_url', 'https://openrouter.ai/api/v1');
+
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$apiKey}",
+        ])->timeout(30)->post("{$baseUrl}/chat/completions", [
+            'model' => config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'),
+            'max_tokens' => 512,
+            'messages' => [[
+                'role' => 'user',
+                'content' => "Kamu adalah SEO specialist untuk website service laptop berbahasa Indonesia. Berdasarkan konten artikel berikut, generate JSON dengan format:\n{\"meta_title\": \"50-60 karakter, mengandung keyword utama\", \"meta_description\": \"150-160 karakter, mengandung CTA\", \"meta_keywords\": [\"5-8 keyword relevan\"], \"excerpt\": \"1-2 kalimat ringkasan\"}\n\nKonten:\n{$truncated}\n\nBalas HANYA dengan JSON valid, tanpa teks lain.",
+            ]],
+        ]);
+
+        $text = $response->json('choices.0.message.content', '');
+        if (preg_match('/\{[\s\S]*\}/', $text, $m)) {
+            $data = json_decode($m[0], true);
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+
+        throw new \RuntimeException('Invalid OpenRouter response');
     }
 }

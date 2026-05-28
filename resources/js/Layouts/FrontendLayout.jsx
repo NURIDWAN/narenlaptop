@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Menu, Search, X } from 'lucide-react';
+import { ChevronUp, MessageCircle, Menu, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
 function useOrganizationSchema(settings) {
@@ -27,8 +27,11 @@ function useOrganizationSchema(settings) {
 export default function FrontendLayout({ children }) {
     const { settings = {}, navigation = {} } = usePage().props;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [whatsappOpen, setWhatsappOpen] = useState(false);
     const siteName = settings.site_name || 'Fenta Computer';
-    const whatsapp = settings.whatsapp_number || '6281234567890';
+    const whatsapp = String(settings.whatsapp_number || '6281234567890').replace(/\D/g, '');
+    const whatsappMessage = String(settings.whatsapp_message_default || 'Halo, saya ingin konsultasi.');
+    const whatsappUrl = `https://wa.me/${whatsapp}${whatsappMessage ? `?text=${encodeURIComponent(whatsappMessage)}` : ''}`;
     const headerMenus = navigation.header || [];
     const footerMenus = navigation.footer || [];
     const orgSchema = useOrganizationSchema(settings);
@@ -71,6 +74,49 @@ export default function FrontendLayout({ children }) {
             </header>
 
             <main>{children}</main>
+
+            <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+                {whatsappOpen && (
+                    <div className="w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/40 sm:w-96">
+                        <div className="flex items-start justify-between gap-4 bg-primary px-4 py-3 text-white">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent/90">WhatsApp</p>
+                                <p className="mt-1 text-sm font-semibold">{siteName}</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition hover:bg-white/10"
+                                aria-label="Tutup pop up WhatsApp"
+                                onClick={() => setWhatsappOpen(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="space-y-3 p-4">
+                            <p className="text-sm leading-6 text-slate-600">
+                                {settings.whatsapp_popup_text || 'Ada pertanyaan? Kirim pesan lewat WhatsApp dan tim kami akan merespons secepatnya.'}
+                            </p>
+                            <a
+                                href={whatsappUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-95"
+                            >
+                                <MessageCircle className="h-4 w-4" />
+                                Chat Sekarang
+                            </a>
+                        </div>
+                    </div>
+                )}
+                <button
+                    type="button"
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-emerald-600/30 transition hover:scale-105"
+                    aria-label={whatsappOpen ? 'Tutup pop up WhatsApp' : 'Buka pop up WhatsApp'}
+                    onClick={() => setWhatsappOpen((open) => !open)}
+                >
+                    {whatsappOpen ? <ChevronUp className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+                </button>
+            </div>
 
             <footer className="border-t border-slate-200 bg-white">
                 <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 text-sm text-slate-600 sm:px-6 md:grid-cols-4 lg:px-8">

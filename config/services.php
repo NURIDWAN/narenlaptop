@@ -36,8 +36,9 @@ return [
     ],
 
     'claude' => [
-        'api_key' => env('CLAUDE_API_KEY'),
-        'model' => env('CLAUDE_MODEL', 'claude-sonnet-4-20250514'),
+        'api_key' => env('OPENROUTER_API_KEY'),
+        'model' => env('OPENROUTER_MODEL', 'anthropic/claude-sonnet-4-20250514'),
+        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
     ],
 
 ];

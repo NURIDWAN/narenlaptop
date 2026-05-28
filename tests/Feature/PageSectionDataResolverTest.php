@@ -70,6 +70,9 @@ class PageSectionDataResolverTest extends TestCase
         Service::create([
             'title' => 'Service Laptop',
             'description' => 'Perbaikan laptop.',
+            'image' => '/storage/media/service-laptop.jpg',
+            'cta_text' => 'Booking Service',
+            'cta_url' => '/kontak',
             'order' => 1,
             'is_active' => true,
         ]);
@@ -91,6 +94,9 @@ class PageSectionDataResolverTest extends TestCase
 
         $this->assertCount(1, $sections[0]['data']['items']);
         $this->assertSame('Service Laptop', $sections[0]['data']['items'][0]['title']);
+        $this->assertSame('/storage/media/service-laptop.jpg', $sections[0]['data']['items'][0]['image']);
+        $this->assertSame('Booking Service', $sections[0]['data']['items'][0]['cta_text']);
+        $this->assertSame('/kontak', $sections[0]['data']['items'][0]['cta_url']);
     }
 
     public function test_slider_section_can_resolve_active_slides(): void

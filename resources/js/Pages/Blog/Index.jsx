@@ -1,13 +1,20 @@
 import { Link, router } from '@inertiajs/react';
-import { ArrowRight, CalendarDays, Clock3, Link2, NotebookText } from 'lucide-react';
+import { ArrowRight, CalendarDays, Clock3, Link2, NotebookText, Search } from 'lucide-react';
+import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function BlogIndex({ articles, categories = [], selectedCategory = '', seo, breadcrumbs }) {
+export default function BlogIndex({ articles, categories = [], selectedCategory = '', seo, breadcrumbs, filters = {} }) {
     const items = articles.data || [];
     const featured = items[0];
     const rest = items.slice(1);
     const activeCategory = categories.find((category) => category.slug === selectedCategory);
+    const [search, setSearch] = useState(filters.search || '');
+
+    function handleSearch(e) {
+        e.preventDefault();
+        router.get('/blog', { search: search.trim() || undefined, category: selectedCategory || undefined }, { preserveScroll: true, preserveState: true });
+    }
 
     return (
         <FrontendLayout>
@@ -38,6 +45,20 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                             ))}
                         </div>
                     )}
+
+                    <form onSubmit={handleSearch} className="mt-6 flex max-w-md gap-2">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Cari artikel..."
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <button type="submit" className="h-10 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary/90">Cari</button>
+                    </form>
 
                     {featured && (
                         <Link href={`/blog/${featured.slug}`} className="mt-10 block overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-2xl">
@@ -103,6 +124,21 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                             </Link>
                         ))}
                     </div>
+
+                    {articles.last_page > 1 && (
+                        <div className="mt-10 flex items-center justify-center gap-2">
+                            {articles.links.map((link, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    disabled={!link.url}
+                                    onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true, preserveState: true })}
+                                    className={`h-9 min-w-9 rounded-lg px-3 text-xs font-medium transition ${link.active ? 'bg-primary text-white shadow-sm' : link.url ? 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50' : 'text-slate-300'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
