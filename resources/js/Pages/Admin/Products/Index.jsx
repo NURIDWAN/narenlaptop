@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import RichTextEditor from '@/Components/Editor/RichTextEditor';
 import ImageField from '@/components/admin/ImageField';
-import { PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { LuPenLine, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useMemo, useState } from 'react';
 
 export default function ProductsIndex({ products, categories = [] }) {
@@ -34,10 +34,10 @@ export default function ProductsIndex({ products, categories = [] }) {
         <AdminLayout title="Produk">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative">
-                    <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                    <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                     <Input className="w-64 pl-9" placeholder="Cari produk..." value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
-                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+                <Button size="sm" onClick={() => setEditing('new')}><LuPlus className="size-4" /> Tambah</Button>
             </div>
 
             <Card className="mt-4 overflow-hidden p-0">
@@ -86,10 +86,10 @@ export default function ProductsIndex({ products, categories = [] }) {
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
                                                 <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setEditing(product.id)}>
-                                                    <PenLine className="size-4" />
+                                                    <LuPenLine className="size-4" />
                                                 </Button>
                                                 <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(product.id)}>
-                                                    <Trash2 className="size-4" />
+                                                    <LuTrash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -240,7 +240,7 @@ function ProductFormModal({ open, onOpenChange, data, categories = [] }) {
                         <div className="flex items-center justify-between">
                             <Label>Gambar Produk</Label>
                             <Button type="button" variant="outline" size="sm" onClick={addImage}>
-                                <Plus className="size-4" />
+                                <LuPlus className="size-4" />
                                 Tambah Gambar
                             </Button>
                         </div>

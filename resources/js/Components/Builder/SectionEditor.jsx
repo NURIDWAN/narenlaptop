@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import RichTextEditor from '@/Components/Editor/RichTextEditor';
-import { ImageUp, Plus, Trash2, X } from 'lucide-react';
+import { LuImagePlus, LuPlus, LuTrash2, LuX } from 'react-icons/lu';
 import { useRef, useState } from 'react';
 import axios from 'axios';
 
@@ -32,6 +32,7 @@ export default function SectionEditor({ type, settings, onChange, builderData = 
         pricing: PricingEditor,
         team: TeamEditor,
         google_reviews: GoogleReviewsEditor,
+        location: LocationEditor,
     };
     const Editor = editors[type] || GenericEditor;
     return <Editor settings={settings} onChange={onChange} builderData={builderData} />;
@@ -109,13 +110,13 @@ function ImageField({ label, value, onChange }) {
                 <div className="relative inline-block">
                     <img src={value} alt="" className="h-20 rounded-md border object-cover" />
                     <button type="button" onClick={() => onChange('')} className="absolute -right-2 -top-2 rounded-full bg-destructive p-0.5 text-white shadow">
-                        <X className="size-3" />
+                        <LuX className="size-3" />
                     </button>
                 </div>
             )}
             <div className="flex gap-2">
                 <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()}>
-                    <ImageUp className="size-4" />
+                    <LuImagePlus className="size-4" />
                     {uploading ? 'Uploading...' : 'Pilih Gambar'}
                 </Button>
                 <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -288,7 +289,7 @@ function SliderEditor({ settings, onChange, builderData = {} }) {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold text-muted-foreground">Slide #{i + 1}</span>
                                     <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                        <Trash2 className="size-4" />
+                                        <LuTrash2 className="size-4" />
                                     </Button>
                                 </div>
                                 <div className="grid gap-3 md:grid-cols-2">
@@ -304,7 +305,7 @@ function SliderEditor({ settings, onChange, builderData = {} }) {
                             </div>
                         ))}
                         <Button type="button" variant="outline" onClick={addItem}>
-                            <Plus className="size-4" />
+                            <LuPlus className="size-4" />
                             Tambah Slide
                         </Button>
                     </SectionGroup>
@@ -344,7 +345,7 @@ function JourneyEditor({ settings, onChange }) {
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted-foreground">Stat #{i + 1}</span>
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                <Trash2 className="size-4" />
+                                <LuTrash2 className="size-4" />
                             </Button>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
@@ -354,7 +355,7 @@ function JourneyEditor({ settings, onChange }) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addItem}>
-                    <Plus className="size-4" />
+                    <LuPlus className="size-4" />
                     Tambah Statistik
                 </Button>
             </SectionGroup>
@@ -391,7 +392,7 @@ function ValuesEditor({ settings, onChange }) {
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted-foreground">Nilai #{i + 1}</span>
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                <Trash2 className="size-4" />
+                                <LuTrash2 className="size-4" />
                             </Button>
                         </div>
                         <Field label="Nama Nilai" value={item.title} onChange={(v) => updateItem(i, 'title', v)} placeholder="Inovasi" />
@@ -399,7 +400,7 @@ function ValuesEditor({ settings, onChange }) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addItem}>
-                    <Plus className="size-4" />
+                    <LuPlus className="size-4" />
                     Tambah Nilai
                 </Button>
             </SectionGroup>
@@ -440,12 +441,12 @@ function ExpertiseEditor({ settings, onChange }) {
                     <div key={index} className="flex gap-2">
                         <Input value={bullet} onChange={(e) => updateBullet(index, e.target.value)} placeholder="Sertifikasi servis..." />
                         <Button type="button" variant="ghost" size="icon" onClick={() => removeBullet(index)} className="text-destructive hover:text-destructive">
-                            <Trash2 className="size-4" />
+                            <LuTrash2 className="size-4" />
                         </Button>
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addBullet}>
-                    <Plus className="size-4" />
+                    <LuPlus className="size-4" />
                     Tambah Bullet
                 </Button>
             </SectionGroup>
@@ -487,7 +488,7 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold text-muted-foreground">Layanan #{i + 1}</span>
                                     <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                        <Trash2 className="size-4" />
+                                        <LuTrash2 className="size-4" />
                                     </Button>
                                 </div>
                                 <Field label="Nama Layanan" value={item.title} onChange={(v) => updateItem(i, 'title', v)} />
@@ -500,7 +501,7 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
                             </div>
                         ))}
                         <Button type="button" variant="outline" onClick={addItem}>
-                            <Plus className="size-4" />
+                            <LuPlus className="size-4" />
                             Tambah Layanan
                         </Button>
                     </SectionGroup>
@@ -571,7 +572,7 @@ function ProductsEditor({ settings, onChange, builderData = {} }) {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold text-muted-foreground">Produk #{i + 1}</span>
                                     <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                        <Trash2 className="size-4" />
+                                        <LuTrash2 className="size-4" />
                                     </Button>
                                 </div>
                                 <div className="grid gap-3 md:grid-cols-2">
@@ -587,7 +588,7 @@ function ProductsEditor({ settings, onChange, builderData = {} }) {
                             </div>
                         ))}
                         <Button type="button" variant="outline" onClick={addItem}>
-                            <Plus className="size-4" />
+                            <LuPlus className="size-4" />
                             Tambah Produk
                         </Button>
                     </SectionGroup>
@@ -676,7 +677,7 @@ function FAQEditor({ settings, onChange }) {
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted-foreground">FAQ #{i + 1}</span>
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive">
-                                <Trash2 className="size-4" />
+                                <LuTrash2 className="size-4" />
                             </Button>
                         </div>
                         <Field label="Pertanyaan" value={item.question} onChange={(v) => updateItem(i, 'question', v)} />
@@ -684,7 +685,7 @@ function FAQEditor({ settings, onChange }) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addItem}>
-                    <Plus className="size-4" />
+                    <LuPlus className="size-4" />
                     Tambah FAQ
                 </Button>
             </SectionGroup>
@@ -857,7 +858,7 @@ function StatsEditor({ settings, onChange }) {
                     <div key={i} className="space-y-3 rounded-lg border bg-muted/30 p-4">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><LuTrash2 className="size-4" /></Button>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                             <Field label="Angka" value={item.value} onChange={(v) => updateItem(i, 'value', v)} placeholder="100+" />
@@ -865,7 +866,7 @@ function StatsEditor({ settings, onChange }) {
                         </div>
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={addItem}><Plus className="size-4" /> Tambah</Button>
+                <Button type="button" variant="outline" onClick={addItem}><LuPlus className="size-4" /> Tambah</Button>
             </SectionGroup>
         </div>
     );
@@ -894,7 +895,7 @@ function TestimonialsEditor({ settings, onChange }) {
                         <div key={i} className="space-y-3 rounded-lg border bg-muted/30 p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><LuTrash2 className="size-4" /></Button>
                             </div>
                             <Field label="Nama" value={item.name} onChange={(v) => updateItem(i, 'name', v)} />
                             <Field label="Jabatan/Peran" value={item.role} onChange={(v) => updateItem(i, 'role', v)} />
@@ -902,7 +903,7 @@ function TestimonialsEditor({ settings, onChange }) {
                             <RangeField label="Rating" value={item.rating || 5} onChange={(v) => updateItem(i, 'rating', v)} min={1} max={5} step={1} suffix="⭐" />
                         </div>
                     ))}
-                    <Button type="button" variant="outline" onClick={addItem}><Plus className="size-4" /> Tambah Testimoni</Button>
+                    <Button type="button" variant="outline" onClick={addItem}><LuPlus className="size-4" /> Tambah Testimoni</Button>
                 </SectionGroup>
             )}
         </div>
@@ -971,13 +972,13 @@ function GalleryEditor({ settings, onChange, builderData = {} }) {
                             <div key={i} className="space-y-3 rounded-lg border bg-muted/30 p-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)} className="text-destructive hover:text-destructive"><LuTrash2 className="size-4" /></Button>
                                 </div>
                                 <ImageField label="Gambar" value={img.url} onChange={(v) => updateImage(i, 'url', v)} />
                                 <Field label="Caption" value={img.caption} onChange={(v) => updateImage(i, 'caption', v)} />
                             </div>
                         ))}
-                        <Button type="button" variant="outline" onClick={addImage}><Plus className="size-4" /> Tambah Gambar</Button>
+                        <Button type="button" variant="outline" onClick={addImage}><LuPlus className="size-4" /> Tambah Gambar</Button>
                     </SectionGroup>
                 </>
             )}
@@ -1016,7 +1017,7 @@ function PricingEditor({ settings, onChange }) {
                     <div key={i} className="space-y-3 rounded-lg border bg-muted/30 p-4">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted-foreground">Paket #{i + 1}</span>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} className="text-destructive hover:text-destructive"><LuTrash2 className="size-4" /></Button>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                             <Field label="Nama Paket" value={item.name} onChange={(v) => updateItem(i, 'name', v)} />
@@ -1034,7 +1035,7 @@ function PricingEditor({ settings, onChange }) {
                         </label>
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={addItem}><Plus className="size-4" /> Tambah Paket</Button>
+                <Button type="button" variant="outline" onClick={addItem}><LuPlus className="size-4" /> Tambah Paket</Button>
             </SectionGroup>
         </div>
     );
@@ -1063,16 +1064,40 @@ function TeamEditor({ settings, onChange }) {
                         <div key={i} className="space-y-3 rounded-lg border bg-muted/30 p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => removeMember(i)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => removeMember(i)} className="text-destructive hover:text-destructive"><LuTrash2 className="size-4" /></Button>
                             </div>
                             <Field label="Nama" value={m.name} onChange={(v) => updateMember(i, 'name', v)} />
                             <Field label="Jabatan" value={m.role} onChange={(v) => updateMember(i, 'role', v)} />
                             <ImageField label="Foto" value={m.photo} onChange={(v) => updateMember(i, 'photo', v)} />
                         </div>
                     ))}
-                    <Button type="button" variant="outline" onClick={addMember}><Plus className="size-4" /> Tambah Anggota</Button>
+                    <Button type="button" variant="outline" onClick={addMember}><LuPlus className="size-4" /> Tambah Anggota</Button>
                 </SectionGroup>
             )}
+        </div>
+    );
+}
+
+function LocationEditor({ settings, onChange }) {
+    const set = (key, val) => onChange({ ...settings, [key]: val });
+    return (
+        <div className="space-y-5">
+            <SectionGroup title="Konten">
+                <Field label="Eyebrow" value={settings.eyebrow} onChange={(v) => set('eyebrow', v)} placeholder="Temukan Kami" />
+                <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
+                <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
+            </SectionGroup>
+            <Separator />
+            <SectionGroup title="Info Lokasi" description="Kosongkan untuk ambil dari Pengaturan website.">
+                <TextareaField label="Alamat" value={settings.address} onChange={(v) => set('address', v)} placeholder="Otomatis dari settings" />
+                <TextareaField label="Jam Operasional" value={settings.hours} onChange={(v) => set('hours', v)} placeholder="Senin – Minggu: 09.30 – 19.30 WIB" />
+                <Field label="Catatan Jam" value={settings.hours_note} onChange={(v) => set('hours_note', v)} placeholder="Buka setiap hari termasuk hari libur" />
+            </SectionGroup>
+            <Separator />
+            <SectionGroup title="Embed & Link">
+                <TextareaField label="Google Maps Embed URL" value={settings.map_embed} onChange={(v) => set('map_embed', v)} placeholder="Kosongkan untuk ambil dari settings" />
+                <Field label="Instagram URL" value={settings.instagram_url} onChange={(v) => set('instagram_url', v)} placeholder="Kosongkan untuk ambil dari settings" />
+            </SectionGroup>
         </div>
     );
 }

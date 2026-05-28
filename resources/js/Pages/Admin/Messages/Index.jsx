@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Eye, Search, Trash2 } from 'lucide-react';
+import { LuEye, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function Index({ messages, filters = {} }) {
@@ -29,7 +29,7 @@ export default function Index({ messages, filters = {} }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9 w-56" placeholder="Cari nama/email..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.status || ''} onChange={e => applyFilters({ status: e.target.value || undefined, page: undefined })}>
@@ -71,8 +71,8 @@ export default function Index({ messages, filters = {} }) {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
-                                                <Button asChild variant="ghost" size="icon" className="size-8"><Link href={`/admin/messages/${msg.id}`}><Eye className="size-4" /></Link></Button>
-                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(msg.id)}><Trash2 className="size-4" /></Button>
+                                                <Button asChild variant="ghost" size="icon" className="size-8"><Link href={`/admin/messages/${msg.id}`}><LuEye className="size-4" /></Link></Button>
+                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(msg.id)}><LuTrash2 className="size-4" /></Button>
                                             </div>
                                         </td>
                                     </tr>

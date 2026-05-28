@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Laptop, MessageCircle, ShoppingCart } from 'lucide-react';
+import { LuArrowLeft, LuArrowRight, LuCheckCircle2, LuLaptop, LuMessageCircle, LuShoppingCart } from 'react-icons/lu';
 import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
@@ -24,7 +24,7 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                                     <img src={activeImage} alt={product.name} className="aspect-[4/3] w-full object-cover" loading="eager" />
                                 ) : (
                                     <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                        <Laptop className="h-20 w-20" />
+                                        <LuLaptop className="h-20 w-20" />
                                     </div>
                                 )}
                             </div>
@@ -47,7 +47,7 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
 
                         <div className="flex flex-col justify-center">
                             <Link href="/produk" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/90">
-                                <ArrowLeft className="h-4 w-4" />
+                                <LuArrowLeft className="h-4 w-4" />
                                 Semua produk
                             </Link>
                             <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -67,11 +67,11 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                             )}
                             <div className="mt-8 flex flex-wrap gap-3">
                                 <a href={`https://wa.me/${whatsapp}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
-                                    <MessageCircle className="h-4 w-4" />
+                                    <LuMessageCircle className="h-4 w-4" />
                                     Konsultasi WhatsApp
                                 </a>
                                 <a href="/kontak" className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary/90">
-                                    <CheckCircle2 className="h-4 w-4" />
+                                    <LuCheckCircle2 className="h-4 w-4" />
                                     Tanya Ketersediaan
                                 </a>
                             </div>
@@ -88,7 +88,7 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                                     <p className="mt-2 text-sm leading-7 text-slate-500">Pilihan lain yang mungkin sesuai kebutuhan Anda.</p>
                                 </div>
                                 <Link href="/produk" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary/90 sm:inline-flex">
-                                    Lihat Semua <ArrowRight className="h-4 w-4" />
+                                    Lihat Semua <LuArrowRight className="h-4 w-4" />
                                 </Link>
                             </div>
                             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -99,7 +99,7 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                                                 <img src={related.image} alt={related.name} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                                             ) : (
                                                 <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                                    <Laptop className="h-10 w-10" />
+                                                    <LuLaptop className="h-10 w-10" />
                                                 </div>
                                             )}
                                         </div>

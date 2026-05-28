@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import RichTextEditor from '@/Components/Editor/RichTextEditor';
-import { Save } from 'lucide-react';
+import { LuSave } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function ArticleEditor({ article, categories = [] }) {
@@ -102,7 +102,7 @@ export default function ArticleEditor({ article, categories = [] }) {
                         </label>
                     </Panel>
                     <button disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
-                        <Save className="h-4 w-4" />
+                        <LuSave className="h-4 w-4" />
                         {saving ? 'Menyimpan...' : 'Simpan Artikel'}
                     </button>
                 </aside>

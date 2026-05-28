@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowRight, CheckCircle2, Cpu, LockKeyhole, Mail, ShieldCheck, Wrench } from 'lucide-react';
+import { LuArrowRight, LuCheckCircle2, LuCpu, LuLock, LuMail, LuShieldCheck, LuWrench } from 'react-icons/lu';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -45,7 +45,7 @@ export default function Login({ status, canResetPassword }) {
 
                             <div className="max-w-xl">
                                 <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-slate-100">
-                                    <ShieldCheck className="size-3.5" />
+                                    <LuShieldCheck className="size-3.5" />
                                     Admin Control Center
                                 </span>
                                 <h1 className="mt-6 text-4xl font-semibold leading-tight tracking-normal xl:text-5xl">
@@ -57,9 +57,9 @@ export default function Login({ status, canResetPassword }) {
                             </div>
 
                             <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
-                                <Feature icon={Wrench} label="CRUD Layanan" />
-                                <Feature icon={Cpu} label="Page Builder" />
-                                <Feature icon={CheckCircle2} label="SEO Ready" />
+                                <Feature icon={LuWrench} label="CRUD Layanan" />
+                                <Feature icon={LuCpu} label="Page Builder" />
+                                <Feature icon={LuCheckCircle2} label="SEO Ready" />
                             </div>
                         </div>
                     </section>
@@ -94,7 +94,7 @@ export default function Login({ status, canResetPassword }) {
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email</Label>
                                         <div className="relative">
-                                            <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                                            <LuMail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                                             <Input
                                                 id="email"
                                                 type="email"
@@ -124,7 +124,7 @@ export default function Login({ status, canResetPassword }) {
                                             )}
                                         </div>
                                         <div className="relative">
-                                            <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                                            <LuLock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                                             <Input
                                                 id="password"
                                                 type="password"
@@ -150,7 +150,7 @@ export default function Login({ status, canResetPassword }) {
 
                                     <Button type="submit" className="h-11 w-full" disabled={processing}>
                                         {processing ? 'Memproses...' : 'Masuk'}
-                                        <ArrowRight className="size-4" />
+                                        <LuArrowRight className="size-4" />
                                     </Button>
                                 </form>
                             </div>

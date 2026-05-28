@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowUpDown, FilePlus2, Pencil, Search, Trash2 } from 'lucide-react';
+import { LuArrowUpDown, LuFilePlus2, LuPencil, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function ArticlesIndex({ articles, filters = {}, categories = [] }) {
@@ -35,7 +35,7 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex flex-wrap gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9 w-56" placeholder="Cari judul..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.status || ''} onChange={e => applyFilters({ status: e.target.value || undefined, page: undefined })}>
@@ -56,7 +56,7 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
                         <Link href="/admin/article-categories">Kelola Kategori</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/admin/articles/create"><FilePlus2 className="size-4" /> Buat Artikel</Link>
+                        <Link href="/admin/articles/create"><LuFilePlus2 className="size-4" /> Buat Artikel</Link>
                     </Button>
                 </div>
             </div>
@@ -94,8 +94,8 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
                                         <td className="px-4 py-3 text-muted-foreground">{new Date(article.updated_at).toLocaleDateString('id-ID')}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
-                                                <Button asChild variant="ghost" size="icon" className="size-8"><Link href={`/admin/articles/${article.id}/edit`}><Pencil className="size-4" /></Link></Button>
-                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(article.id)}><Trash2 className="size-4" /></Button>
+                                                <Button asChild variant="ghost" size="icon" className="size-8"><Link href={`/admin/articles/${article.id}/edit`}><LuPencil className="size-4" /></Link></Button>
+                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(article.id)}><LuTrash2 className="size-4" /></Button>
                                             </div>
                                         </td>
                                     </tr>
@@ -118,7 +118,7 @@ function SortHeader({ label, col, current, onSort }) {
         <th className="px-4 py-3 font-medium">
             <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(col)}>
                 {label}
-                <ArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
+                <LuArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
             </button>
         </th>
     );

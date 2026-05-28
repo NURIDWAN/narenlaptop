@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileText, FolderGit2, Image, Images, Inbox, LayoutGrid, Menu, Newspaper, Settings, ShoppingBag, Star, Tag, Users, Wrench } from 'lucide-react';
+import { LuBookOpen, LuFileText, LuFolderGit2, LuImage, LuInbox, LuLayoutGrid, LuMenu, LuNewspaper, LuSettings, LuShoppingBag, LuStar, LuTag, LuUsers, LuWrench } from 'react-icons/lu';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -19,35 +19,35 @@ const mainNavGroups: { title: string; items: NavItem[] }[] = [
     {
         title: 'Overview',
         items: [
-            { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+            { title: 'Dashboard', href: '/dashboard', icon: LuLayoutGrid },
         ],
     },
     {
         title: 'Konten',
         items: [
-            { title: 'Halaman', href: '/admin/pages', icon: FileText },
-            { title: 'Slider', href: '/admin/sliders', icon: Images },
-            { title: 'Artikel', href: '/admin/articles', icon: Newspaper },
-            { title: 'Kategori Artikel', href: '/admin/article-categories', icon: Tag },
-            { title: 'Layanan', href: '/admin/services', icon: Wrench },
-            { title: 'Kategori Produk', href: '/admin/product-categories', icon: Tag },
-            { title: 'Produk', href: '/admin/products', icon: ShoppingBag },
-            { title: 'Testimoni', href: '/admin/testimonials', icon: Star },
-            { title: 'Tim', href: '/admin/team', icon: Users },
-            { title: 'Media', href: '/admin/media', icon: Image },
+            { title: 'Halaman', href: '/admin/pages', icon: LuFileText },
+            { title: 'Slider', href: '/admin/sliders', icon: LuImage },
+            { title: 'Artikel', href: '/admin/articles', icon: LuNewspaper },
+            { title: 'Kategori Artikel', href: '/admin/article-categories', icon: LuTag },
+            { title: 'Layanan', href: '/admin/services', icon: LuWrench },
+            { title: 'Kategori Produk', href: '/admin/product-categories', icon: LuTag },
+            { title: 'Produk', href: '/admin/products', icon: LuShoppingBag },
+            { title: 'Testimoni', href: '/admin/testimonials', icon: LuStar },
+            { title: 'Tim', href: '/admin/team', icon: LuUsers },
+            { title: 'Media', href: '/admin/media', icon: LuImage },
         ],
     },
     {
         title: 'Operasional',
         items: [
-            { title: 'Pesan', href: '/admin/messages', icon: Inbox },
+            { title: 'Pesan', href: '/admin/messages', icon: LuInbox },
         ],
     },
     {
         title: 'Sistem',
         items: [
-            { title: 'Navigasi', href: '/admin/navigation', icon: Menu },
-            { title: 'Pengaturan', href: '/admin/settings', icon: Settings },
+            { title: 'Navigasi', href: '/admin/navigation', icon: LuMenu },
+            { title: 'Pengaturan', href: '/admin/settings', icon: LuSettings },
         ],
     },
 ];
@@ -56,12 +56,12 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
         href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
+        icon: LuFolderGit2,
     },
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        icon: LuBookOpen,
     },
 ];
 

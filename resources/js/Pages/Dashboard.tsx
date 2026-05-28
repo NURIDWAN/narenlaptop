@@ -1,15 +1,15 @@
 import { Head, Link } from '@inertiajs/react';
 import {
-    ArrowUpRight,
-    FileText,
-    Globe2,
-    Inbox,
-    LayoutTemplate,
-    Newspaper,
-    PenLine,
-    Plus,
-    TrendingUp,
-} from 'lucide-react';
+    LuArrowUpRight,
+    LuFileText,
+    LuGlobe2,
+    LuInbox,
+    LuLayoutTemplate,
+    LuNewspaper,
+    LuPenLine,
+    LuPlus,
+    LuTrendingUp,
+} from 'react-icons/lu';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -64,13 +64,13 @@ export default function Dashboard({
                     <div className="flex gap-2">
                         <Button asChild size="sm">
                             <Link href="/admin/pages/create">
-                                <Plus className="size-4" />
+                                <LuPlus className="size-4" />
                                 Halaman Baru
                             </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm">
                             <Link href="/admin/articles/create">
-                                <PenLine className="size-4" />
+                                <LuPenLine className="size-4" />
                                 Tulis Artikel
                             </Link>
                         </Button>
@@ -79,11 +79,11 @@ export default function Dashboard({
 
                 {/* Stats Grid */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    <StatCard icon={LayoutTemplate} label="Halaman" value={stats.pages} accent="bg-blue-500/10 text-blue-600" />
-                    <StatCard icon={Globe2} label="Published" value={stats.publishedPages} accent="bg-emerald-500/10 text-emerald-600" />
-                    <StatCard icon={Newspaper} label="Artikel" value={stats.articles} accent="bg-violet-500/10 text-violet-600" />
-                    <StatCard icon={FileText} label="Artikel Live" value={stats.publishedArticles} accent="bg-amber-500/10 text-amber-600" />
-                    <StatCard icon={Inbox} label="Pesan" value={stats.messages} accent="bg-rose-500/10 text-rose-600" />
+                    <StatCard icon={LuLayoutTemplate} label="Halaman" value={stats.pages} accent="bg-blue-500/10 text-blue-600" />
+                    <StatCard icon={LuGlobe2} label="Published" value={stats.publishedPages} accent="bg-emerald-500/10 text-emerald-600" />
+                    <StatCard icon={LuNewspaper} label="Artikel" value={stats.articles} accent="bg-violet-500/10 text-violet-600" />
+                    <StatCard icon={LuFileText} label="Artikel Live" value={stats.publishedArticles} accent="bg-amber-500/10 text-amber-600" />
+                    <StatCard icon={LuInbox} label="Pesan" value={stats.messages} accent="bg-rose-500/10 text-rose-600" />
                 </div>
 
                 {/* Main Content */}
@@ -126,9 +126,9 @@ export default function Dashboard({
                             <CardTitle className="text-base">Pintasan</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <QuickLink href="/admin/pages" label="Kelola Halaman" icon={LayoutTemplate} />
-                            <QuickLink href="/admin/articles" label="Kelola Artikel" icon={Newspaper} />
-                            <QuickLink href="/" label="Lihat Website" icon={Globe2} />
+                            <QuickLink href="/admin/pages" label="Kelola Halaman" icon={LuLayoutTemplate} />
+                            <QuickLink href="/admin/articles" label="Kelola Artikel" icon={LuNewspaper} />
+                            <QuickLink href="/" label="Lihat Website" icon={LuGlobe2} />
                         </CardContent>
                     </Card>
                 </div>
@@ -137,7 +137,7 @@ export default function Dashboard({
     );
 }
 
-function StatCard({ icon: Icon, label, value, accent }: { icon: typeof LayoutTemplate; label: string; value: number; accent: string }) {
+function StatCard({ icon: Icon, label, value, accent }: { icon: typeof LuLayoutTemplate; label: string; value: number; accent: string }) {
     return (
         <Card className="gap-4 py-5">
             <CardContent className="flex items-center gap-4 px-5 py-0">
@@ -166,13 +166,13 @@ function RecentRow({ item, editPath, publicPath }: { item: RecentItem; editPath:
                 </Badge>
                 <Button asChild variant="ghost" size="icon" className="size-7">
                     <Link href={editPath}>
-                        <PenLine className="size-3.5" />
+                        <LuPenLine className="size-3.5" />
                     </Link>
                 </Button>
                 {item.status === 'published' && (
                     <Button asChild variant="ghost" size="icon" className="size-7">
                         <Link href={publicPath}>
-                            <ArrowUpRight className="size-3.5" />
+                            <LuArrowUpRight className="size-3.5" />
                         </Link>
                     </Button>
                 )}
@@ -181,7 +181,7 @@ function RecentRow({ item, editPath, publicPath }: { item: RecentItem; editPath:
     );
 }
 
-function QuickLink({ href, label, icon: Icon }: { href: string; label: string; icon: typeof LayoutTemplate }) {
+function QuickLink({ href, label, icon: Icon }: { href: string; label: string; icon: typeof LuLayoutTemplate }) {
     return (
         <Button asChild variant="outline" className="w-full justify-start" size="sm">
             <Link href={href}>

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
-import { Copy, ImagePlus, LoaderCircle, Search, Trash2 } from 'lucide-react';
+import { LuCopy, LuImagePlus, LuLoader2, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useId, useRef, useState } from 'react';
 
 export default function ImageField({ label = 'Gambar', value, onChange, placeholder = '/storage/media/image.jpg' }) {
@@ -99,7 +99,7 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
             </div>
             <div className="flex flex-wrap gap-2">
                 <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()}>
-                    {uploading ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+                    {uploading ? <LuLoader2 className="size-4 animate-spin" /> : <LuImagePlus className="size-4" />}
                     {uploading ? 'Uploading...' : 'Upload'}
                 </Button>
                 <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
@@ -107,7 +107,7 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
                 </Button>
                 {value && (
                     <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => onChange('')}>
-                        <Trash2 className="size-4" />
+                        <LuTrash2 className="size-4" />
                         Hapus
                     </Button>
                 )}
@@ -122,7 +122,7 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
                         <DialogTitle>Pilih Gambar dari Media</DialogTitle>
                     </DialogHeader>
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9" placeholder="Cari media..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                     {loading ? (
@@ -142,7 +142,7 @@ export default function ImageField({ label = 'Gambar', value, onChange, placehol
                             ))}
                         </div>
                     )}
-                    <p className="text-xs text-muted-foreground">Tip: Anda bisa klik ikon <Copy className="inline size-3" /> di Media Library untuk copy URL manual.</p>
+                    <p className="text-xs text-muted-foreground">Tip: Anda bisa klik ikon <LuCopy className="inline size-3" /> di Media Library untuk copy URL manual.</p>
                 </DialogContent>
             </Dialog>
         </div>

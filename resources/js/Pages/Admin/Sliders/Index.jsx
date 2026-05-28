@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImageField from '@/components/admin/ImageField';
-import { PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { LuPenLine, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 
 export default function Index({ sliders, filters = {} }) {
@@ -30,13 +30,13 @@ export default function Index({ sliders, filters = {} }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="w-64 pl-9" placeholder="Cari slider..." value={search} onChange={(event) => setSearch(event.target.value)} />
                     </div>
                     <Button type="submit" variant="outline" size="sm">Cari</Button>
                 </form>
                 <Button type="button" size="sm" onClick={() => setEditing('new')}>
-                    <Plus className="size-4" />
+                    <LuPlus className="size-4" />
                     Tambah Slider
                 </Button>
             </div>
@@ -83,10 +83,10 @@ export default function Index({ sliders, filters = {} }) {
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
                                                 <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setEditing(slider.id)}>
-                                                    <PenLine className="size-4" />
+                                                    <LuPenLine className="size-4" />
                                                 </Button>
                                                 <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => remove(slider.id)}>
-                                                    <Trash2 className="size-4" />
+                                                    <LuTrash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -231,7 +231,7 @@ function SliderFormModal({ open, onOpenChange, data }) {
                         <div className="flex items-center justify-between">
                             <Label>Gambar Slider</Label>
                             <Button type="button" variant="outline" size="sm" onClick={addImage}>
-                                <Plus className="size-4" />
+                                <LuPlus className="size-4" />
                                 Tambah Gambar
                             </Button>
                         </div>

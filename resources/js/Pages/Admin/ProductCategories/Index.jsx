@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { LuPencil, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function ProductCategoriesIndex({ categories, filters = {} }) {
@@ -76,7 +76,7 @@ export default function ProductCategoriesIndex({ categories, filters = {} }) {
 
                     <div className="flex gap-2">
                         <Button type="submit" disabled={processing}>
-                            <Plus className="size-4" />
+                            <LuPlus className="size-4" />
                             {editingId ? 'Simpan' : 'Tambah'}
                         </Button>
                         {editingId && <Button type="button" variant="outline" onClick={clear}>Batal</Button>}
@@ -86,7 +86,7 @@ export default function ProductCategoriesIndex({ categories, filters = {} }) {
                 <div className="space-y-4">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative w-full">
-                            <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                            <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                             <Input className="pl-9" placeholder="Cari nama atau slug..." value={search} onChange={(e) => setSearch(e.target.value)} />
                         </div>
                         <Button type="submit" variant="outline">Cari</Button>
@@ -114,10 +114,10 @@ export default function ProductCategoriesIndex({ categories, filters = {} }) {
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-2">
                                                 <Button type="button" variant="outline" size="icon" onClick={() => edit(category)}>
-                                                    <Pencil className="size-4" />
+                                                    <LuPencil className="size-4" />
                                                 </Button>
                                                 <Button type="button" variant="outline" size="icon" onClick={() => remove(category)}>
-                                                    <Trash2 className="size-4 text-red-600" />
+                                                    <LuTrash2 className="size-4 text-red-600" />
                                                 </Button>
                                             </div>
                                         </td>

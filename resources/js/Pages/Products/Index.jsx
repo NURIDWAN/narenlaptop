@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { ArrowRight, Laptop, Search, ShoppingCart } from 'lucide-react';
+import { LuArrowRight, LuLaptop, LuSearch, LuShoppingCart } from 'react-icons/lu';
 import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
@@ -30,7 +30,7 @@ export default function ProductIndex({ products, filters = {}, seo, breadcrumbs 
 
                         <form onSubmit={submit} className="flex w-full gap-2 sm:max-w-sm">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                <LuSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                 <input
                                     value={search}
                                     onChange={(event) => setSearch(event.target.value)}
@@ -71,7 +71,7 @@ function ProductCard({ product }) {
                     <img src={product.image} alt={product.name} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                 ) : (
                     <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                        <Laptop className="h-10 w-10" />
+                        <LuLaptop className="h-10 w-10" />
                     </div>
                 )}
                 {product.badge && <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white">{product.badge}</span>}
@@ -89,7 +89,7 @@ function ProductCard({ product }) {
                     {(product.discount_price || product.price) && <p className="text-sm font-bold text-primary">{product.discount_price || product.price}</p>}
                 </div>
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-primary transition group-hover:bg-primary group-hover:text-white">
-                    <ShoppingCart className="h-4 w-4" />
+                    <LuShoppingCart className="h-4 w-4" />
                 </span>
             </div>
         </Link>

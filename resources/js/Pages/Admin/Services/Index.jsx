@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImageField from '@/components/admin/ImageField';
-import { ArrowUpDown, PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { LuArrowUpDown, LuPenLine, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 
 export default function ServicesIndex({ services, filters = {} }) {
@@ -39,7 +39,7 @@ export default function ServicesIndex({ services, filters = {} }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="w-56 pl-9" placeholder="Cari layanan..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                     <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.active ?? ''} onChange={(e) => applyFilters({ active: e.target.value !== '' ? e.target.value : undefined, page: undefined })}>
@@ -48,7 +48,7 @@ export default function ServicesIndex({ services, filters = {} }) {
                         <option value="0">Nonaktif</option>
                     </select>
                 </form>
-                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+                <Button size="sm" onClick={() => setEditing('new')}><LuPlus className="size-4" /> Tambah</Button>
             </div>
 
             <Card className="mt-4 overflow-hidden p-0">
@@ -96,10 +96,10 @@ export default function ServicesIndex({ services, filters = {} }) {
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
                                                 <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setEditing(service.id)}>
-                                                    <PenLine className="size-4" />
+                                                    <LuPenLine className="size-4" />
                                                 </Button>
                                                 <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(service.id)}>
-                                                    <Trash2 className="size-4" />
+                                                    <LuTrash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -218,7 +218,7 @@ function SortHeader({ label, col, current, onSort }) {
         <th className="px-4 py-3 font-medium">
             <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(col)}>
                 {label}
-                <ArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
+                <LuArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
             </button>
         </th>
     );

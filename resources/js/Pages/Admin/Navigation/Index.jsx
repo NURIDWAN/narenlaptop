@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ExternalLink, Globe, GripVertical, Link2, PenLine, Plus, Trash2 } from 'lucide-react';
+import { LuChevronDown, LuExternalLink, LuGlobe, LuGripVertical, LuLink2, LuPenLine, LuPlus, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 
 export default function Index({ headerMenus, footerMenus, pages = [] }) {
@@ -54,7 +54,7 @@ function MenuSection({ title, location, items, pages }) {
             <CardHeader className="flex-row items-center justify-between">
                 <CardTitle className="text-base">{title}</CardTitle>
                 <Button size="sm" onClick={() => setOpen(true)}>
-                    <Plus className="size-4" /> Tambah
+                    <LuPlus className="size-4" /> Tambah
                 </Button>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -92,17 +92,17 @@ function SortableMenuItem({ item, onDelete, onEdit }) {
         <div ref={setNodeRef} style={style} className="flex items-center justify-between rounded-lg border bg-background px-4 py-2.5">
             <div className="flex items-center gap-3">
                 <button type="button" {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground">
-                    <GripVertical className="size-4" />
+                    <LuGripVertical className="size-4" />
                 </button>
                 <MenuLabel item={item} />
             </div>
             <div className="flex items-center gap-1">
-                {item.open_in_new_tab && <ExternalLink className="text-muted-foreground size-3.5" />}
+                {item.open_in_new_tab && <LuExternalLink className="text-muted-foreground size-3.5" />}
                 <Button variant="ghost" size="icon" className="size-7" onClick={() => onEdit(item)}>
-                    <PenLine className="size-3.5" />
+                    <LuPenLine className="size-3.5" />
                 </Button>
                 <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => onDelete(item.id)}>
-                    <Trash2 className="size-3.5" />
+                    <LuTrash2 className="size-3.5" />
                 </Button>
             </div>
         </div>
@@ -118,10 +118,10 @@ function MenuItem({ item, onDelete, onEdit, isChild }) {
             </div>
             <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="size-7" onClick={() => onEdit(item)}>
-                    <PenLine className="size-3.5" />
+                    <LuPenLine className="size-3.5" />
                 </Button>
                 <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => onDelete(item.id)}>
-                    <Trash2 className="size-3.5" />
+                    <LuTrash2 className="size-3.5" />
                 </Button>
             </div>
         </div>
@@ -136,8 +136,8 @@ function MenuLabel({ item }) {
             <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{item.label}</span>
                 {item.badge && <Badge variant="secondary" className="text-[10px]">{item.badge}</Badge>}
-                {isDropdown && <Badge variant="outline" className="text-[10px] gap-0.5"><ChevronDown className="size-2.5" />Dropdown</Badge>}
-                {isExternal && <Badge variant="outline" className="text-[10px] gap-0.5"><Globe className="size-2.5" />External</Badge>}
+                {isDropdown && <Badge variant="outline" className="text-[10px] gap-0.5"><LuChevronDown className="size-2.5" />Dropdown</Badge>}
+                {isExternal && <Badge variant="outline" className="text-[10px] gap-0.5"><LuGlobe className="size-2.5" />External</Badge>}
             </div>
             <p className="text-muted-foreground text-xs">{item.url === '#' ? `${item.children?.length || 0} sub-menu` : item.url}</p>
         </div>
@@ -236,9 +236,9 @@ function MenuDialog({ open, onOpenChange, location, pages, data = null }) {
                 <form onSubmit={submit} className="space-y-4">
                     {/* Type */}
                     <div className="flex gap-1">
-                        <TypeBtn active={linkType === 'page'} onClick={() => setLinkType('page')} icon={Link2} label="Halaman" />
-                        <TypeBtn active={linkType === 'external'} onClick={() => setLinkType('external')} icon={Globe} label="External" />
-                        <TypeBtn active={linkType === 'dropdown'} onClick={() => setLinkType('dropdown')} icon={ChevronDown} label="Dropdown" />
+                        <TypeBtn active={linkType === 'page'} onClick={() => setLinkType('page')} icon={LuLink2} label="Halaman" />
+                        <TypeBtn active={linkType === 'external'} onClick={() => setLinkType('external')} icon={LuGlobe} label="External" />
+                        <TypeBtn active={linkType === 'dropdown'} onClick={() => setLinkType('dropdown')} icon={LuChevronDown} label="Dropdown" />
                     </div>
 
                     {/* Page */}
@@ -279,7 +279,7 @@ function MenuDialog({ open, onOpenChange, location, pages, data = null }) {
                                     {form.data.children.map((child, i) => (
                                         <div key={i} className="flex items-center justify-between rounded px-3 py-1.5 hover:bg-muted/50">
                                             <span className="text-sm">{child.label} <span className="text-muted-foreground text-xs">{child.url}</span></span>
-                                            <Button type="button" variant="ghost" size="icon" className="size-6 text-destructive" onClick={() => removeChild(i)}><Trash2 className="size-3" /></Button>
+                                            <Button type="button" variant="ghost" size="icon" className="size-6 text-destructive" onClick={() => removeChild(i)}><LuTrash2 className="size-3" /></Button>
                                         </div>
                                     ))}
                                 </div>

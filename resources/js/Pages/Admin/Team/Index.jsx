@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImageField from '@/components/admin/ImageField';
-import { ArrowUpDown, PenLine, Plus, Search, Trash2 } from 'lucide-react';
+import { LuArrowUpDown, LuPenLine, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function Index({ members, filters = {} }) {
@@ -40,7 +40,7 @@ export default function Index({ members, filters = {} }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9 w-56" placeholder="Cari nama/jabatan..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.active ?? ''} onChange={e => applyFilters({ active: e.target.value !== '' ? e.target.value : undefined, page: undefined })}>
@@ -49,7 +49,7 @@ export default function Index({ members, filters = {} }) {
                         <option value="0">Nonaktif</option>
                     </select>
                 </form>
-                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+                <Button size="sm" onClick={() => setEditing('new')}><LuPlus className="size-4" /> Tambah</Button>
             </div>
 
             {editing && <MemberForm data={editing === 'new' ? null : data.find(m => m.id === editing)} onClose={() => setEditing(null)} />}
@@ -83,8 +83,8 @@ export default function Index({ members, filters = {} }) {
                                         <td className="px-4 py-3 text-muted-foreground">{m.order}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
-                                                <Button variant="ghost" size="icon" className="size-8" onClick={() => setEditing(m.id)}><PenLine className="size-4" /></Button>
-                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(m.id)}><Trash2 className="size-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-8" onClick={() => setEditing(m.id)}><LuPenLine className="size-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(m.id)}><LuTrash2 className="size-4" /></Button>
                                             </div>
                                         </td>
                                     </tr>
@@ -144,7 +144,7 @@ function SortHeader({ label, col, current, onSort }) {
     return (
         <th className="px-4 py-3 font-medium">
             <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(col)}>
-                {label}<ArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
+                {label}<LuArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
             </button>
         </th>
     );

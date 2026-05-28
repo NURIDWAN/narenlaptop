@@ -22,32 +22,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
-    BookOpen,
-    ChevronDown,
-    ChevronRight,
-    Code2,
-    CalendarCheck,
-    Eye,
-    FileText,
-    GripVertical,
-    HelpCircle,
-    Image,
-    Images,
-    LayoutGrid,
-    Megaphone,
-    MessageCircle,
-    MousePointerClick,
-    Pencil,
-    Plus,
-    Save,
-    ShoppingBag,
-    Sparkles,
-    ShieldCheck,
-    Star,
-    Trash2,
-    Users,
-    Wrench,
-} from 'lucide-react';
+    LuBookOpen,
+    LuChevronDown,
+    LuChevronRight,
+    LuCode2,
+    LuCalendarCheck,
+    LuEye,
+    LuFileText,
+    LuGripVertical,
+    LuHelpCircle,
+    LuImage,
+    LuLayoutGrid,
+    LuMegaphone,
+    LuMessageCircle,
+    LuMousePointerClick,
+    LuPencil,
+    LuPlus,
+    LuSave,
+    LuShoppingBag,
+    LuSparkles,
+    LuShieldCheck,
+    LuStar,
+    LuTrash2,
+    LuUsers,
+    LuWrench,
+} from 'react-icons/lu';
 import { useMemo, useState } from 'react';
 
 const defaults = {
@@ -119,32 +118,34 @@ const defaults = {
     pricing: { title: 'Harga Layanan', subtitle: '', items: [{ name: 'Paket Basic', price: 'Rp 100.000', description: '', features: ['Bersih debu', 'Cek hardware'], featured: false, cta_text: 'Pilih', cta_url: '' }] },
     team: { title: 'Tim Kami', subtitle: '', members: [{ name: 'Nama', role: 'Teknisi', photo: '' }] },
     google_reviews: { title: 'Apa Kata Pelanggan Kami', subtitle: '', embed_code: '' },
+    location: { eyebrow: 'Temukan Kami', title: 'Lokasi Service Laptop Fentacom Depok', subtitle: 'Berlokasi di Margonda Raya, Depok – mudah dijangkau dari berbagai penjuru kota.', address: '', hours: '', hours_note: '', map_embed: '', instagram_url: '' },
 };
 
 const sectionMeta = {
-    slider: { label: 'Slider', description: 'Carousel slide dari CRUD Slider atau input manual.', icon: Images, category: 'dynamic', dataKey: 'sliders', sourceLabel: 'CRUD Slider' },
-    hero: { label: 'Hero', description: 'Banner utama, headline, CTA, dan background.', icon: Sparkles, category: 'static' },
-    about: { label: 'Tentang', description: 'Profil singkat bisnis dan value proposition.', icon: FileText, category: 'static' },
-    about_hero: { label: 'About Hero', description: 'Judul center dengan gambar besar.', icon: Sparkles, category: 'static' },
-    journey: { label: 'Perjalanan', description: 'Cerita bisnis dan statistik ringkas.', icon: LayoutGrid, category: 'static' },
-    values: { label: 'Nilai Inti', description: 'Tiga kartu nilai perusahaan.', icon: ShieldCheck, category: 'static' },
-    expertise: { label: 'Keahlian Teknis', description: 'Section gelap dengan gambar dan checklist.', icon: Wrench, category: 'static' },
-    services: { label: 'Layanan', description: 'Data dari CRUD Layanan atau input manual.', icon: Wrench, category: 'dynamic', dataKey: 'services', sourceLabel: 'CRUD Layanan' },
-    products: { label: 'Produk Unggulan', description: 'Data dari CRUD Produk atau input manual.', icon: ShoppingBag, category: 'dynamic', dataKey: 'products', sourceLabel: 'CRUD Produk' },
-    booking_service: { label: 'Booking Service', description: 'Daftar layanan dan form booking service.', icon: CalendarCheck, category: 'static' },
-    stats: { label: 'Statistik', description: 'Angka pencapaian dan metric penting.', icon: LayoutGrid, category: 'static' },
-    image_compare: { label: 'Image Compare', description: 'Slider before-after interaktif.', icon: Image, category: 'static' },
-    cta: { label: 'CTA', description: 'Ajakan aksi dengan tombol utama atau WhatsApp dari pengaturan.', icon: Megaphone, category: 'dynamic', sourceLabel: 'Settings' },
-    faq: { label: 'FAQ', description: 'Pertanyaan dan jawaban accordion.', icon: HelpCircle, category: 'static' },
-    pricing: { label: 'Pricing', description: 'Tabel harga atau paket layanan.', icon: MousePointerClick, category: 'static' },
-    custom_html: { label: 'Custom HTML', description: 'Blok HTML khusus untuk kebutuhan bebas.', icon: Code2, category: 'static' },
-    testimonials: { label: 'Testimoni', description: 'Data dari CRUD Testimoni atau input manual.', icon: Star, category: 'dynamic', sourceLabel: 'CRUD Testimoni' },
-    team: { label: 'Tim', description: 'Data dari CRUD Tim atau input manual.', icon: Users, category: 'dynamic', sourceLabel: 'CRUD Tim' },
-    gallery: { label: 'Galeri', description: 'Gambar dari Media Library atau input manual.', icon: Images, category: 'dynamic', dataKey: 'media', sourceLabel: 'Media Library' },
-    blog_list: { label: 'Blog List', description: 'Artikel terbaru dari database.', icon: BookOpen, category: 'dynamic', dataKey: 'articleCategories', sourceLabel: 'Artikel' },
-    rich_text: { label: 'Rich Text', description: 'Konten visual dengan editor lengkap.', icon: FileText, category: 'static' },
-    contact: { label: 'Kontak', description: 'Form kontak, data dari Pengaturan.', icon: MessageCircle, category: 'dynamic', sourceLabel: 'Settings' },
-    google_reviews: { label: 'Google Reviews', description: 'Widget Trustindex / embed Google Reviews.', icon: Star, category: 'static' },
+    slider: { label: 'Slider', description: 'Carousel slide dari CRUD Slider atau input manual.', icon: LuImage, category: 'dynamic', dataKey: 'sliders', sourceLabel: 'CRUD Slider' },
+    hero: { label: 'Hero', description: 'Banner utama, headline, CTA, dan background.', icon: LuSparkles, category: 'static' },
+    about: { label: 'Tentang', description: 'Profil singkat bisnis dan value proposition.', icon: LuFileText, category: 'static' },
+    about_hero: { label: 'About Hero', description: 'Judul center dengan gambar besar.', icon: LuSparkles, category: 'static' },
+    journey: { label: 'Perjalanan', description: 'Cerita bisnis dan statistik ringkas.', icon: LuLayoutGrid, category: 'static' },
+    values: { label: 'Nilai Inti', description: 'Tiga kartu nilai perusahaan.', icon: LuShieldCheck, category: 'static' },
+    expertise: { label: 'Keahlian Teknis', description: 'Section gelap dengan gambar dan checklist.', icon: LuWrench, category: 'static' },
+    services: { label: 'Layanan', description: 'Data dari CRUD Layanan atau input manual.', icon: LuWrench, category: 'dynamic', dataKey: 'services', sourceLabel: 'CRUD Layanan' },
+    products: { label: 'Produk Unggulan', description: 'Data dari CRUD Produk atau input manual.', icon: LuShoppingBag, category: 'dynamic', dataKey: 'products', sourceLabel: 'CRUD Produk' },
+    booking_service: { label: 'Booking Service', description: 'Daftar layanan dan form booking service.', icon: LuCalendarCheck, category: 'static' },
+    stats: { label: 'Statistik', description: 'Angka pencapaian dan metric penting.', icon: LuLayoutGrid, category: 'static' },
+    image_compare: { label: 'Image Compare', description: 'Slider before-after interaktif.', icon: LuImage, category: 'static' },
+    cta: { label: 'CTA', description: 'Ajakan aksi dengan tombol utama atau WhatsApp dari pengaturan.', icon: LuMegaphone, category: 'dynamic', sourceLabel: 'Settings' },
+    faq: { label: 'FAQ', description: 'Pertanyaan dan jawaban accordion.', icon: LuHelpCircle, category: 'static' },
+    pricing: { label: 'Pricing', description: 'Tabel harga atau paket layanan.', icon: LuMousePointerClick, category: 'static' },
+    custom_html: { label: 'Custom HTML', description: 'Blok HTML khusus untuk kebutuhan bebas.', icon: LuCode2, category: 'static' },
+    testimonials: { label: 'Testimoni', description: 'Data dari CRUD Testimoni atau input manual.', icon: LuStar, category: 'dynamic', sourceLabel: 'CRUD Testimoni' },
+    team: { label: 'Tim', description: 'Data dari CRUD Tim atau input manual.', icon: LuUsers, category: 'dynamic', sourceLabel: 'CRUD Tim' },
+    gallery: { label: 'Galeri', description: 'Gambar dari Media Library atau input manual.', icon: LuImage, category: 'dynamic', dataKey: 'media', sourceLabel: 'Media Library' },
+    blog_list: { label: 'Blog List', description: 'Artikel terbaru dari database.', icon: LuBookOpen, category: 'dynamic', dataKey: 'articleCategories', sourceLabel: 'Artikel' },
+    rich_text: { label: 'Rich Text', description: 'Konten visual dengan editor lengkap.', icon: LuFileText, category: 'static' },
+    contact: { label: 'Kontak', description: 'Form kontak, data dari Pengaturan.', icon: LuMessageCircle, category: 'dynamic', sourceLabel: 'Settings' },
+    google_reviews: { label: 'Google Reviews', description: 'Widget Trustindex / embed Google Reviews.', icon: LuStar, category: 'static' },
+    location: { label: 'Lokasi', description: 'Peta lokasi, alamat, dan jam operasional.', icon: LuMessageCircle, category: 'static' },
 };
 
 export default function Builder({ page, sectionTypes, builderData = {} }) {
@@ -213,13 +214,13 @@ export default function Builder({ page, sectionTypes, builderData = {} }) {
                         <div className="flex flex-wrap gap-2">
                             <PageSettingsDialog form={form} setForm={setForm} />
                             <Button type="submit" disabled={saving}>
-                                <Save className="size-4" />
+                                <LuSave className="size-4" />
                                 {saving ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                             {page.id && (
                                 <Button asChild variant="outline">
                                     <a href={`/admin/pages/${page.id}`}>
-                                        <Eye className="size-4" />
+                                        <LuEye className="size-4" />
                                         Preview
                                     </a>
                                 </Button>
@@ -245,7 +246,7 @@ export default function Builder({ page, sectionTypes, builderData = {} }) {
                                 <Badge variant="outline">{sections.filter((section) => section.is_visible).length} visible</Badge>
                                 {sections.length > 0 && (
                                     <Button type="button" size="sm" onClick={() => setAddSectionOpen(true)}>
-                                        <Plus className="size-4" />
+                                        <LuPlus className="size-4" />
                                         Tambah Section
                                     </Button>
                                 )}
@@ -267,14 +268,14 @@ export default function Builder({ page, sectionTypes, builderData = {} }) {
                         <Card className="border-dashed">
                             <CardContent className="flex min-h-72 flex-col items-center justify-center p-10 text-center">
                                 <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                                    <Plus className="size-5 text-muted-foreground" />
+                                    <LuPlus className="size-5 text-muted-foreground" />
                                 </div>
                                 <h3 className="mt-4 text-base font-semibold">Belum ada section</h3>
                                 <p className="mt-2 max-w-md text-sm text-muted-foreground">
                                     Pilih Hero, Layanan, FAQ, atau section lain untuk mulai menyusun halaman.
                                 </p>
                                 <Button type="button" className="mt-5" onClick={() => setAddSectionOpen(true)}>
-                                    <Plus className="size-4" />
+                                    <LuPlus className="size-4" />
                                     Tambah Section
                                 </Button>
                             </CardContent>
@@ -302,7 +303,7 @@ function PageSettingsDialog({ form, setForm }) {
         <Dialog>
             <DialogTrigger asChild>
                 <Button type="button" variant="outline">
-                    <Pencil className="size-4" />
+                    <LuPencil className="size-4" />
                     Informasi Halaman
                 </Button>
             </DialogTrigger>
@@ -398,7 +399,7 @@ function AddSectionDialog({ open, onOpenChange, sectionTypes, builderData = {}, 
 }
 
 function SectionLibraryButton({ type, builderData = {}, onClick }) {
-    const meta = sectionMeta[type] || { label: readableType(type), description: 'Section konten umum.', icon: FileText };
+    const meta = sectionMeta[type] || { label: readableType(type), description: 'Section konten umum.', icon: LuFileText };
     const Icon = meta.icon;
     const isDynamic = meta.category === 'dynamic';
     const count = meta.dataKey ? builderData[meta.dataKey]?.length : null;
@@ -421,7 +422,7 @@ function SectionLibraryButton({ type, builderData = {}, onClick }) {
                     </span>
                     <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{meta.description}</span>
                 </span>
-                <Plus className="mt-1 size-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
+                <LuPlus className="mt-1 size-4 shrink-0 text-muted-foreground transition group-hover:text-foreground" />
             </span>
         </button>
     );
@@ -431,7 +432,7 @@ function SortableSection({ section, index, onUpdate, onRemove, builderData }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.clientId });
     const style = { transform: CSS.Transform.toString(transform), transition };
     const [open, setOpen] = useState(true);
-    const meta = sectionMeta[section.type] || { label: readableType(section.type), icon: FileText };
+    const meta = sectionMeta[section.type] || { label: readableType(section.type), icon: LuFileText };
     const Icon = meta.icon;
     const summary = sectionSummary(section);
 
@@ -440,7 +441,7 @@ function SortableSection({ section, index, onUpdate, onRemove, builderData }) {
             <div className="flex items-center justify-between gap-3 p-4">
                 <div className="flex min-w-0 items-center gap-3">
                     <Button type="button" variant="outline" size="icon" {...attributes} {...listeners} className="cursor-grab">
-                        <GripVertical className="size-4" />
+                        <LuGripVertical className="size-4" />
                     </Button>
                     <button type="button" onClick={() => setOpen(!open)} className="flex min-w-0 items-center gap-3 text-left">
                         <span className="hidden rounded-md border bg-muted p-2 sm:inline-flex">
@@ -448,7 +449,7 @@ function SortableSection({ section, index, onUpdate, onRemove, builderData }) {
                         </span>
                         <span className="min-w-0">
                             <span className="flex items-center gap-2">
-                                {open ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+                                {open ? <LuChevronDown className="size-4 text-muted-foreground" /> : <LuChevronRight className="size-4 text-muted-foreground" />}
                                 <span className="truncate text-sm font-semibold">{index + 1}. {meta.label}</span>
                             </span>
                             <span className="mt-1 block truncate text-xs text-muted-foreground">{summary}</span>
@@ -461,7 +462,7 @@ function SortableSection({ section, index, onUpdate, onRemove, builderData }) {
                         <span className="hidden sm:inline">{section.is_visible ? 'Visible' : 'Hidden'}</span>
                     </label>
                     <Button type="button" variant="destructive" size="icon" onClick={() => onRemove(section.clientId)}>
-                        <Trash2 className="size-4" />
+                        <LuTrash2 className="size-4" />
                     </Button>
                 </div>
             </div>

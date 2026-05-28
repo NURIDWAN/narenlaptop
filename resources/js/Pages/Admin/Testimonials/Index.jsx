@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImageField from '@/components/admin/ImageField';
-import { ArrowUpDown, PenLine, Plus, Search, Star, Trash2 } from 'lucide-react';
+import { LuArrowUpDown, LuPenLine, LuPlus, LuSearch, LuStar, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
 export default function Index({ testimonials, filters = {} }) {
@@ -40,7 +40,7 @@ export default function Index({ testimonials, filters = {} }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9 w-56" placeholder="Cari nama/isi..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={filters.active ?? ''} onChange={e => applyFilters({ active: e.target.value !== '' ? e.target.value : undefined, page: undefined })}>
@@ -49,7 +49,7 @@ export default function Index({ testimonials, filters = {} }) {
                         <option value="0">Nonaktif</option>
                     </select>
                 </form>
-                <Button size="sm" onClick={() => setEditing('new')}><Plus className="size-4" /> Tambah</Button>
+                <Button size="sm" onClick={() => setEditing('new')}><LuPlus className="size-4" /> Tambah</Button>
             </div>
 
             {editing && <TestimonialForm data={editing === 'new' ? null : data.find(t => t.id === editing)} onClose={() => setEditing(null)} />}
@@ -84,14 +84,14 @@ export default function Index({ testimonials, filters = {} }) {
                                         </td>
                                         <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{t.content}</td>
                                         <td className="px-4 py-3">
-                                            <div className="flex gap-0.5 text-amber-400">{Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="size-3 fill-current" />)}</div>
+                                            <div className="flex gap-0.5 text-amber-400">{Array.from({ length: t.rating }).map((_, i) => <LuStar key={i} className="size-3 fill-current" />)}</div>
                                         </td>
                                         <td className="px-4 py-3"><Badge variant={t.is_active ? 'default' : 'secondary'}>{t.is_active ? 'Aktif' : 'Nonaktif'}</Badge></td>
                                         <td className="px-4 py-3 text-muted-foreground">{t.order}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex justify-end gap-1">
-                                                <Button variant="ghost" size="icon" className="size-8" onClick={() => setEditing(t.id)}><PenLine className="size-4" /></Button>
-                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(t.id)}><Trash2 className="size-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-8" onClick={() => setEditing(t.id)}><LuPenLine className="size-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => handleDelete(t.id)}><LuTrash2 className="size-4" /></Button>
                                             </div>
                                         </td>
                                     </tr>
@@ -153,7 +153,7 @@ function SortHeader({ label, col, current, onSort }) {
     return (
         <th className="px-4 py-3 font-medium">
             <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(col)}>
-                {label}<ArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
+                {label}<LuArrowUpDown className={`size-3 ${active ? 'text-foreground' : 'text-muted-foreground/50'}`} />
             </button>
         </th>
     );

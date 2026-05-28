@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
-import { ImageUp, Save, X } from 'lucide-react';
+import { LuImagePlus, LuSave, LuX } from 'react-icons/lu';
 import { useRef, useState } from 'react';
 
 const groups = [
@@ -120,7 +120,7 @@ export default function Index({ settings }) {
                 ))}
 
                 <Button type="submit" disabled={saving} className="w-full">
-                    <Save className="size-4" />
+                    <LuSave className="size-4" />
                     {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
                 </Button>
             </form>
@@ -161,7 +161,7 @@ function ImageSettingField({ id, value, onChange }) {
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-xs text-muted-foreground">{value}</p>
                         <Button type="button" variant="ghost" size="sm" className="mt-2 text-destructive hover:text-destructive" onClick={() => onChange('')}>
-                            <X className="size-4" />
+                            <LuX className="size-4" />
                             Hapus gambar
                         </Button>
                     </div>
@@ -176,7 +176,7 @@ function ImageSettingField({ id, value, onChange }) {
                     placeholder="/storage/media/logo.png"
                 />
                 <Button type="button" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
-                    <ImageUp className="size-4" />
+                    <LuImagePlus className="size-4" />
                     {uploading ? 'Uploading...' : 'Upload'}
                 </Button>
             </div>

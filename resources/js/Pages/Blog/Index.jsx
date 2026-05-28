@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { ArrowRight, CalendarDays, Clock3, Link2, NotebookText, Search } from 'lucide-react';
+import { LuArrowRight, LuCalendarDays, LuClock3, LuLink2, LuFileText, LuSearch } from 'react-icons/lu';
 import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
@@ -48,7 +48,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
 
                     <form onSubmit={handleSearch} className="mt-6 flex max-w-md gap-2">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <LuSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                             <input
                                 type="text"
                                 value={search}
@@ -74,11 +74,11 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                         {featured.excerpt}
                                     </p>
                                     <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                                        <MetaItem icon={CalendarDays} label={formatDate(featured.published_at)} />
-                                        <MetaItem icon={Clock3} label={`${featured.reading_time || 1} menit baca`} />
+                                        <MetaItem icon={LuCalendarDays} label={formatDate(featured.published_at)} />
+                                        <MetaItem icon={LuClock3} label={`${featured.reading_time || 1} menit baca`} />
                                     </div>
                                     <div className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                                        Baca artikel <ArrowRight className="h-4 w-4" />
+                                        Baca artikel <LuArrowRight className="h-4 w-4" />
                                     </div>
                                 </div>
                                 <div className="order-1 bg-slate-100 lg:order-2">
@@ -86,7 +86,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                         <img src={featured.thumbnail} alt={featured.title} className="h-full min-h-72 w-full object-cover" loading="eager" />
                                     ) : (
                                         <div className="flex min-h-72 items-center justify-center text-slate-300">
-                                            <Link2 className="h-16 w-16" />
+                                            <LuLink2 className="h-16 w-16" />
                                         </div>
                                     )}
                                 </div>
@@ -102,7 +102,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                         <img src={article.thumbnail} alt={article.title} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                                     ) : (
                                         <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                            <Link2 className="h-10 w-10" />
+                                            <LuLink2 className="h-10 w-10" />
                                         </div>
                                     )}
                                 </div>
@@ -149,7 +149,7 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                                 </p>
                             </div>
                             <a href="/kontak" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
-                                <NotebookText className="h-4 w-4" />
+                                <LuFileText className="h-4 w-4" />
                                 Kontak Kami
                             </a>
                         </div>

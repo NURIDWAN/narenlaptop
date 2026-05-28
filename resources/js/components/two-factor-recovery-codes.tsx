@@ -1,5 +1,5 @@
 import { Form } from '@inertiajs/react';
-import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
+import { LuEye, LuEyeOff, LuLock, LuRefreshCw } from 'react-icons/lu';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import { Button } from '@/components/ui/button';
@@ -50,13 +50,13 @@ export default function TwoFactorRecoveryCodes({
         }
     }, [recoveryCodesList.length, fetchRecoveryCodes]);
 
-    const RecoveryCodeIconComponent = codesAreVisible ? EyeOff : Eye;
+    const RecoveryCodeIconComponent = codesAreVisible ? LuEyeOff : LuEye;
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex gap-3">
-                    <LockKeyhole className="size-4" aria-hidden="true" />
+                    <LuLock className="size-4" aria-hidden="true" />
                     2FA recovery codes
                 </CardTitle>
                 <CardDescription>
@@ -92,7 +92,7 @@ export default function TwoFactorRecoveryCodes({
                                     disabled={processing}
                                     aria-describedby="regenerate-warning"
                                 >
-                                    <RefreshCw /> Regenerate codes
+                                    <LuRefreshCw /> Regenerate codes
                                 </Button>
                             )}
                         </Form>

@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ChevronUp, MessageCircle, Menu, Search, X } from 'lucide-react';
+import { LuChevronUp, LuMessageCircle, LuMenu, LuSearch, LuX } from 'react-icons/lu';
 import { useState } from 'react';
 
 function useOrganizationSchema(settings) {
@@ -58,7 +58,7 @@ export default function FrontendLayout({ children }) {
                             aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
                             onClick={() => setMobileMenuOpen((open) => !open)}
                         >
-                            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                            {mobileMenuOpen ? <LuX className="h-5 w-5" /> : <LuMenu className="h-5 w-5" />}
                         </button>
                     </div>
                 </div>
@@ -89,7 +89,7 @@ export default function FrontendLayout({ children }) {
                                 aria-label="Tutup pop up WhatsApp"
                                 onClick={() => setWhatsappOpen(false)}
                             >
-                                <X className="h-4 w-4" />
+                                <LuX className="h-4 w-4" />
                             </button>
                         </div>
                         <div className="space-y-3 p-4">
@@ -102,7 +102,7 @@ export default function FrontendLayout({ children }) {
                                 rel="noopener noreferrer"
                                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-95"
                             >
-                                <MessageCircle className="h-4 w-4" />
+                                <LuMessageCircle className="h-4 w-4" />
                                 Chat Sekarang
                             </a>
                         </div>
@@ -114,7 +114,7 @@ export default function FrontendLayout({ children }) {
                     aria-label={whatsappOpen ? 'Tutup pop up WhatsApp' : 'Buka pop up WhatsApp'}
                     onClick={() => setWhatsappOpen((open) => !open)}
                 >
-                    {whatsappOpen ? <ChevronUp className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+                    {whatsappOpen ? <LuChevronUp className="h-6 w-6" /> : <LuMessageCircle className="h-6 w-6" />}
                 </button>
             </div>
 
@@ -152,7 +152,7 @@ export default function FrontendLayout({ children }) {
                     <div>
                         <p className="mb-3 text-xs font-semibold text-slate-950">Location</p>
                         <div className="flex h-28 items-center justify-center rounded-lg bg-slate-100 text-primary">
-                            <Search className="h-5 w-5" />
+                            <LuSearch className="h-5 w-5" />
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { LuArrowLeft, LuTrash2 } from 'react-icons/lu';
 
 export default function Show({ message }) {
     function handleDelete() {
@@ -15,10 +15,10 @@ export default function Show({ message }) {
             <div className="mx-auto max-w-2xl space-y-4">
                 <div className="flex items-center justify-between">
                     <Button asChild variant="ghost" size="sm">
-                        <Link href="/admin/messages"><ArrowLeft className="size-4" /> Kembali</Link>
+                        <Link href="/admin/messages"><LuArrowLeft className="size-4" /> Kembali</Link>
                     </Button>
                     <Button variant="destructive" size="sm" onClick={handleDelete}>
-                        <Trash2 className="size-4" /> Hapus
+                        <LuTrash2 className="size-4" /> Hapus
                     </Button>
                 </div>
                 <Card>

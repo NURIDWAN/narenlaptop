@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Copy, Search, Trash2, Upload } from 'lucide-react';
+import { LuCopy, LuSearch, LuTrash2, LuUpload } from 'react-icons/lu';
 import { useCallback, useState } from 'react';
 
 export default function Index({ media, filters }) {
@@ -38,14 +38,14 @@ export default function Index({ media, filters }) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative">
-                        <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                        <LuSearch className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
                         <Input className="pl-9" placeholder="Cari file..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                     <Button type="submit" variant="outline" size="sm">Cari</Button>
                 </form>
                 <label className="cursor-pointer">
                     <Button asChild variant="default" size="sm">
-                        <span><Upload className="size-4" /> Upload</span>
+                        <span><LuUpload className="size-4" /> Upload</span>
                     </Button>
                     <input type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
                 </label>
@@ -67,10 +67,10 @@ export default function Index({ media, filters }) {
                                     <span className="truncate text-xs text-white">{item.filename}</span>
                                     <div className="flex gap-1">
                                         <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-white/20" onClick={() => copyUrl(item.url)}>
-                                            <Copy className="size-3.5" />
+                                            <LuCopy className="size-3.5" />
                                         </Button>
                                         <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-red-500/80" onClick={() => handleDelete(item.id)}>
-                                            <Trash2 className="size-3.5" />
+                                            <LuTrash2 className="size-3.5" />
                                         </Button>
                                     </div>
                                 </div>

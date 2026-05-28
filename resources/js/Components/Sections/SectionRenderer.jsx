@@ -1,10 +1,10 @@
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { Link, router, usePage } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Cpu, HardDrive, Laptop, Mail, MessageSquare, Phone, Quote, RotateCcw, Send, ShieldCheck, ShoppingCart, Star, Wrench } from 'lucide-react';
+import { LuArrowRight, LuCalendarDays, LuCheckCircle2, LuChevronLeft, LuChevronRight, LuCpu, LuHardDrive, LuLaptop, LuMail, LuMessageSquare, LuPhone, LuQuote, LuRotateCcw, LuSend, LuShieldCheck, LuShoppingCart, LuStar, LuWrench } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
 
-const iconSet = [Wrench, Cpu, ShieldCheck, Star, CheckCircle2, MessageSquare];
+const iconSet = [LuWrench, LuCpu, LuShieldCheck, LuStar, LuCheckCircle2, LuMessageSquare];
 
 function FadeIn({ children, className = '', delay = 0 }) {
     return (
@@ -111,6 +111,7 @@ export default function SectionRenderer({ section, latestArticles = [] }) {
     if (section.type === 'pricing') return <Pricing settings={settings} />;
     if (section.type === 'team') return <Team settings={settings} data={data} />;
     if (section.type === 'google_reviews') return <GoogleReviews settings={settings} />;
+    if (section.type === 'location') return <Location settings={settings} />;
 
     return <Generic settings={settings} />;
 }
@@ -163,7 +164,7 @@ function Slider({ settings, data = {} }) {
                             className="mt-9 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:bg-primary/90"
                         >
                             {current.cta_text || 'Selengkapnya'}
-                            <ArrowRight className="h-4 w-4" />
+                            <LuArrowRight className="h-4 w-4" />
                         </a>
                     )}
                 </FadeIn>
@@ -177,7 +178,7 @@ function Slider({ settings, data = {} }) {
                         className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
                         aria-label="Slide sebelumnya"
                     >
-                        <ChevronLeft className="h-5 w-5" />
+                        <LuChevronLeft className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-2">
                         {slides.map((slide, index) => (
@@ -196,7 +197,7 @@ function Slider({ settings, data = {} }) {
                         className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
                         aria-label="Slide berikutnya"
                     >
-                        <ChevronRight className="h-5 w-5" />
+                        <LuChevronRight className="h-5 w-5" />
                     </button>
                 </div>
             )}
@@ -289,7 +290,7 @@ function Hero({ settings }) {
                             <img src={settings.background_image} alt={settings.title || 'Hero'} className="aspect-[4/3] w-full object-cover" />
                         ) : (
                             <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-primary/30 text-slate-300">
-                                <Laptop className="h-20 w-20" />
+                                <LuLaptop className="h-20 w-20" />
                             </div>
                         )}
                     </div>
@@ -336,7 +337,7 @@ function AboutHero({ settings }) {
                             <img src={settings.image} alt={settings.title || 'Tentang kami'} className="aspect-[16/10] w-full object-cover" />
                         ) : (
                             <div className="flex aspect-[16/10] items-center justify-center bg-slate-100 text-slate-300">
-                                <Laptop className="h-20 w-20" />
+                                <LuLaptop className="h-20 w-20" />
                             </div>
                         )}
                     </div>
@@ -412,7 +413,7 @@ function Values({ settings }) {
                 </div>
                 <div className="mt-10 grid gap-4 md:grid-cols-3">
                     {items.map((item, index) => {
-                        const Icon = [ShieldCheck, Cpu, Star][index % 3];
+                        const Icon = [LuShieldCheck, LuCpu, LuStar][index % 3];
                         return (
                             <div key={index} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary">
@@ -440,7 +441,7 @@ function Expertise({ settings }) {
                             <img src={settings.image} alt={settings.title || 'Keahlian teknis'} className="aspect-[4/3] w-full object-cover" />
                         ) : (
                             <div className="flex aspect-[4/3] items-center justify-center bg-white/5 text-white/20">
-                                <Wrench className="h-20 w-20" />
+                                <LuWrench className="h-20 w-20" />
                             </div>
                         )}
                     </div>
@@ -453,7 +454,7 @@ function Expertise({ settings }) {
                         <ul className="mt-8 space-y-3">
                             {(settings.bullets || []).map((bullet, index) => (
                                 <li key={index} className="flex items-start gap-3 text-sm leading-7 text-slate-200">
-                                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent" />
+                                    <LuCheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent" />
                                     <span>{bullet}</span>
                                 </li>
                             ))}
@@ -510,7 +511,7 @@ function Services({ settings, data = {} }) {
                                                 className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary/90"
                                             >
                                                 {item.cta_text || 'Selengkapnya'}
-                                                <ArrowRight className="h-3.5 w-3.5" />
+                                                <LuArrowRight className="h-3.5 w-3.5" />
                                             </a>
                                         )}
                                     </div>
@@ -563,7 +564,7 @@ function Products({ settings, data = {} }) {
                         {subtitle && <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">{subtitle}</p>}
                     </div>
                     <a href={linkUrl} className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90">
-                        {linkText} <ArrowRight className="h-3.5 w-3.5" />
+                        {linkText} <LuArrowRight className="h-3.5 w-3.5" />
                     </a>
                 </div>
                 <StaggerChildren className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -579,7 +580,7 @@ function Products({ settings, data = {} }) {
                                                 <img src={item.image} alt={item.name || 'Produk'} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                                             ) : (
                                                 <div className="flex aspect-[4/3] items-center justify-center text-slate-300">
-                                                    <Laptop className="h-10 w-10" />
+                                                    <LuLaptop className="h-10 w-10" />
                                                 </div>
                                             )}
                                             {item.badge && (
@@ -608,7 +609,7 @@ function Products({ settings, data = {} }) {
                                             className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary/90"
                                             aria-label={`Beli ${item.name || 'produk'} sekarang via WhatsApp`}
                                         >
-                                            <ShoppingCart className="h-4 w-4" />
+                                            <LuShoppingCart className="h-4 w-4" />
                                             <span>Beli Sekarang</span>
                                         </a>
                                     </div>
@@ -657,7 +658,7 @@ function BookingService({ settings }) {
                 {services.length > 0 && (
                     <div className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-3">
                         {services.map((service, index) => {
-                            const Icon = [HardDrive, Cpu, Wrench, Laptop, RotateCcw, ShieldCheck][index % 6];
+                            const Icon = [LuHardDrive, LuCpu, LuWrench, LuLaptop, LuRotateCcw, LuShieldCheck][index % 6];
                             return (
                                 <span key={service} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm">
                                     <Icon className="h-3.5 w-3.5 text-slate-500" />
@@ -672,7 +673,7 @@ function BookingService({ settings }) {
                         {settings.image ? (
                             <img src={settings.image} alt={settings.title || 'Booking service'} className="h-full min-h-96 w-full object-cover opacity-90" loading="lazy" />
                         ) : (
-                            <div className="flex min-h-96 items-center justify-center text-slate-600"><Wrench className="h-16 w-16" /></div>
+                            <div className="flex min-h-96 items-center justify-center text-slate-600"><LuWrench className="h-16 w-16" /></div>
                         )}
                         {(settings.badge_title || settings.badge_subtitle) && (
                             <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/95 p-5 shadow-lg backdrop-blur">
@@ -707,12 +708,12 @@ function BookingService({ settings }) {
                             Pilih Jadwal Kedatangan
                             <div className="relative">
                                 <input type="date" className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-                                <CalendarDays className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                <LuCalendarDays className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                             </div>
                         </label>
                         <button className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
                             Kirim Permintaan Booking
-                            <Send className="h-4 w-4" />
+                            <LuSend className="h-4 w-4" />
                         </button>
                     </form>
                 </div>
@@ -786,9 +787,9 @@ function Testimonials({ settings, data = {} }) {
                             {displayItems.map((item, i) => (
                                 <div key={`${item.name || 'testimoni'}-${i}`} className="w-full flex-none px-1 sm:px-2">
                                     <blockquote className="mx-auto h-full max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                                        <Quote className="mb-4 h-5 w-5 text-slate-300" />
+                                        <LuQuote className="mb-4 h-5 w-5 text-slate-300" />
                                         <div className="flex gap-0.5 text-accent">
-                                            {Array.from({ length: item.rating || 5 }).map((_, s) => <Star key={s} className="h-4 w-4 fill-current" />)}
+                                            {Array.from({ length: item.rating || 5 }).map((_, s) => <LuStar key={s} className="h-4 w-4 fill-current" />)}
                                         </div>
                                         <p className="mt-4 text-base leading-8 text-slate-600">"{item.content}"</p>
                                         <footer className="mt-6 flex items-center gap-3">
@@ -814,7 +815,7 @@ function Testimonials({ settings, data = {} }) {
                                 className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 sm:-left-3"
                                 aria-label="Testimoni sebelumnya"
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <LuChevronLeft className="h-4 w-4" />
                             </button>
                             <button
                                 type="button"
@@ -822,7 +823,7 @@ function Testimonials({ settings, data = {} }) {
                                 className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 sm:-right-3"
                                 aria-label="Testimoni berikutnya"
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <LuChevronRight className="h-4 w-4" />
                             </button>
                             {items.length > 1 && (
                                 <div className="mt-6 flex items-center justify-center gap-2">
@@ -916,7 +917,7 @@ function CTA({ settings }) {
                     {settings.cta_url && (
                         <a href={settings.cta_url} className="mt-10 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-semibold text-primary/90 shadow-lg transition hover:bg-primary/5 hover:shadow-xl">
                             {settings.cta_text || 'Selengkapnya'}
-                            <ArrowRight className="h-4 w-4" />
+                            <LuArrowRight className="h-4 w-4" />
                         </a>
                     )}
                 </FadeIn>
@@ -1002,11 +1003,11 @@ function Contact({ settings, data = {} }) {
                     <p className="mt-4 leading-relaxed text-slate-400">{settings.subtitle}</p>
                     <div className="mt-8 space-y-4">
                         <div className="flex items-center gap-3 text-sm text-slate-300">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><Mail className="h-5 w-5 text-accent" /></div>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><LuMail className="h-5 w-5 text-accent" /></div>
                             Kirim pesan melalui form
                         </div>
                         <div className="flex items-center gap-3 text-sm text-slate-300">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><Phone className="h-5 w-5 text-accent" /></div>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><LuPhone className="h-5 w-5 text-accent" /></div>
                             Atau hubungi via WhatsApp
                         </div>
                     </div>
@@ -1049,7 +1050,7 @@ function BlogList({ settings, articles }) {
                         {settings.subtitle && <p className="mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
                     </div>
                     <Link href="/blog" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary/90 sm:inline-flex">
-                        Lihat Semua <ArrowRight className="h-4 w-4" />
+                        Lihat Semua <LuArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
                 <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -1113,7 +1114,7 @@ function Pricing({ settings }) {
                             <ul className="mt-8 space-y-3">
                                 {(plan.features || []).map((f, fi) => (
                                     <li key={fi} className="flex items-start gap-3 text-sm text-slate-700">
-                                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{f}
+                                        <LuCheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{f}
                                     </li>
                                 ))}
                             </ul>
@@ -1159,6 +1160,67 @@ function Team({ settings, data = {} }) {
                         </StaggerItem>
                     ))}
                 </StaggerChildren>
+            </div>
+        </section>
+    );
+}
+
+/* ─── Location ─── */
+function Location({ settings }) {
+    const { settings: siteSettings = {} } = usePage().props;
+    const address = settings.address || siteSettings.address || '';
+    const hours = settings.hours || siteSettings.business_hours || '';
+    const mapEmbed = settings.map_embed || siteSettings.google_maps_embed || '';
+    const instagramUrl = settings.instagram_url || siteSettings.social_instagram || '';
+
+    return (
+        <section className="bg-white py-16 sm:py-20">
+            <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:px-8">
+                <div>
+                    {settings.eyebrow && <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">{settings.eyebrow}</p>}
+                    <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">{settings.title || 'Lokasi Kami'}</h2>
+                    {settings.subtitle && <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+
+                    <div className="mt-10 space-y-6">
+                        {address && (
+                            <div className="flex gap-4">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-950">Alamat Lengkap</p>
+                                    <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{address}</p>
+                                </div>
+                            </div>
+                        )}
+                        {hours && (
+                            <div className="flex gap-4">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-500">
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-950">Jam Operasional</p>
+                                    <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">{hours}</p>
+                                    {settings.hours_note && <p className="mt-1 text-xs text-slate-400">{settings.hours_note}</p>}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {mapEmbed && (
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+                            <iframe src={mapEmbed} title="Lokasi" className="h-72 w-full sm:h-80" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+                        </div>
+                    )}
+                    {instagramUrl && (
+                        <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-5 py-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            Lihat Kami di Instagram
+                        </a>
+                    )}
+                </div>
             </div>
         </section>
     );
