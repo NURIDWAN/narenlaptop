@@ -6,6 +6,24 @@ import { useEffect, useRef, useState } from 'react';
 
 const iconSet = [LuWrench, LuCpu, LuShieldCheck, LuStar, LuCheckCircle2, LuMessageSquare];
 
+function normalizeGoogleMapsEmbedUrl(value = '') {
+    const rawValue = String(value || '').trim();
+    if (!rawValue) return '';
+
+    const srcMatch = rawValue.match(/src=["']([^"']+)["']/i);
+    const mapValue = (srcMatch?.[1] || rawValue).replaceAll('&amp;', '&').trim();
+
+    if (mapValue.startsWith('!')) {
+        return `https://www.google.com/maps/embed?pb=${mapValue}`;
+    }
+
+    if (mapValue.startsWith('pb=')) {
+        return `https://www.google.com/maps/embed?${mapValue}`;
+    }
+
+    return mapValue;
+}
+
 function FadeIn({ children, className = '', delay = 0 }) {
     return (
         <motion.div
@@ -962,7 +980,7 @@ function Contact({ settings, data = {} }) {
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
     const [sent, setSent] = useState(false);
     const contactSettings = data.settings || {};
-    const mapEmbedUrl = settings.map_embed_url || contactSettings.google_maps_embed || '';
+    const mapEmbedUrl = normalizeGoogleMapsEmbedUrl(settings.map_embed_url || contactSettings.google_maps_embed || '');
     const whatsappNumber = String(siteSettings.whatsapp_number || contactSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
 
     function whatsappUrl(payload) {
@@ -1170,7 +1188,7 @@ function Location({ settings }) {
     const { settings: siteSettings = {} } = usePage().props;
     const address = settings.address || siteSettings.address || '';
     const hours = settings.hours || siteSettings.business_hours || '';
-    const mapEmbed = settings.map_embed || siteSettings.google_maps_embed || '';
+    const mapEmbed = normalizeGoogleMapsEmbedUrl(settings.map_embed || siteSettings.google_maps_embed || '');
     const instagramUrl = settings.instagram_url || siteSettings.social_instagram || '';
 
     return (

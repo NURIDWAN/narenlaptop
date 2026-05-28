@@ -190,4 +190,53 @@ class ArticleController extends Controller
 
         return $slug;
     }
+
+    public function generate(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['topic' => 'required|string|max:500']);
+
+        $apiKey = config('services.claude.api_key');
+        if (! $apiKey) {
+            return response()->json(['error' => 'API key belum dikonfigurasi.'], 422);
+        }
+
+        $baseUrl = config('services.claude.base_url', 'https://openrouter.ai/api/v1');
+        $topic = $request->input('topic');
+
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'Authorization' => "Bearer {$apiKey}",
+        ])->timeout(60)->post("{$baseUrl}/chat/completions", [
+            'model' => config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'),
+            'max_tokens' => 2048,
+            'messages' => [[
+                'role' => 'user',
+                'content' => "Buat artikel blog SEO-friendly dalam Bahasa Indonesia tentang: \"{$topic}\"\n\nArtikel untuk website service laptop dan gadget.\n\nBalas HANYA dengan JSON valid (tanpa markdown code block) dengan format:\n{\"title\": \"judul artikel menarik\", \"excerpt\": \"ringkasan 1-2 kalimat\", \"content\": \"<p>konten HTML lengkap minimal 500 kata dengan heading h2/h3, paragraf, dan list</p>\", \"meta_title\": \"50-60 karakter\", \"meta_description\": \"150-160 karakter\", \"meta_keywords\": [\"keyword1\", \"keyword2\"]}",
+            ]],
+        ]);
+
+        $text = $response->json('choices.0.message.content', '');
+        if (preg_match('/\{[\s\S]*\}/', $text, $m)) {
+            $data = json_decode($m[0], true);
+            if (is_array($data) && ! empty($data['title'])) {
+                $slug = $this->generateUniqueSlug($data['title']);
+                $article = Article::create([
+                    'title' => $data['title'],
+                    'slug' => $slug,
+                    'excerpt' => $data['excerpt'] ?? '',
+                    'content' => $data['content'] ?? '',
+                    'status' => 'draft',
+                    'author_id' => $request->user()->id,
+                    'meta_title' => $data['meta_title'] ?? '',
+                    'meta_description' => $data['meta_description'] ?? '',
+                    'meta_keywords' => $data['meta_keywords'] ?? [],
+                    'schema_type' => 'Article',
+                    'reading_time' => max(1, (int) ceil(str_word_count(strip_tags($data['content'] ?? '')) / 200)),
+                ]);
+
+                return response()->json(['id' => $article->id, 'title' => $article->title]);
+            }
+        }
+
+        return response()->json(['error' => 'Gagal generate artikel. Coba lagi.'], 422);
+    }
 }

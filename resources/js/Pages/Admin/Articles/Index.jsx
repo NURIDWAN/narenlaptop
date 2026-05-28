@@ -4,8 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { LuArrowUpDown, LuFilePlus2, LuPencil, LuSearch, LuTrash2 } from 'react-icons/lu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { LuArrowUpDown, LuFilePlus2, LuPencil, LuSearch, LuSparkles, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function ArticlesIndex({ articles, filters = {}, categories = [] }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -55,6 +57,7 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
                     <Button asChild variant="outline">
                         <Link href="/admin/article-categories">Kelola Kategori</Link>
                     </Button>
+                    <GenerateArticleModal />
                     <Button asChild>
                         <Link href="/admin/articles/create"><LuFilePlus2 className="size-4" /> Buat Artikel</Link>
                     </Button>
@@ -109,6 +112,62 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
             {/* Pagination */}
             {articles.last_page > 1 && <Pagination links={articles.links} />}
         </AdminLayout>
+    );
+}
+
+function GenerateArticleModal() {
+    const [open, setOpen] = useState(false);
+    const [topic, setTopic] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    async function handleGenerate(e) {
+        e.preventDefault();
+        if (!topic.trim()) return;
+        setLoading(true);
+        setError('');
+        try {
+            const { data } = await axios.post('/admin/articles/generate', { topic: topic.trim() });
+            setOpen(false);
+            setTopic('');
+            router.visit(`/admin/articles/${data.id}/edit`);
+        } catch (err) {
+            setError(err.response?.data?.error || 'Gagal generate. Coba lagi.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline"><LuSparkles className="size-4" /> Generate AI</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <form onSubmit={handleGenerate}>
+                    <DialogHeader>
+                        <DialogTitle>Generate Artikel dengan AI</DialogTitle>
+                        <DialogDescription>Masukkan topik atau keyword, AI akan membuat artikel lengkap secara otomatis.</DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 space-y-3">
+                        <Input
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            placeholder="Contoh: Cara merawat baterai laptop agar awet"
+                            disabled={loading}
+                            autoFocus
+                        />
+                        {error && <p className="text-sm text-destructive">{error}</p>}
+                    </div>
+                    <DialogFooter className="mt-6">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Batal</Button>
+                        <Button type="submit" disabled={loading || !topic.trim()}>
+                            {loading ? 'Generating...' : 'Generate Artikel'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
 

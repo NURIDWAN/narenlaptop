@@ -115,6 +115,7 @@ Route::middleware(['auth', 'verified'])
     ->group(function () {
         Route::resource('pages', AdminPageController::class);
         Route::resource('articles', AdminArticleController::class);
+        Route::post('articles/generate', [AdminArticleController::class, 'generate'])->name('articles.generate');
         Route::resource('article-categories', AdminArticleCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('services', AdminServiceController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('product-categories', AdminProductCategoryController::class)->only(['index', 'store', 'update', 'destroy']);

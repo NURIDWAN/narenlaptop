@@ -713,7 +713,7 @@ function ContactEditor({ settings, onChange }) {
                     label="Override Map Embed URL"
                     value={settings.map_embed_url}
                     onChange={(v) => set('map_embed_url', v)}
-                    placeholder="https://www.google.com/maps/embed?pb=..."
+                    placeholder="https://www.google.com/maps/embed?pb=... atau kode iframe Google Maps"
                 />
                 <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
                     Kosongkan untuk memakai Google Maps Embed dari Pengaturan. Isi field ini jika section ini butuh map berbeda.
@@ -1095,7 +1095,7 @@ function LocationEditor({ settings, onChange }) {
             </SectionGroup>
             <Separator />
             <SectionGroup title="Embed & Link">
-                <TextareaField label="Google Maps Embed URL" value={settings.map_embed} onChange={(v) => set('map_embed', v)} placeholder="Kosongkan untuk ambil dari settings" />
+                <TextareaField label="Google Maps Embed URL" value={settings.map_embed} onChange={(v) => set('map_embed', v)} placeholder="Kosongkan untuk ambil dari settings, atau isi URL/kode iframe Google Maps" />
                 <Field label="Instagram URL" value={settings.instagram_url} onChange={(v) => set('instagram_url', v)} placeholder="Kosongkan untuk ambil dari settings" />
             </SectionGroup>
         </div>

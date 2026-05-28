@@ -27,7 +27,7 @@ const groups = [
             { key: 'whatsapp_number', label: 'Nomor WhatsApp', placeholder: '6281234567890' },
             { key: 'whatsapp_message_default', label: 'Pesan Default WA' },
             { key: 'address', label: 'Alamat' },
-            { key: 'google_maps_embed', label: 'Embed Google Maps', multiline: true },
+            { key: 'google_maps_embed', label: 'Embed Google Maps', multiline: true, placeholder: 'https://www.google.com/maps/embed?pb=... atau kode iframe Google Maps' },
         ],
     },
     {
