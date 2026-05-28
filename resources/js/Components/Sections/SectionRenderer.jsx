@@ -319,8 +319,8 @@ function Hero({ settings }) {
                         viewport={{ once: true }}
                         transition={{ delay: 0.25, duration: 0.4 }}
                     >
-                        <p className="text-[11px] uppercase tracking-wider text-accent">Support</p>
-                        <p className="text-sm font-semibold text-white">Fast response team</p>
+                        <p className="text-[11px] uppercase tracking-wider text-accent">{settings.support_label || 'Support'}</p>
+                        <p className="text-sm font-semibold text-white">{settings.support_text || 'Fast response team'}</p>
                     </motion.div>
                     <motion.div
                         className="absolute -right-4 top-6 rounded-xl border border-primary/35 bg-accent/20 px-4 py-3 backdrop-blur"
@@ -329,8 +329,8 @@ function Hero({ settings }) {
                         viewport={{ once: true }}
                         transition={{ delay: 0.35, duration: 0.4 }}
                     >
-                        <p className="text-[11px] uppercase tracking-wider text-accent/90">Rating</p>
-                        <p className="text-sm font-semibold text-white">4.9/5 pelanggan</p>
+                        <p className="text-[11px] uppercase tracking-wider text-accent/90">{settings.rating_label || 'Rating'}</p>
+                        <p className="text-sm font-semibold text-white">{settings.rating_text || '4.9/5 pelanggan'}</p>
                     </motion.div>
                 </motion.div>
             </div>

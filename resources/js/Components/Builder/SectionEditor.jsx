@@ -227,6 +227,17 @@ function HeroEditor({ settings, onChange }) {
                 </div>
             </SectionGroup>
             <Separator />
+            <SectionGroup title="Badge Rating & Support" description="Teks badge kecil di atas gambar hero.">
+                <div className="grid gap-3 md:grid-cols-2">
+                    <Field label="Label Rating" value={settings.rating_label} onChange={(v) => set('rating_label', v)} placeholder="Rating" />
+                    <Field label="Teks Rating" value={settings.rating_text} onChange={(v) => set('rating_text', v)} placeholder="4.9/5 pelanggan" />
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                    <Field label="Label Support" value={settings.support_label} onChange={(v) => set('support_label', v)} placeholder="Support" />
+                    <Field label="Teks Support" value={settings.support_text} onChange={(v) => set('support_text', v)} placeholder="Fast response team" />
+                </div>
+            </SectionGroup>
+            <Separator />
             <SectionGroup title="Background">
                 <ImageField label="Gambar Background" value={settings.background_image} onChange={(v) => set('background_image', v)} />
                 <RangeField label="Overlay Opacity" value={settings.overlay_opacity ?? 0.5} onChange={(v) => set('overlay_opacity', v)} />

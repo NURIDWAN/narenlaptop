@@ -56,7 +56,7 @@ const defaults = {
         subtitle: 'Menghadirkan standar baru dalam solusi laptop premium dan layanan teknis terpercaya.',
         image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=80',
     },
-    hero: { title: 'Judul Hero', subtitle: 'Subjudul halaman', cta_text: 'Hubungi Kami', cta_url: '/kontak', secondary_text: 'Lihat Layanan', secondary_url: '#layanan', tertiary_text: 'Booking Service', tertiary_url: '#booking-service', background_image: '', overlay_opacity: 0.5 },
+    hero: { title: 'Judul Hero', subtitle: 'Subjudul halaman', cta_text: 'Hubungi Kami', cta_url: '/kontak', secondary_text: 'Lihat Layanan', secondary_url: '#layanan', tertiary_text: 'Booking Service', tertiary_url: '#booking-service', background_image: '', overlay_opacity: 0.5, rating_label: 'Rating', rating_text: '4.9/5 pelanggan', support_label: 'Support', support_text: 'Fast response team' },
     about: { title: 'Tentang Kami', subtitle: '', description: 'Ceritakan keunggulan dan pengalaman bisnis Anda.', image: '' },
     journey: {
         title: 'Perjalanan Kami',
