@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Heart, Menu, MessageCircle, Search, ShoppingCart, X } from 'lucide-react';
+import { Menu, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function FrontendLayout({ children }) {
@@ -13,34 +13,16 @@ export default function FrontendLayout({ children }) {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-950">
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-18 lg:px-8">
+                <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <Link href="/" className="text-lg font-bold tracking-normal text-primary lg:text-xl">
-                        {settings.site_logo ? <img src={settings.site_logo} alt={siteName} className="h-8" /> : siteName}
+                        {settings.site_logo ? <img src={settings.site_logo} alt={siteName} className="h-12 w-auto object-contain sm:h-14" /> : siteName}
                     </Link>
                     <nav className="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
                         {headerMenus.map((item) => (
                             <NavItem key={item.id} item={item} />
                         ))}
                     </nav>
-                    <div className="flex items-center gap-1 text-primary sm:gap-2">
-                        <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5" aria-label="Cari">
-                            <Search className="h-5 w-5" />
-                        </button>
-                        <a
-                            href={`https://wa.me/${whatsapp}${settings.whatsapp_message_default ? '?text=' + encodeURIComponent(settings.whatsapp_message_default) : ''}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5"
-                            aria-label="WhatsApp"
-                        >
-                            <MessageCircle className="h-5 w-5" />
-                        </a>
-                        <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5 sm:flex" aria-label="Wishlist">
-                            <Heart className="h-5 w-5" />
-                        </button>
-                        <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5 sm:flex" aria-label="Keranjang">
-                            <ShoppingCart className="h-5 w-5" />
-                        </button>
+                    <div className="flex items-center text-primary">
                         <button
                             type="button"
                             className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5 md:hidden"
