@@ -63,8 +63,8 @@ export default function FrontendLayout({ children }) {
             </Head>
             <header className="sticky top-0 z-40 border-b border-white/10 bg-[#000411]/95 backdrop-blur">
                 <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="text-lg font-bold tracking-normal text-white lg:text-xl">
-                        {settings.site_logo ? <img src={settings.site_logo} alt={siteName} className="h-12 w-auto object-contain sm:h-14" /> : siteName}
+                    <Link href="/" className="flex items-center text-lg font-bold tracking-normal text-white lg:text-xl">
+                        {settings.site_logo ? <img src={settings.site_logo} alt={siteName} className="h-auto max-h-14 w-40 object-contain sm:w-48 lg:w-56" /> : siteName}
                     </Link>
                     <nav className="hidden items-center gap-9 text-sm font-medium text-slate-100 md:flex">
                         {headerMenus.map((item) => (
