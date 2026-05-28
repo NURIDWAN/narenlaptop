@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { LuChevronUp, LuMessageCircle, LuMenu, LuSearch, LuX } from 'react-icons/lu';
+import { FaWhatsapp } from 'react-icons/fa';
+import { LuChevronUp, LuMenu, LuSearch, LuX } from 'react-icons/lu';
 import { useState } from 'react';
 
 function useOrganizationSchema(settings) {
@@ -102,7 +103,7 @@ export default function FrontendLayout({ children }) {
                                 rel="noopener noreferrer"
                                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-95"
                             >
-                                <LuMessageCircle className="h-4 w-4" />
+                                <FaWhatsapp className="h-4 w-4" />
                                 Chat Sekarang
                             </a>
                         </div>
@@ -114,7 +115,7 @@ export default function FrontendLayout({ children }) {
                     aria-label={whatsappOpen ? 'Tutup pop up WhatsApp' : 'Buka pop up WhatsApp'}
                     onClick={() => setWhatsappOpen((open) => !open)}
                 >
-                    {whatsappOpen ? <LuChevronUp className="h-6 w-6" /> : <LuMessageCircle className="h-6 w-6" />}
+                    {whatsappOpen ? <LuChevronUp className="h-6 w-6" /> : <FaWhatsapp className="h-7 w-7" />}
                 </button>
             </div>
 
