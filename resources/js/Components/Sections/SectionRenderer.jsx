@@ -332,7 +332,10 @@ function Hero({ settings }) {
                         transition={{ delay: 0.35, duration: 0.4 }}
                     >
                         <p className="text-[11px] uppercase tracking-wider text-accent/90">{settings.rating_label || 'Rating'}</p>
-                        <p className="text-sm font-semibold text-white">{settings.rating_text || '4.9/5 pelanggan'}</p>
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-white">
+                            <LuStar className="h-3.5 w-3.5 fill-accent text-accent" />
+                            {settings.rating_text || '4.9/5 pelanggan'}
+                        </p>
                     </motion.div>
                 </motion.div>
             </div>
