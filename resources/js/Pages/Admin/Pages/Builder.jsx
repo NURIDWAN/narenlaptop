@@ -119,6 +119,7 @@ const defaults = {
     team: { title: 'Tim Kami', subtitle: '', members: [{ name: 'Nama', role: 'Teknisi', photo: '' }] },
     google_reviews: { title: 'Apa Kata Pelanggan Kami', subtitle: '', embed_code: '' },
     location: { eyebrow: 'Temukan Kami', title: 'Lokasi Service Laptop Fentacom Depok', subtitle: 'Berlokasi di Margonda Raya, Depok – mudah dijangkau dari berbagai penjuru kota.', address: '', hours: '', hours_note: '', map_embed: '', instagram_url: '' },
+    sell_laptop: { title: 'Jual Laptop Anda', subtitle: 'Dapatkan penawaran terbaik untuk laptop bekas Anda.', image: '' },
 };
 
 const sectionMeta = {
@@ -146,6 +147,7 @@ const sectionMeta = {
     contact: { label: 'Kontak', description: 'Form kontak, data dari Pengaturan.', icon: LuMessageCircle, category: 'dynamic', sourceLabel: 'Settings' },
     google_reviews: { label: 'Google Reviews', description: 'Widget Trustindex / embed Google Reviews.', icon: LuStar, category: 'static' },
     location: { label: 'Lokasi', description: 'Peta lokasi, alamat, dan jam operasional.', icon: LuMessageCircle, category: 'static' },
+    sell_laptop: { label: 'Jual Laptop', description: 'Form jual laptop, data masuk DB & WhatsApp.', icon: LuShoppingBag, category: 'static' },
 };
 
 export default function Builder({ page, sectionTypes, builderData = {} }) {

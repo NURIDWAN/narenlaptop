@@ -33,6 +33,7 @@ export default function SectionEditor({ type, settings, onChange, builderData = 
         team: TeamEditor,
         google_reviews: GoogleReviewsEditor,
         location: LocationEditor,
+        sell_laptop: SellLaptopEditor,
     };
     const Editor = editors[type] || GenericEditor;
     return <Editor settings={settings} onChange={onChange} builderData={builderData} />;
@@ -1124,6 +1125,22 @@ function GoogleReviewsEditor({ settings, onChange }) {
             <Separator />
             <SectionGroup title="Embed Trustindex" description="Paste kode embed dari dashboard Trustindex (https://www.trustindex.io). Kode biasanya berupa tag <script> atau <div>.">
                 <TextareaField label="Kode Embed" value={settings.embed_code} onChange={(v) => set('embed_code', v)} rows={5} placeholder='<script src="https://cdn.trustindex.io/loader.js?..."></script>' />
+            </SectionGroup>
+        </div>
+    );
+}
+
+function SellLaptopEditor({ settings, onChange }) {
+    const set = (key, val) => onChange({ ...settings, [key]: val });
+    return (
+        <div className="space-y-5">
+            <SectionGroup title="Header">
+                <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
+                <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
+            </SectionGroup>
+            <Separator />
+            <SectionGroup title="Gambar">
+                <ImageField label="Gambar Section" value={settings.image} onChange={(v) => set('image', v)} />
             </SectionGroup>
         </div>
     );

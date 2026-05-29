@@ -3,6 +3,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import { LuArrowRight, LuCalendarDays, LuCheckCircle2, LuChevronLeft, LuChevronRight, LuCpu, LuHardDrive, LuLaptop, LuMail, LuMessageSquare, LuPhone, LuQuote, LuRotateCcw, LuSend, LuShieldCheck, LuShoppingCart, LuStar, LuWrench } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
+import { formatPrice } from '@/lib/utils';
 
 const iconSet = [LuWrench, LuCpu, LuShieldCheck, LuStar, LuCheckCircle2, LuMessageSquare];
 
@@ -130,6 +131,7 @@ export default function SectionRenderer({ section, latestArticles = [] }) {
     if (section.type === 'team') return <Team settings={settings} data={data} />;
     if (section.type === 'google_reviews') return <GoogleReviews settings={settings} />;
     if (section.type === 'location') return <Location settings={settings} />;
+    if (section.type === 'sell_laptop') return <SellLaptop settings={settings} />;
 
     return <Generic settings={settings} />;
 }
@@ -617,8 +619,8 @@ function Products({ settings, data = {} }) {
                                     )}
                                     <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                                         <div>
-                                            {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{item.price}</p>}
-                                            {(item.discount_price || item.price) && <p className="text-xs font-bold text-primary">{item.discount_price || item.price}</p>}
+                                            {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{formatPrice(item.price)}</p>}
+                                            {(item.discount_price || item.price) && <p className="text-xs font-bold text-primary">{formatPrice(item.discount_price || item.price)}</p>}
                                         </div>
                                         <a
                                             href={productWhatsappUrl(item, href)}
@@ -643,12 +645,16 @@ function Products({ settings, data = {} }) {
 
 /* ─── Booking Service ─── */
 function BookingService({ settings }) {
+    const { settings: siteSettings = {} } = usePage().props;
     const [form, setForm] = useState({ name: '', phone: '', device: '', issue: '', date: '' });
     const [sent, setSent] = useState(false);
     const services = settings.services || [];
+    const whatsappNumber = String(siteSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
 
     function submit(event) {
         event.preventDefault();
+        const submittedForm = { ...form };
+
         router.post('/kontak', {
             name: form.name,
             phone: form.phone,
@@ -661,6 +667,15 @@ function BookingService({ settings }) {
             preserveScroll: true,
             onSuccess: () => {
                 setSent(true);
+                const message = [
+                    'Halo, saya ingin booking service laptop.',
+                    `Nama: ${submittedForm.name}`,
+                    submittedForm.phone ? `No. HP: ${submittedForm.phone}` : null,
+                    submittedForm.device ? `Laptop: ${submittedForm.device}` : null,
+                    submittedForm.issue ? `Keluhan: ${submittedForm.issue}` : null,
+                    submittedForm.date ? `Jadwal: ${submittedForm.date}` : null,
+                ].filter(Boolean).join('\n');
+                window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
                 setForm({ name: '', phone: '', device: '', issue: '', date: '' });
             },
         });
@@ -1010,47 +1025,49 @@ function Contact({ settings, data = {} }) {
     }
 
     return (
-        <section id="kontak" className="relative overflow-hidden bg-slate-950 py-24 text-white">
+        <section id="kontak" className="relative overflow-hidden bg-slate-950 py-16 text-white sm:py-20">
             <div className="absolute inset-0 opacity-30">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(190,151,78,0.3),transparent_60%)]" />
             </div>
-            <div className="relative mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-5 lg:px-8">
-                <div className="lg:col-span-2">
-                    <span className="text-sm font-semibold uppercase tracking-widest text-accent">Kontak</span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight">{settings.title || 'Hubungi Kami'}</h2>
-                    <p className="mt-4 leading-relaxed text-slate-400">{settings.subtitle}</p>
-                    <div className="mt-8 space-y-4">
-                        <div className="flex items-center gap-3 text-sm text-slate-300">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><LuMail className="h-5 w-5 text-accent" /></div>
-                            Kirim pesan melalui form
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-slate-300">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20"><LuPhone className="h-5 w-5 text-accent" /></div>
-                            Atau hubungi via WhatsApp
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid gap-10 lg:grid-cols-2">
+                    <div className="flex flex-col justify-center">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-accent">Kontak</span>
+                        <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{settings.title || 'Hubungi Kami'}</h2>
+                        {settings.subtitle && <p className="mt-4 max-w-md leading-relaxed text-slate-400">{settings.subtitle}</p>}
+                        <div className="mt-8 space-y-4">
+                            <div className="flex items-center gap-3 text-sm text-slate-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20"><LuMail className="h-5 w-5 text-accent" /></div>
+                                Kirim pesan melalui form
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-slate-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20"><LuPhone className="h-5 w-5 text-accent" /></div>
+                                Atau hubungi via WhatsApp
+                            </div>
                         </div>
                     </div>
-                    {mapEmbedUrl && (
-                        <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
-                            <iframe
-                                src={mapEmbedUrl}
-                                title="Map lokasi"
-                                className="h-64 w-full"
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            />
+                    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
+                        {sent && <p className="rounded-lg bg-green-500/20 px-4 py-2.5 text-sm font-medium text-green-300">✓ Pesan berhasil dikirim!</p>}
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <input className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Nama" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                            <input className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                         </div>
-                    )}
+                        <input className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="No. HP" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                        <textarea className="min-h-32 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Tulis pesan Anda..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+                        <button className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary/90">Kirim Pesan</button>
+                    </form>
                 </div>
-                <form onSubmit={submit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm lg:col-span-3">
-                    {sent && <p className="rounded-lg bg-green-500/20 px-4 py-2.5 text-sm font-medium text-green-300">✓ Pesan berhasil dikirim!</p>}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <input className="rounded-xl border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 focus:border-primary focus:ring-primary/20" placeholder="Nama" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                        <input className="rounded-xl border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 focus:border-primary focus:ring-primary/20" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                {mapEmbedUrl && (
+                    <div className="mt-12 overflow-hidden rounded-2xl border border-white/10">
+                        <iframe
+                            src={mapEmbedUrl}
+                            title="Map lokasi"
+                            className="h-72 w-full sm:h-80"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        />
                     </div>
-                    <input className="w-full rounded-xl border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 focus:border-primary focus:ring-primary/20" placeholder="No. HP" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                    <textarea className="min-h-32 w-full rounded-xl border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 focus:border-primary focus:ring-primary/20" placeholder="Tulis pesan Anda..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
-                    <button className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary/90">Kirim Pesan</button>
-                </form>
+                )}
             </div>
         </section>
     );
@@ -1272,6 +1289,110 @@ function GoogleReviews({ settings }) {
                 )}
                 <div ref={containerRef} />
                 {!settings.embed_code && <p className="text-center text-sm text-slate-400">Paste kode embed Trustindex di pengaturan section ini.</p>}
+            </div>
+        </section>
+    );
+}
+
+/* ─── Sell Laptop ─── */
+function SellLaptop({ settings }) {
+    const { settings: siteSettings = {} } = usePage().props;
+    const [form, setForm] = useState({ name: '', phone: '', brand: '', condition: '', price: '', notes: '' });
+    const [sent, setSent] = useState(false);
+    const whatsappNumber = String(siteSettings.whatsapp_number || '6281234567890').replace(/\D/g, '');
+
+    function submit(event) {
+        event.preventDefault();
+        const submittedForm = { ...form };
+
+        router.post('/kontak', {
+            name: form.name,
+            phone: form.phone,
+            message: [
+                'Jual Laptop',
+                `Merk & Tipe: ${form.brand || '-'}`,
+                `Kondisi: ${form.condition || '-'}`,
+                `Harga harapan: ${form.price || '-'}`,
+                form.notes ? `Catatan: ${form.notes}` : null,
+            ].filter(Boolean).join('\n'),
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSent(true);
+                const message = [
+                    'Halo, saya ingin menjual laptop saya.',
+                    `Nama: ${submittedForm.name}`,
+                    submittedForm.phone ? `No. HP: ${submittedForm.phone}` : null,
+                    `Laptop: ${submittedForm.brand || '-'}`,
+                    `Kondisi: ${submittedForm.condition || '-'}`,
+                    submittedForm.price ? `Harga harapan: ${submittedForm.price}` : null,
+                    submittedForm.notes ? `Catatan: ${submittedForm.notes}` : null,
+                ].filter(Boolean).join('\n');
+                window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+                setForm({ name: '', phone: '', brand: '', condition: '', price: '', notes: '' });
+            },
+        });
+    }
+
+    return (
+        <section id="jual-laptop" className="bg-slate-50 py-16 sm:py-20">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Jual Laptop Anda'}</h2>
+                    {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                </div>
+                <div className="mt-12 grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/80 lg:grid-cols-2 lg:gap-10 lg:p-10">
+                    <div className="relative overflow-hidden rounded-2xl bg-slate-900">
+                        {settings.image ? (
+                            <img src={settings.image} alt={settings.title || 'Jual Laptop'} className="h-full min-h-80 w-full object-cover opacity-90" loading="lazy" />
+                        ) : (
+                            <div className="flex min-h-80 items-center justify-center text-slate-600"><LuLaptop className="h-16 w-16" /></div>
+                        )}
+                    </div>
+                    <form onSubmit={submit} className="flex flex-col justify-center p-6 lg:p-0">
+                        <h3 className="text-2xl font-bold tracking-normal text-slate-950">Formulir Jual Laptop</h3>
+                        <p className="mt-2 text-sm text-slate-500">Isi data laptop Anda, kami akan menghubungi untuk penawaran.</p>
+                        {sent && <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">Data berhasil dikirim! Kami akan segera menghubungi Anda.</p>}
+                        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                            <label className="space-y-2 text-xs font-medium text-slate-600">
+                                Nama Lengkap
+                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                            </label>
+                            <label className="space-y-2 text-xs font-medium text-slate-600">
+                                Nomor WhatsApp
+                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx-xxxx-xxxx" required />
+                            </label>
+                        </div>
+                        <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
+                            Merk & Tipe Laptop
+                            <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Misal: ASUS ROG Strix G15 2022" required />
+                        </label>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                            <label className="space-y-2 text-xs font-medium text-slate-600">
+                                Kondisi
+                                <select className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })} required>
+                                    <option value="">Pilih kondisi</option>
+                                    <option value="Seperti baru">Seperti baru</option>
+                                    <option value="Mulus">Mulus</option>
+                                    <option value="Normal pemakaian">Normal pemakaian</option>
+                                    <option value="Ada kerusakan">Ada kerusakan</option>
+                                </select>
+                            </label>
+                            <label className="space-y-2 text-xs font-medium text-slate-600">
+                                Harga Harapan
+                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Rp 5.000.000" />
+                            </label>
+                        </div>
+                        <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
+                            Catatan Tambahan
+                            <textarea className="min-h-24 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Spesifikasi, kelengkapan, kerusakan, dll." />
+                        </label>
+                        <button className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
+                            Kirim Data Laptop
+                            <LuSend className="h-4 w-4" />
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     );

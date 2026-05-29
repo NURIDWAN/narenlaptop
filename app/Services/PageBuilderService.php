@@ -30,6 +30,9 @@ class PageBuilderService
         'custom_html',
         'pricing',
         'team',
+        'google_reviews',
+        'location',
+        'sell_laptop',
     ];
 
     public function syncSections(Page $page, array $sections): void

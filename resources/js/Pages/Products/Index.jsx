@@ -3,6 +3,7 @@ import { LuArrowRight, LuLaptop, LuSearch, LuShoppingCart } from 'react-icons/lu
 import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
+import { formatPrice } from '@/lib/utils';
 
 export default function ProductIndex({ products, filters = {}, seo, breadcrumbs }) {
     const items = products.data || [];
@@ -85,8 +86,8 @@ function ProductCard({ product }) {
             )}
             <div className="mt-5 flex items-center justify-between gap-3">
                 <div>
-                    {product.discount_price && product.price && <p className="text-[11px] text-slate-400 line-through">{product.price}</p>}
-                    {(product.discount_price || product.price) && <p className="text-sm font-bold text-primary">{product.discount_price || product.price}</p>}
+                    {product.discount_price && product.price && <p className="text-[11px] text-slate-400 line-through">{formatPrice(product.price)}</p>}
+                    {(product.discount_price || product.price) && <p className="text-sm font-bold text-primary">{formatPrice(product.discount_price || product.price)}</p>}
                 </div>
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-primary transition group-hover:bg-primary group-hover:text-white">
                     <LuShoppingCart className="h-4 w-4" />

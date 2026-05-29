@@ -3,6 +3,7 @@ import { LuArrowLeft, LuArrowRight, LuCheckCircle2, LuLaptop, LuMessageCircle, L
 import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
+import { formatPrice } from '@/lib/utils';
 
 export default function ProductShow({ product, relatedProducts = [], seo, schema, breadcrumbs }) {
     const images = product.images?.length ? product.images : (product.image ? [product.image] : []);
@@ -56,8 +57,8 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                             </div>
                             <h1 className="mt-4 break-words text-4xl font-extrabold tracking-normal text-slate-950 sm:text-5xl">{product.name}</h1>
                             <div className="mt-6">
-                                {product.discount_price && product.price && <p className="text-base text-slate-400 line-through">{product.price}</p>}
-                                {(product.discount_price || product.price) && <p className="text-2xl font-bold text-primary">{product.discount_price || product.price}</p>}
+                                {product.discount_price && product.price && <p className="text-base text-slate-400 line-through">{formatPrice(product.price)}</p>}
+                                {(product.discount_price || product.price) && <p className="text-2xl font-bold text-primary">{formatPrice(product.discount_price || product.price)}</p>}
                             </div>
                             {product.description && (
                                 <div
@@ -104,7 +105,7 @@ export default function ProductShow({ product, relatedProducts = [], seo, schema
                                             )}
                                         </div>
                                         <h3 className="mt-4 line-clamp-2 text-base font-semibold text-slate-950 group-hover:text-primary/90">{related.name}</h3>
-                                        {(related.discount_price || related.price) && <p className="mt-4 text-sm font-bold text-primary">{related.discount_price || related.price}</p>}
+                                        {(related.discount_price || related.price) && <p className="mt-4 text-sm font-bold text-primary">{formatPrice(related.discount_price || related.price)}</p>}
                                     </Link>
                                 ))}
                             </div>

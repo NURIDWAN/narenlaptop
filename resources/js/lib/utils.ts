@@ -10,3 +10,10 @@ export function cn(...inputs: ClassValue[]) {
 export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
+
+export function formatPrice(value: string | number | null | undefined): string {
+    if (!value && value !== 0) return '';
+    const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
+    if (isNaN(num)) return String(value);
+    return 'Rp ' + num.toLocaleString('id-ID');
+}
