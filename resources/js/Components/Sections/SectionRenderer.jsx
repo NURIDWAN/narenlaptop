@@ -1,11 +1,46 @@
 import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider';
 import { Link, router, usePage } from '@inertiajs/react';
-import { motion, useInView } from 'framer-motion';
-import { LuArrowRight, LuCalendarDays, LuCheckCircle2, LuChevronLeft, LuChevronRight, LuCpu, LuHardDrive, LuLaptop, LuMail, LuMessageSquare, LuPhone, LuQuote, LuRotateCcw, LuSend, LuShieldCheck, LuShoppingCart, LuStar, LuWrench } from 'react-icons/lu';
+import { AnimatePresence, motion, useInView } from 'framer-motion';
+import { LuArrowRight, LuCalendarDays, LuCheck, LuCheckCircle2, LuChevronDown, LuChevronLeft, LuChevronRight, LuCpu, LuEye, LuHardDrive, LuLaptop, LuMail, LuMessageSquare, LuPhone, LuQuote, LuRotateCcw, LuSearch, LuSend, LuShieldCheck, LuShoppingCart, LuStar, LuWrench } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
 import { formatPrice } from '@/lib/utils';
 
 const iconSet = [LuWrench, LuCpu, LuShieldCheck, LuStar, LuCheckCircle2, LuMessageSquare];
+
+function useReducedMotion() {
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    });
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const handleChange = (event) => setPrefersReducedMotion(event.matches);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
+    return prefersReducedMotion;
+}
+
+function htmlToPlainText(value = '') {
+    return String(value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function HtmlText({ html, className = '' }) {
+    if (!html) return null;
+
+    return (
+        <div
+            className={className}
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
+    );
+}
 
 function normalizeGoogleMapsEmbedUrl(value = '') {
     const rawValue = String(value || '').trim();
@@ -25,13 +60,41 @@ function normalizeGoogleMapsEmbedUrl(value = '') {
     return mapValue;
 }
 
-function FadeIn({ children, className = '', delay = 0 }) {
+function FadeIn({ children, className = '', delay = 0, direction = 'up' }) {
+    const prefersReducedMotion = useReducedMotion();
+
+    const initialVariants = prefersReducedMotion
+        ? { opacity: 0 }
+        : {
+            up: { opacity: 0, y: 32 },
+            left: { opacity: 0, x: -32 },
+            right: { opacity: 0, x: 32 },
+            scale: { opacity: 0, scale: 0.95 },
+        };
+
+    const animateVariants = prefersReducedMotion
+        ? { opacity: 1 }
+        : {
+            up: { opacity: 1, y: 0 },
+            left: { opacity: 1, x: 0 },
+            right: { opacity: 1, x: 0 },
+            scale: { opacity: 1, scale: 1 },
+        };
+
+    const initial = prefersReducedMotion
+        ? initialVariants
+        : (initialVariants[direction] || initialVariants.up);
+
+    const animate = prefersReducedMotion
+        ? animateVariants
+        : (animateVariants[direction] || animateVariants.up);
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={initial}
+            whileInView={animate}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+            transition={{ duration: prefersReducedMotion ? 0.15 : 0.5, delay: prefersReducedMotion ? 0 : delay, ease: 'easeOut' }}
             className={className}
         >
             {children}
@@ -45,7 +108,7 @@ function StaggerChildren({ children, className = '' }) {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-60px' }}
-            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+            variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
             className={className}
         >
             {children}
@@ -53,14 +116,36 @@ function StaggerChildren({ children, className = '' }) {
     );
 }
 
-function StaggerItem({ children, className = '' }) {
+function StaggerItem({ children, className = '', variant = 'slide' }) {
+    const prefersReducedMotion = useReducedMotion();
+
+    const variants = prefersReducedMotion
+        ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.15 } } }
+        : variant === 'scale'
+            ? { hidden: { opacity: 0, scale: 0.96 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.4 } } }
+            : { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
+
     return (
         <motion.div
-            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
+            variants={variants}
             className={className}
         >
             {children}
         </motion.div>
+    );
+}
+
+function GlassCard({ children, className = '', intensity = 'medium' }) {
+    const intensityClasses = {
+        light: 'bg-white/5 backdrop-blur-sm',
+        medium: 'bg-white/10 backdrop-blur-md border border-white/20',
+        strong: 'bg-white/15 backdrop-blur-lg border border-white/25',
+    };
+
+    return (
+        <div className={`rounded-2xl ${intensityClasses[intensity] || intensityClasses.medium} ${className}`}>
+            {children}
+        </div>
     );
 }
 
@@ -85,12 +170,13 @@ function AnimatedStatValue({ value }) {
         }
 
         let frameId;
-        const duration = 1500;
+        const duration = 1800;
         const start = performance.now();
 
         const tick = (now) => {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - ((1 - progress) ** 3);
+            // Smooth ease-out-quart for a more polished deceleration
+            const eased = 1 - ((1 - progress) ** 4);
             const current = Math.round(target * eased);
             setDisplayValue(`${prefix}${current}${suffix}`);
             if (progress < 1) frameId = requestAnimationFrame(tick);
@@ -107,95 +193,168 @@ export default function SectionRenderer({ section, latestArticles = [] }) {
     const settings = section.settings || {};
     const data = section.data || {};
 
-    if (section.type === 'hero') return <Hero settings={settings} />;
-    if (section.type === 'about_hero') return <AboutHero settings={settings} />;
-    if (section.type === 'slider') return <Slider settings={settings} data={data} />;
-    if (section.type === 'about') return <About settings={settings} />;
-    if (section.type === 'journey') return <Journey settings={settings} />;
-    if (section.type === 'values') return <Values settings={settings} />;
-    if (section.type === 'expertise') return <Expertise settings={settings} />;
-    if (section.type === 'services') return <Services settings={settings} data={data} />;
-    if (section.type === 'products') return <Products settings={settings} data={data} />;
-    if (section.type === 'booking_service') return <BookingService settings={settings} />;
-    if (section.type === 'stats') return <Stats settings={settings} />;
-    if (section.type === 'testimonials') return <Testimonials settings={settings} data={data} />;
-    if (section.type === 'gallery') return <Gallery settings={settings} data={data} />;
-    if (section.type === 'image_compare') return <ImageCompare settings={settings} />;
-    if (section.type === 'cta') return <CTA settings={settings} />;
-    if (section.type === 'faq') return <FAQ settings={settings} />;
-    if (section.type === 'contact') return <Contact settings={settings} data={data} />;
-    if (section.type === 'blog_list') return <BlogList settings={settings} articles={data.articles || latestArticles} />;
-    if (section.type === 'rich_text') return <RichText settings={settings} />;
-    if (section.type === 'custom_html') return <section dangerouslySetInnerHTML={{ __html: settings.html || '' }} />;
-    if (section.type === 'pricing') return <Pricing settings={settings} />;
-    if (section.type === 'team') return <Team settings={settings} data={data} />;
-    if (section.type === 'google_reviews') return <GoogleReviews settings={settings} />;
-    if (section.type === 'location') return <Location settings={settings} />;
-    if (section.type === 'sell_laptop') return <SellLaptop settings={settings} />;
+    const content = (() => {
+        if (section.type === 'hero') return <Hero settings={settings} />;
+        if (section.type === 'about_hero') return <AboutHero settings={settings} />;
+        if (section.type === 'slider') return <Slider settings={settings} data={data} />;
+        if (section.type === 'about') return <About settings={settings} />;
+        if (section.type === 'journey') return <Journey settings={settings} />;
+        if (section.type === 'values') return <Values settings={settings} />;
+        if (section.type === 'expertise') return <Expertise settings={settings} />;
+        if (section.type === 'services') return <Services settings={settings} data={data} />;
+        if (section.type === 'products') return <Products settings={settings} data={data} />;
+        if (section.type === 'booking_service') return <BookingService settings={settings} />;
+        if (section.type === 'stats') return <Stats settings={settings} />;
+        if (section.type === 'testimonials') return <Testimonials settings={settings} data={data} />;
+        if (section.type === 'gallery') return <Gallery settings={settings} data={data} />;
+        if (section.type === 'image_compare') return <ImageCompare settings={settings} />;
+        if (section.type === 'cta') return <CTA settings={settings} />;
+        if (section.type === 'faq') return <FAQ settings={settings} />;
+        if (section.type === 'contact') return <Contact settings={settings} data={data} />;
+        if (section.type === 'blog_list') return <BlogList settings={settings} articles={data.articles || latestArticles} />;
+        if (section.type === 'rich_text') return <RichText settings={settings} />;
+        if (section.type === 'custom_html') return <section dangerouslySetInnerHTML={{ __html: settings.html || '' }} />;
+        if (section.type === 'pricing') return <Pricing settings={settings} />;
+        if (section.type === 'team') return <Team settings={settings} data={data} />;
+        if (section.type === 'google_reviews') return <GoogleReviews settings={settings} />;
+        if (section.type === 'location') return <Location settings={settings} />;
+        if (section.type === 'sell_laptop') return <SellLaptop settings={settings} />;
+        return <Generic settings={settings} />;
+    })();
 
-    return <Generic settings={settings} />;
+    // Sections that manage their own full-bleed background (hero, slider, about_hero) skip wrapper
+    const fullBleedSections = ['hero', 'slider', 'about_hero', 'custom_html'];
+    if (fullBleedSections.includes(section.type) && !settings.section_bg) {
+        return content;
+    }
+
+    // Apply per-section color overrides via inline styles
+    const sectionStyle = {};
+    if (settings.section_bg) sectionStyle.backgroundColor = settings.section_bg;
+    if (settings.section_text) sectionStyle.color = settings.section_text;
+
+    const accentStyle = settings.section_accent ? { '--section-accent': settings.section_accent } : {};
+
+    if (Object.keys(sectionStyle).length === 0 && Object.keys(accentStyle).length === 0) {
+        return content;
+    }
+
+    return (
+        <div style={{ ...sectionStyle, ...accentStyle }}>
+            {content}
+        </div>
+    );
 }
 
 /* ─── Slider ─── */
 function Slider({ settings, data = {} }) {
     const slides = data.slides?.length ? data.slides : (settings.items || []);
     const [active, setActive] = useState(0);
+    const [progress, setProgress] = useState(0);
+    const intervalRef = useRef(null);
+    const reducedMotion = useReducedMotion();
+    const SLIDE_DURATION = 5000; // 5 seconds per slide
+
+    // Auto-play logic
+    useEffect(() => {
+        if (slides.length <= 1) return;
+        const tick = 50; // update progress every 50ms
+        let elapsed = 0;
+        intervalRef.current = setInterval(() => {
+            elapsed += tick;
+            setProgress((elapsed / SLIDE_DURATION) * 100);
+            if (elapsed >= SLIDE_DURATION) {
+                elapsed = 0;
+                setProgress(0);
+                setActive((prev) => (prev + 1) % slides.length);
+            }
+        }, tick);
+        return () => clearInterval(intervalRef.current);
+    }, [active, slides.length]);
 
     if (!slides.length) {
         return null;
     }
 
     const current = slides[active % slides.length] || slides[0];
-    const goTo = (index) => setActive((index + slides.length) % slides.length);
+    const goTo = (index) => {
+        setActive((index + slides.length) % slides.length);
+        setProgress(0);
+    };
     const backgroundImage = current.image || settings.background_image;
 
     return (
         <section className="relative overflow-hidden bg-slate-950 text-white">
-            {backgroundImage ? (
-                <img
-                    src={backgroundImage}
-                    alt={current.title || settings.title || 'Slider'}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading={active === 0 ? 'eager' : 'lazy'}
-                />
-            ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-primary/30 to-slate-900" />
-            )}
-            <div className="absolute inset-0 bg-slate-950/65" />
+            {/* Background image with crossfade */}
+            <AnimatePresence mode="sync">
+                <motion.div
+                    key={`bg-${active}`}
+                    initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reducedMotion ? 0 : 0.7, ease: 'easeInOut' }}
+                    className="absolute inset-0"
+                >
+                    {backgroundImage ? (
+                        <img
+                            src={backgroundImage}
+                            alt={current.title || settings.title || 'Slider'}
+                            className="absolute inset-0 h-full w-full object-cover"
+                            loading={active === 0 ? 'eager' : 'lazy'}
+                        />
+                    ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-primary/30 to-slate-900" />
+                    )}
+                </motion.div>
+            </AnimatePresence>
 
+            {/* Enhanced multi-stop overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent" />
+
+            {/* Slide content with crossfade animation */}
             <div className="relative mx-auto flex min-h-[620px] max-w-7xl items-center px-4 py-24 sm:px-6 lg:px-8">
-                <FadeIn className="max-w-3xl">
-                    {(current.badge || settings.title) && (
-                        <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent/90 backdrop-blur">
-                            {current.badge || settings.title}
-                        </span>
-                    )}
-                    <h2 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-                        {current.title}
-                    </h2>
-                    {(current.subtitle || settings.subtitle) && (
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
-                            {current.subtitle || settings.subtitle}
-                        </p>
-                    )}
-                    {current.cta_url && (
-                        <a
-                            href={current.cta_url}
-                            className="mt-9 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:bg-primary/90"
-                        >
-                            {current.cta_text || 'Selengkapnya'}
-                            <LuArrowRight className="h-4 w-4" />
-                        </a>
-                    )}
-                </FadeIn>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`content-${active}`}
+                        initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: -12 }}
+                        transition={{ duration: reducedMotion ? 0 : 0.5, ease: 'easeOut' }}
+                        className="max-w-3xl"
+                    >
+                        {(current.badge || settings.title) && (
+                            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent/90 backdrop-blur-md">
+                                {current.badge || settings.title}
+                            </span>
+                        )}
+                        <h2 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+                            {current.title}
+                        </h2>
+                        {(current.subtitle || settings.subtitle) && (
+                            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+                                {current.subtitle || settings.subtitle}
+                            </p>
+                        )}
+                        {current.cta_url && (
+                            <a
+                                href={current.cta_url}
+                                className="mt-9 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40"
+                            >
+                                {current.cta_text || 'Selengkapnya'}
+                                <LuArrowRight className="h-4 w-4" />
+                            </a>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
             </div>
 
+            {/* Navigation pill with glassmorphism */}
             {slides.length > 1 && (
-                <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/15 bg-slate-950/50 px-3 py-2 backdrop-blur">
+                <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/20 bg-white/10 px-3 py-2 shadow-lg shadow-black/20 backdrop-blur-md">
                     <button
                         type="button"
                         onClick={() => goTo(active - 1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/20"
                         aria-label="Slide sebelumnya"
                     >
                         <LuChevronLeft className="h-5 w-5" />
@@ -206,19 +365,39 @@ function Slider({ settings, data = {} }) {
                                 key={slide.title || index}
                                 type="button"
                                 onClick={() => goTo(index)}
-                                className={`h-2.5 rounded-full transition ${index === active ? 'w-8 bg-white' : 'w-2.5 bg-white/45 hover:bg-white/70'}`}
+                                className="relative flex h-3 items-center justify-center"
                                 aria-label={`Buka slide ${index + 1}`}
-                            />
+                            >
+                                <motion.span
+                                    className="block h-2.5 rounded-full"
+                                    animate={{
+                                        width: index === active ? 32 : 10,
+                                        backgroundColor: index === active ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.4)',
+                                    }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                />
+                            </button>
                         ))}
                     </div>
                     <button
                         type="button"
                         onClick={() => goTo(active + 1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/20"
                         aria-label="Slide berikutnya"
                     >
                         <LuChevronRight className="h-5 w-5" />
                     </button>
+                </div>
+            )}
+
+            {/* Auto-play progress indicator */}
+            {slides.length > 1 && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
+                    <motion.div
+                        className="h-full bg-white/70"
+                        style={{ width: `${progress}%` }}
+                        transition={{ duration: 0.05, ease: 'linear' }}
+                    />
                 </div>
             )}
         </section>
@@ -234,18 +413,37 @@ function Hero({ settings }) {
     ].filter(Boolean);
 
     return (
-        <section className="relative overflow-hidden bg-slate-950 py-16 text-slate-100 sm:py-20 lg:py-24">
+        <section className="relative overflow-hidden bg-[var(--section-bg-light,#f8f5ec)] py-16 text-slate-900 sm:py-20 lg:py-24">
+            {/* Dynamic animated gradient mesh background */}
             <motion.div
                 aria-hidden="true"
-                className="pointer-events-none absolute -left-24 top-16 h-64 w-64 rounded-full bg-accent/30 blur-3xl"
+                className="pointer-events-none absolute -left-24 top-16 h-64 w-64 rounded-full bg-accent/25 blur-3xl"
                 animate={{ y: [0, -16, 0], x: [0, 14, 0] }}
                 transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
             />
             <motion.div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-20 bottom-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+                className="pointer-events-none absolute -right-20 bottom-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
                 animate={{ y: [0, 20, 0], x: [0, -10, 0] }}
                 transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/3 top-1/4 h-48 w-48 rounded-full bg-accent/10 blur-3xl"
+                animate={{ y: [0, 24, 0], x: [0, -18, 0], scale: [1, 1.15, 1] }}
+                transition={{ duration: 12, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-1/3 right-1/4 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
+                animate={{ y: [0, -12, 0], x: [0, 20, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 14, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-10 left-1/2 h-56 w-56 rounded-full bg-accent/20 blur-[80px]"
+                animate={{ y: [0, 18, 0], x: [0, -14, 0] }}
+                transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
             />
 
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-8">
@@ -258,12 +456,13 @@ function Hero({ settings }) {
                     <span className="inline-flex rounded-full border border-accent/35 bg-accent/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
                         Solusi teknologi terpercaya
                     </span>
-                    <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-primary sm:text-5xl lg:text-6xl">
                         {settings.title || 'Teknologi yang tepat untuk kerja yang cepat'}
                     </h1>
-                    <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                    <p className="mt-6 max-w-xl text-sm leading-7 text-slate-700 sm:text-base">
                         {settings.subtitle || 'Pilih laptop, desktop, dan aksesoris terbaik untuk produktivitas harian hingga kebutuhan profesional.'}
                     </p>
+                    {/* Highlight badges with subtle pulse animation */}
                     <div className="mt-8 flex flex-wrap gap-2.5">
                         {highlights.map((item, index) => (
                             <motion.span
@@ -272,25 +471,26 @@ function Hero({ settings }) {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.12 + (index * 0.09), duration: 0.35 }}
-                                className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-slate-200"
+                                className="animate-pulse rounded-full border border-primary/10 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm [animation-duration:3s]"
                             >
                                 {item}
                             </motion.span>
                         ))}
                     </div>
+                    {/* CTA buttons with hover glow */}
                     <div className="mt-8 flex flex-wrap gap-3">
                         {settings.cta_url && (
-                            <a href={settings.cta_url} className="inline-flex h-11 items-center justify-center rounded-lg bg-accent px-5 text-xs font-semibold text-slate-950 shadow-lg shadow-accent/35 transition hover:-translate-y-0.5 hover:bg-accent/90">
+                            <a href={settings.cta_url} className="inline-flex h-11 items-center justify-center rounded-lg bg-accent px-5 text-xs font-semibold text-slate-950 shadow-lg shadow-accent/35 transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-[0_0_24px_rgba(99,102,241,0.3)]">
                                 {settings.cta_text || 'Hubungi Kami'}
                             </a>
                         )}
                         {settings.secondary_url && (
-                            <a href={settings.secondary_url} className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-600 bg-slate-900/65 px-5 text-xs font-semibold text-slate-100 transition hover:border-accent/60 hover:bg-slate-800">
+                            <a href={settings.secondary_url} className="inline-flex h-11 items-center justify-center rounded-lg border border-primary/20 bg-white/80 px-5 text-xs font-semibold text-primary transition-all duration-300 hover:border-accent/60 hover:bg-white hover:shadow-[0_0_24px_rgba(190,151,78,0.24)]">
                                 {settings.secondary_text || 'Pelajari'}
                             </a>
                         )}
                         {settings.tertiary_url && (
-                            <a href={settings.tertiary_url} className="inline-flex h-11 items-center justify-center rounded-lg border border-primary/40 bg-primary/20 px-5 text-xs font-semibold text-accent/90 transition hover:bg-primary/30">
+                            <a href={settings.tertiary_url} className="inline-flex h-11 items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-5 text-xs font-semibold text-primary transition-all duration-300 hover:bg-primary/10 hover:shadow-[0_0_24px_rgba(190,151,78,0.24)]">
                                 {settings.tertiary_text || 'Booking Service'}
                             </a>
                         )}
@@ -304,35 +504,41 @@ function Hero({ settings }) {
                     transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
                     className="relative"
                 >
-                    <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-accent/35 via-primary/10 to-transparent blur-2xl" />
-                    <div className="relative overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-900/80 shadow-2xl shadow-slate-950/40">
+                    {/* Image frame with light treatment, gold ring, and soft shadow */}
+                    <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-accent/25 via-white/70 to-transparent blur-2xl" />
+                    <div className="relative overflow-hidden rounded-[1.5rem] border border-accent/25 bg-white shadow-2xl shadow-slate-300/60 ring-1 ring-primary/10">
                         {settings.background_image ? (
-                            <img src={settings.background_image} alt={settings.title || 'Hero'} className="aspect-[4/3] w-full object-cover" />
+                            <>
+                                <img src={settings.background_image} alt={settings.title || 'Hero'} className="aspect-[4/3] w-full object-cover brightness-100 contrast-105 saturate-95" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-transparent" />
+                            </>
                         ) : (
-                            <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-primary/30 text-slate-300">
+                            <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-white via-[#f8f5ec] to-accent/20 text-primary">
                                 <LuLaptop className="h-20 w-20" />
                             </div>
                         )}
                     </div>
+                    {/* Floating support badge with stronger glassmorphism */}
                     <motion.div
-                        className="absolute -bottom-5 left-5 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-3 backdrop-blur"
+                        className="absolute -bottom-5 left-5 rounded-xl border border-primary/10 bg-white/85 px-4 py-3 shadow-lg shadow-slate-300/50 backdrop-blur-md"
                         initial={{ opacity: 0, y: 16 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.25, duration: 0.4 }}
                     >
                         <p className="text-[11px] uppercase tracking-wider text-accent">{settings.support_label || 'Support'}</p>
-                        <p className="text-sm font-semibold text-white">{settings.support_text || 'Fast response team'}</p>
+                        <p className="text-sm font-semibold text-primary">{settings.support_text || 'Fast response team'}</p>
                     </motion.div>
+                    {/* Floating rating badge with stronger glassmorphism */}
                     <motion.div
-                        className="absolute -right-4 top-6 rounded-xl border border-primary/35 bg-accent/20 px-4 py-3 backdrop-blur"
+                        className="absolute -right-4 top-6 rounded-xl border border-primary/10 bg-white/85 px-4 py-3 shadow-lg shadow-slate-300/50 backdrop-blur-md"
                         initial={{ opacity: 0, y: 16 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.35, duration: 0.4 }}
                     >
                         <p className="text-[11px] uppercase tracking-wider text-accent/90">{settings.rating_label || 'Rating'}</p>
-                        <p className="flex items-center gap-1.5 text-sm font-semibold text-white">
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
                             <LuStar className="h-3.5 w-3.5 fill-accent text-accent" />
                             {settings.rating_text || '4.9/5 pelanggan'}
                         </p>
@@ -346,18 +552,34 @@ function Hero({ settings }) {
 /* ─── About Hero ─── */
 function AboutHero({ settings }) {
     return (
-        <section className="bg-slate-50 py-16 sm:py-20">
-            <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-slate-50 py-16 sm:py-20 lg:py-24">
+            {/* Decorative geometric accent elements */}
+            <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -left-16 top-1/4 h-64 w-64 rounded-full bg-[var(--section-accent,#6366f1)]/5 blur-3xl" />
+                <div className="absolute -right-20 bottom-1/4 h-80 w-80 rounded-full bg-[var(--section-accent,#6366f1)]/5 blur-3xl" />
+                <div className="absolute left-[10%] top-[15%] h-20 w-20 rotate-45 rounded-lg border border-[var(--section-accent,#6366f1)]/10" />
+                <div className="absolute right-[12%] bottom-[20%] h-14 w-14 rotate-12 rounded-full border border-slate-200" />
+                <div className="absolute right-[25%] top-[10%] h-3 w-3 rounded-full bg-[var(--section-accent,#6366f1)]/20" />
+                <div className="absolute left-[20%] bottom-[15%] h-2 w-2 rounded-full bg-[var(--section-accent,#6366f1)]/25" />
+            </div>
+
+            <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
                 <FadeIn>
-                    <h1 className="text-4xl font-extrabold tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
                         {settings.title || 'Tentang Kami'}
                     </h1>
-                    {settings.subtitle && <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">{settings.subtitle}</p>}
+                    {/* Accent underline decoration */}
+                    <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-[var(--section-accent,#6366f1)] to-[var(--section-accent,#6366f1)]/40" />
+                    {settings.subtitle && <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base lg:text-lg">{settings.subtitle}</p>}
                 </FadeIn>
                 <FadeIn delay={0.12}>
-                    <div className="mx-auto mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/70">
+                    <div className="relative mx-auto mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/70">
                         {settings.image ? (
-                            <img src={settings.image} alt={settings.title || 'Tentang kami'} className="aspect-[16/10] w-full object-cover" />
+                            <>
+                                <img src={settings.image} alt={settings.title || 'Tentang kami'} className="aspect-[16/10] w-full object-cover" />
+                                {/* Gradient overlay on image */}
+                                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-50/30 via-slate-50/10 to-transparent" />
+                            </>
                         ) : (
                             <div className="flex aspect-[16/10] items-center justify-center bg-slate-100 text-slate-300">
                                 <LuLaptop className="h-20 w-20" />
@@ -373,19 +595,42 @@ function AboutHero({ settings }) {
 /* ─── About ─── */
 function About({ settings }) {
     return (
-        <section className="bg-white py-24">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-20 lg:px-8">
-                <FadeIn>
-                    <span className="text-sm font-semibold uppercase tracking-widest text-primary">Tentang Kami</span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
-                    {settings.subtitle && <p className="mt-4 text-base leading-7 text-slate-600">{settings.subtitle}</p>}
-                    {settings.description && <p className="mt-4 text-sm leading-7 text-slate-500">{settings.description}</p>}
-                </FadeIn>
+                <div>
+                    {/* Decorative accent line left of heading */}
+                    <FadeIn delay={0}>
+                        <div className="flex items-center gap-3">
+                            <div className="h-8 w-[3px] rounded-full bg-accent" />
+                            <span className="text-sm font-semibold uppercase tracking-widest text-primary">Tentang Kami</span>
+                        </div>
+                    </FadeIn>
+                    <FadeIn delay={0.1}>
+                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                    </FadeIn>
+                    {settings.subtitle && (
+                        <FadeIn delay={0.2}>
+                            <p className="mt-4 text-base leading-7 text-slate-600">{settings.subtitle}</p>
+                        </FadeIn>
+                    )}
+                    <FadeIn delay={0.3}>
+                        <HtmlText html={settings.description} className="mt-4 text-sm leading-7 text-slate-500 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
+                    </FadeIn>
+                </div>
                 {settings.image && (
-                    <FadeIn delay={0.2}>
+                    <FadeIn delay={0.3}>
                         <div className="relative">
+                            {/* Subtle dot pattern SVG background behind image */}
+                            <svg className="absolute -right-6 -top-6 h-48 w-48 text-accent/10" aria-hidden="true">
+                                <defs>
+                                    <pattern id="about-dot-pattern" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+                                        <circle cx="2" cy="2" r="1.5" fill="currentColor" />
+                                    </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#about-dot-pattern)" />
+                            </svg>
                             <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-accent/20 to-slate-100" />
-                            <img src={settings.image} alt={settings.title || 'About'} className="relative rounded-2xl object-cover shadow-xl" loading="lazy" />
+                            <img src={settings.image} alt={settings.title || 'About'} className="relative rounded-2xl object-cover shadow-xl shadow-accent/10" loading="lazy" />
                         </div>
                     </FadeIn>
                 )}
@@ -399,21 +644,23 @@ function Journey({ settings }) {
     const stats = settings.stats || [];
 
     return (
-        <section className="bg-white py-16 sm:py-20">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
             <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
                 <FadeIn>
-                    <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Perjalanan Kami'}</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title || 'Perjalanan Kami'}</h2>
                     <div className="mt-6 space-y-4 text-sm leading-7 text-slate-600">
                         {settings.subtitle && <p>{settings.subtitle}</p>}
-                        {settings.description && <p>{settings.description}</p>}
+                        <HtmlText html={settings.description} className="[&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
                     </div>
                 </FadeIn>
                 <StaggerChildren className="grid gap-4 sm:grid-cols-2">
                     {stats.map((item, index) => (
-                        <StaggerItem key={index}>
-                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm">
-                                <p className="text-3xl font-bold tracking-tight text-primary">{item.value}</p>
-                                <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-500">{item.label}</p>
+                        <StaggerItem key={index} variant="scale">
+                            <div className="group relative rounded-2xl border border-slate-200/70 bg-white/80 p-6 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:ring-2 hover:ring-[var(--section-accent,#6366f1)]/30">
+                                <p className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+                                    <AnimatedStatValue value={item.value} />
+                                </p>
+                                <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-slate-500">{item.label}</p>
                             </div>
                         </StaggerItem>
                     ))}
@@ -428,26 +675,30 @@ function Values({ settings }) {
     const items = settings.items || [];
 
     return (
-        <section className="bg-slate-50 py-16 sm:py-20">
+        <section className="bg-slate-50 py-16 sm:py-20 lg:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Nilai Inti Kami'}</h2>
-                    {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                </div>
-                <div className="mt-10 grid gap-4 md:grid-cols-3">
+                <FadeIn>
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Nilai Inti Kami'}</h2>
+                        {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                    </div>
+                </FadeIn>
+                <StaggerChildren className="mt-12 grid gap-6 md:grid-cols-3 lg:gap-8">
                     {items.map((item, index) => {
                         const Icon = [LuShieldCheck, LuCpu, LuStar][index % 3];
                         return (
-                            <div key={index} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5 text-primary">
-                                    <Icon className="h-5 w-5" />
+                            <StaggerItem key={index} variant="scale">
+                                <div className="group rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-accent hover:shadow-xl">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 text-accent">
+                                        <Icon className="h-7 w-7" />
+                                    </div>
+                                    <h3 className="mt-6 text-lg font-semibold text-slate-950">{item.title}</h3>
+                                    <HtmlText html={item.description} className="mt-3 text-sm leading-7 text-slate-600 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
                                 </div>
-                                <h3 className="mt-5 text-lg font-semibold text-slate-950">{item.title}</h3>
-                                <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-                            </div>
+                            </StaggerItem>
                         );
                     })}
-                </div>
+                </StaggerChildren>
             </div>
         </section>
     );
@@ -456,32 +707,43 @@ function Values({ settings }) {
 /* ─── Expertise ─── */
 function Expertise({ settings }) {
     return (
-        <section className="bg-slate-950 py-16 text-white sm:py-20">
-            <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+        <section className="relative overflow-hidden bg-white py-16 text-primary sm:py-20">
+            {/* Subtle grid pattern overlay */}
+            <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(6,19,41,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(6,19,41,0.18) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+            <div className="relative mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
                 <FadeIn>
-                    <div className="overflow-hidden rounded-2xl">
-                        {settings.image ? (
-                            <img src={settings.image} alt={settings.title || 'Keahlian teknis'} className="aspect-[4/3] w-full object-cover" />
-                        ) : (
-                            <div className="flex aspect-[4/3] items-center justify-center bg-white/5 text-white/20">
-                                <LuWrench className="h-20 w-20" />
-                            </div>
-                        )}
+                    <div className="relative">
+                        {/* Decorative gradient border ring */}
+                        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-accent/30 via-white to-accent/15 opacity-75 blur-sm" />
+                        <div className="relative overflow-hidden rounded-2xl ring-1 ring-primary/10 shadow-xl shadow-slate-200/70">
+                            {settings.image ? (
+                                <img src={settings.image} alt={settings.title || 'Keahlian teknis'} className="aspect-[4/3] w-full object-cover" />
+                            ) : (
+                                <div className="flex aspect-[4/3] items-center justify-center bg-accent/10 text-primary/30">
+                                    <LuWrench className="h-20 w-20" />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </FadeIn>
                 <FadeIn delay={0.1}>
                     <div className="flex h-full flex-col justify-center">
-                        <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-300">{settings.eyebrow || 'Keahlian Teknis'}</p>
-                        <h2 className="mt-4 max-w-xl text-3xl font-bold tracking-normal text-white sm:text-4xl">{settings.title || 'Presisi di Setiap Perbaikan'}</h2>
-                        {settings.subtitle && <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300">{settings.subtitle}</p>}
-                        <ul className="mt-8 space-y-3">
+                        <p className="text-xs font-bold uppercase tracking-[0.24em] text-accent">{settings.eyebrow || 'Keahlian Teknis'}</p>
+                        <h2 className="mt-4 max-w-xl text-3xl font-bold tracking-normal text-primary sm:text-4xl">{settings.title || 'Presisi di Setiap Perbaikan'}</h2>
+                        {settings.subtitle && <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600">{settings.subtitle}</p>}
+                        <StaggerChildren className="mt-8 space-y-3">
                             {(settings.bullets || []).map((bullet, index) => (
-                                <li key={index} className="flex items-start gap-3 text-sm leading-7 text-slate-200">
-                                    <LuCheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent" />
-                                    <span>{bullet}</span>
-                                </li>
+                                <StaggerItem key={index}>
+                                    <li className="flex items-start gap-3 text-sm leading-7 text-slate-700 list-none">
+                                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/20 ring-1 ring-accent/40">
+                                            <LuCheck className="h-3 w-3 text-accent" />
+                                        </span>
+                                        <span>{bullet}</span>
+                                    </li>
+                                </StaggerItem>
                             ))}
-                        </ul>
+                        </StaggerChildren>
                     </div>
                 </FadeIn>
             </div>
@@ -491,7 +753,9 @@ function Expertise({ settings }) {
 
 /* ─── Services ─── */
 function Services({ settings, data = {} }) {
+    const { settings: siteSettings = {} } = usePage().props;
     const items = data.items?.length ? data.items : (settings.items || []);
+    const whatsappNumber = String(siteSettings.whatsapp_number || '').replace(/\D/g, '');
 
     const linkProps = (url) => {
         const href = String(url || '').trim();
@@ -504,30 +768,83 @@ function Services({ settings, data = {} }) {
         };
     };
 
+    const subServiceWhatsappUrl = (service, subService) => {
+        if (!whatsappNumber) return '';
+
+        const message = [
+            'Halo, saya ingin konsultasi layanan.',
+            `Layanan: ${service.title || '-'}`,
+            `Sub-service: ${subService.name || '-'}`,
+            subService.description ? `Detail: ${htmlToPlainText(subService.description)}` : null,
+        ].filter(Boolean).join('\n');
+
+        return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    };
+
     return (
-        <section id="layanan" className="bg-slate-50 py-16 sm:py-20">
+        <section id="layanan" className="bg-slate-50 py-16 sm:py-20 lg:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title}</h2>
                     {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                </div>
+                </FadeIn>
                 <StaggerChildren className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, index) => {
                         const Icon = iconSet[index % iconSet.length];
                         const cta = linkProps(item.cta_url);
+                        const subServices = item.sub_services || [];
                         return (
                             <StaggerItem key={item.title || index}>
-                                <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-slate-200/80">
+                                <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10">
+                                    {/* Subtle gradient overlay on hover */}
+                                    <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                     {item.image ? (
                                         <img src={item.image} alt={item.title || 'Layanan'} className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                                     ) : (
-                                        <div className="mx-6 mt-6 flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 text-primary transition group-hover:bg-primary group-hover:text-white">
+                                        <div className="mx-6 mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent/10 to-primary/10 text-primary shadow-sm transition group-hover:bg-primary group-hover:text-white group-hover:shadow-md">
                                             <Icon className="h-5 w-5" />
                                         </div>
                                     )}
-                                    <div className="flex flex-1 flex-col p-6">
+                                    <div className="relative flex flex-1 flex-col p-6">
                                         <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
-                                        <p className="mt-3 flex-1 text-sm leading-6 text-slate-500">{item.description}</p>
+                                        <HtmlText html={item.description} className="mt-3 flex-1 text-sm leading-6 text-slate-500 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
+                                        {subServices.length > 0 && (
+                                            <div className="mt-5 space-y-2 border-t border-dashed border-slate-100 pt-4">
+                                                {subServices.map((subService, subIndex) => {
+                                                    const whatsappUrl = subServiceWhatsappUrl(item, subService);
+
+                                                    return (
+                                                        <div key={subService.id || subIndex} className="rounded-lg bg-slate-50 px-2.5 py-2">
+                                                            <div className="flex items-start gap-2">
+                                                                {subService.image ? (
+                                                                    <img src={subService.image} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" loading="lazy" />
+                                                                ) : (
+                                                                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-accent/10 to-primary/10 text-primary shadow-sm">
+                                                                        <Icon className="h-4 w-4" />
+                                                                    </span>
+                                                                )}
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="truncate text-xs font-semibold text-slate-800">{subService.name}</p>
+                                                                    <HtmlText html={subService.description} className="mt-1 line-clamp-2 text-[11px] leading-5 text-slate-500 [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" />
+                                                                </div>
+                                                            </div>
+                                                            {whatsappUrl && (
+                                                                <a
+                                                                    href={whatsappUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="mt-3 inline-flex h-8 w-full items-center justify-center gap-2 rounded-md bg-primary px-3 text-[11px] font-semibold text-white transition hover:bg-primary/90"
+                                                                    aria-label={`Konsultasi ${subService.name || 'sub-service'} via WhatsApp`}
+                                                                >
+                                                                    WhatsApp
+                                                                    <LuArrowRight className="h-3.5 w-3.5" />
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                         {cta.href && (
                                             <a
                                                 {...cta}
@@ -581,22 +898,24 @@ function Products({ settings, data = {} }) {
     return (
         <section id="produk" className="bg-slate-100 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{title}</h2>
-                        {subtitle && <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">{subtitle}</p>}
+                <FadeIn>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{title}</h2>
+                            {subtitle && <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">{subtitle}</p>}
+                        </div>
+                        <a href={linkUrl} className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90">
+                            {linkText} <LuArrowRight className="h-3.5 w-3.5" />
+                        </a>
                     </div>
-                    <a href={linkUrl} className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90">
-                        {linkText} <LuArrowRight className="h-3.5 w-3.5" />
-                    </a>
-                </div>
+                </FadeIn>
                 <StaggerChildren className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, index) => {
                         const href = item.slug ? `/produk/${item.slug}` : (item.cta_url || linkUrl || '/kontak');
 
                         return (
                             <StaggerItem key={item.name || index}>
-                                <article className="group h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-300/60">
+                                <article className="group h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-300/60">
                                     <a href={href} className="block">
                                         <div className="relative overflow-hidden rounded-lg bg-slate-100">
                                             {item.image ? (
@@ -606,8 +925,15 @@ function Products({ settings, data = {} }) {
                                                     <LuLaptop className="h-10 w-10" />
                                                 </div>
                                             )}
+                                            {/* Hover overlay with eye icon */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-md">
+                                                    <LuEye className="h-5 w-5" />
+                                                </span>
+                                            </div>
+                                            {/* Discount badge with gradient */}
                                             {item.badge && (
-                                                <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                                                <span className="absolute left-3 top-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
                                                     {item.badge}
                                                 </span>
                                             )}
@@ -622,8 +948,8 @@ function Products({ settings, data = {} }) {
                                     )}
                                     <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                                         <div>
-                                            {item.discount_price && item.price && <p className="text-[11px] text-slate-400 line-through">{formatPrice(item.price)}</p>}
-                                            {(item.discount_price || item.price) && <p className="text-xs font-bold text-primary">{formatPrice(item.discount_price || item.price)}</p>}
+                                            {item.discount_price && item.price && <p className="text-xs text-slate-400 line-through decoration-red-400">{formatPrice(item.price)}</p>}
+                                            {(item.discount_price || item.price) && <p className="text-base font-bold text-primary">{formatPrice(item.discount_price || item.price)}</p>}
                                         </div>
                                         <a
                                             href={productWhatsappUrl(item, href)}
@@ -684,27 +1010,29 @@ function BookingService({ settings }) {
         });
     }
 
+    const inputClasses = "h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition-all duration-200 focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/15";
+
     return (
         <section id="booking-service" className="bg-slate-50 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Layanan Service Kami'}</h2>
                     {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                </div>
+                </FadeIn>
                 {services.length > 0 && (
                     <div className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-3">
                         {services.map((service, index) => {
                             const Icon = [LuHardDrive, LuCpu, LuWrench, LuLaptop, LuRotateCcw, LuShieldCheck][index % 6];
                             return (
-                                <span key={service} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm">
-                                    <Icon className="h-3.5 w-3.5 text-slate-500" />
+                                <span key={service} className="group/pill inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition-all duration-200 hover:border-accent/30 hover:shadow-sm">
+                                    <Icon className="h-3.5 w-3.5 text-slate-500 transition-colors duration-200 group-hover/pill:text-accent" />
                                     {service}
                                 </span>
                             );
                         })}
                     </div>
                 )}
-                <div className="mt-12 grid overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/80 lg:grid-cols-2 lg:gap-10 lg:p-10">
+                <div className="relative mt-12 grid overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-200/80 before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-accent before:to-primary before:rounded-t-3xl lg:grid-cols-2 lg:gap-10 lg:p-10">
                     <div className="relative overflow-hidden rounded-2xl bg-slate-900">
                         {settings.image ? (
                             <img src={settings.image} alt={settings.title || 'Booking service'} className="h-full min-h-96 w-full object-cover opacity-90" loading="lazy" />
@@ -721,29 +1049,48 @@ function BookingService({ settings }) {
                     <form onSubmit={submit} className="mt-8 flex flex-col justify-center lg:mt-0">
                         <h3 className="text-3xl font-bold tracking-normal text-slate-950">{settings.card_title || 'Booking Service'}</h3>
                         {settings.card_subtitle && <p className="mt-3 text-sm leading-7 text-slate-500">{settings.card_subtitle}</p>}
-                        {sent && <p className="mt-5 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">Permintaan booking berhasil dikirim.</p>}
+                        <AnimatePresence>
+                            {sent && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                    className="mt-5 flex items-center gap-3 rounded-lg bg-green-50 px-4 py-3"
+                                >
+                                    <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.15 }}
+                                    >
+                                        <LuCheckCircle2 className="h-5 w-5 text-green-600" />
+                                    </motion.span>
+                                    <p className="text-sm font-medium text-green-700">Permintaan booking berhasil dikirim.</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         <div className="mt-6 grid gap-4 sm:grid-cols-2">
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Nama Lengkap
-                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                                <input className={inputClasses} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                             </label>
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Nomor WhatsApp
-                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx-xxxx-xxxx" />
+                                <input className={inputClasses} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx-xxxx-xxxx" />
                             </label>
                         </div>
                         <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
                             Merk & Tipe Laptop
-                            <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.device} onChange={(e) => setForm({ ...form, device: e.target.value })} placeholder="Misal: MacBook Pro M1 2020" />
+                            <input className={inputClasses} value={form.device} onChange={(e) => setForm({ ...form, device: e.target.value })} placeholder="Misal: MacBook Pro M1 2020" />
                         </label>
                         <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
                             Keluhan / Masalah
-                            <textarea className="min-h-28 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.issue} onChange={(e) => setForm({ ...form, issue: e.target.value })} placeholder="Ceritakan masalah laptop Anda" required />
+                            <textarea className="min-h-28 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition-all duration-200 focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/15" value={form.issue} onChange={(e) => setForm({ ...form, issue: e.target.value })} placeholder="Ceritakan masalah laptop Anda" required />
                         </label>
                         <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
                             Pilih Jadwal Kedatangan
                             <div className="relative">
-                                <input type="date" className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+                                <input type="date" className={inputClasses} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
                                 <LuCalendarDays className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                             </div>
                         </label>
@@ -762,23 +1109,26 @@ function BookingService({ settings }) {
 function Stats({ settings }) {
     const items = settings.items || [];
     return (
-        <section className="relative overflow-hidden bg-gradient-to-r from-primary to-primary/80 py-20 text-white">
-            <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
+        <section className="relative overflow-hidden bg-[var(--section-bg-light,#f8f5ec)] py-20 text-primary">
+            {/* Light brand mesh background */}
+            <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(190,151,78,0.18),transparent_50%)] opacity-100" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(6,19,41,0.08),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.55),transparent_70%)]" />
             </div>
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {settings.title && (
                     <div className="mb-12 text-center">
                         <h2 className="text-3xl font-bold tracking-tight">{settings.title}</h2>
-                        {settings.subtitle && <p className="mt-3 text-accent/90">{settings.subtitle}</p>}
+                        {settings.subtitle && <p className="mt-3 text-slate-600">{settings.subtitle}</p>}
                     </div>
                 )}
                 <StaggerChildren className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, i) => (
                         <StaggerItem key={i}>
-                            <div className="rounded-2xl bg-white/10 p-8 text-center backdrop-blur-sm">
-                                <p className="text-4xl font-extrabold tracking-tight"><AnimatedStatValue value={item.value} /></p>
-                                <p className="mt-2 text-sm font-medium text-accent/90">{item.label}</p>
+                            <div className="rounded-2xl border border-primary/10 bg-white/80 p-8 text-center shadow-lg shadow-slate-200/60 backdrop-blur-md">
+                                <p className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl"><AnimatedStatValue value={item.value} /></p>
+                                <p className="mt-2 text-sm font-medium text-accent">{item.label}</p>
                             </div>
                         </StaggerItem>
                     ))}
@@ -809,21 +1159,30 @@ function Testimonials({ settings, data = {} }) {
     return (
         <section className="bg-slate-50 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Kata Mereka'}</h2>
                     {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                </div>
+                </FadeIn>
                 <div className="relative mt-10">
                     <div className="overflow-hidden">
                         <motion.div
                             className="flex"
                             animate={{ x: `-${active * 100}%` }}
-                            transition={{ duration: 0.45, ease: 'easeOut' }}
+                            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                         >
                             {displayItems.map((item, i) => (
-                                <div key={`${item.name || 'testimoni'}-${i}`} className="w-full flex-none px-1 sm:px-2">
-                                    <blockquote className="mx-auto h-full max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                                        <LuQuote className="mb-4 h-5 w-5 text-slate-300" />
+                                <motion.div
+                                    key={`${item.name || 'testimoni'}-${i}`}
+                                    className="w-full flex-none px-1 sm:px-2"
+                                    animate={{
+                                        scale: i === active ? 1 : 0.95,
+                                        opacity: i === active ? 1 : 0.6,
+                                        rotateY: i === active ? 0 : (i < active ? -3 : 3),
+                                    }}
+                                    transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                                >
+                                    <blockquote className="mx-auto h-full max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 sm:p-8">
+                                        <LuQuote className="mb-4 h-8 w-8 text-accent/40" />
                                         <div className="flex gap-0.5 text-accent">
                                             {Array.from({ length: item.rating || 5 }).map((_, s) => <LuStar key={s} className="h-4 w-4 fill-current" />)}
                                         </div>
@@ -838,7 +1197,7 @@ function Testimonials({ settings, data = {} }) {
                                             </div>
                                         </footer>
                                     </blockquote>
-                                </div>
+                                </motion.div>
                             ))}
                         </motion.div>
                     </div>
@@ -897,15 +1256,26 @@ function Gallery({ settings, data = {} }) {
     return (
         <section className="bg-slate-50 py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <span className="text-sm font-semibold uppercase tracking-widest text-primary">Galeri</span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
-                    {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
-                </div>
+                <FadeIn>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-primary">Galeri</span>
+                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                        {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
+                    </div>
+                </FadeIn>
                 <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
                     {images.map((img, i) => (
-                        <div key={i} className="mb-4 break-inside-avoid overflow-hidden rounded-2xl">
-                            <img src={img.url} alt={img.caption || `Gallery ${i + 1}`} className="w-full object-cover transition duration-300 hover:scale-105" loading="lazy" />
+                        <div key={i} className="group mb-4 break-inside-avoid overflow-hidden rounded-2xl ring-2 ring-transparent transition-all duration-300 hover:ring-[var(--section-accent,#6366f1)]/30">
+                            <div className="relative">
+                                <img src={img.url} alt={img.caption || `Gallery ${i + 1}`} className="w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                                {/* Hover overlay with zoom icon and caption */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                    <LuSearch className="h-8 w-8 text-white" />
+                                    {img.caption && (
+                                        <p className="mt-2 px-4 text-center text-sm font-medium text-white">{img.caption}</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -919,19 +1289,25 @@ function ImageCompare({ settings }) {
     return (
         <section className="bg-white py-24">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <span className="text-sm font-semibold uppercase tracking-widest text-primary">Hasil Kerja</span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
-                    {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
-                </div>
-                <div className="relative mt-12 overflow-hidden rounded-2xl border border-slate-200 shadow-xl">
-                    <ReactCompareSlider
-                        position={settings.initial_position ?? 50}
-                        itemOne={<ReactCompareSliderImage src={settings.before_image} alt={settings.before_label || 'Before'} loading="lazy" />}
-                        itemTwo={<ReactCompareSliderImage src={settings.after_image} alt={settings.after_label || 'After'} loading="lazy" />}
-                    />
-                    <span className="absolute left-4 top-4 rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">{settings.before_label || 'Sebelum'}</span>
-                    <span className="absolute right-4 top-4 rounded-lg bg-primary/90 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">{settings.after_label || 'Sesudah'}</span>
+                <FadeIn>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-primary">Hasil Kerja</span>
+                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                        {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
+                    </div>
+                </FadeIn>
+                {/* Decorative gradient border frame */}
+                <div className="relative mt-12 rounded-2xl bg-gradient-to-br from-[var(--section-accent,#6366f1)]/40 via-[var(--navbar-color,#6366f1)]/30 to-[var(--section-accent,#6366f1)]/20 p-[2px]">
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-xl">
+                        <ReactCompareSlider
+                            position={settings.initial_position ?? 50}
+                            itemOne={<ReactCompareSliderImage src={settings.before_image} alt={settings.before_label || 'Before'} loading="lazy" />}
+                            itemTwo={<ReactCompareSliderImage src={settings.after_image} alt={settings.after_label || 'After'} loading="lazy" />}
+                        />
+                        {/* Glassmorphism label badges */}
+                        <span className="absolute left-4 top-4 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/20">{settings.before_label || 'Sebelum'}</span>
+                        <span className="absolute right-4 top-4 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/20">{settings.after_label || 'Sesudah'}</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -941,17 +1317,32 @@ function ImageCompare({ settings }) {
 /* ─── CTA ─── */
 function CTA({ settings }) {
     return (
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80 py-20">
-            <div className="absolute inset-0">
-                <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-white/5" />
-                <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-white/5" />
-            </div>
+        <section className="relative overflow-hidden bg-[var(--section-bg-light,#f8f5ec)] py-20">
+            {/* Animated decorative orbs */}
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-accent/20 blur-3xl"
+                animate={{ y: [0, -18, 0], x: [0, 12, 0] }}
+                transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-16 -right-16 h-60 w-60 rounded-full bg-primary/10 blur-3xl"
+                animate={{ y: [0, 14, 0], x: [0, -10, 0] }}
+                transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-1/4 h-48 w-48 rounded-full bg-white/70 blur-3xl"
+                animate={{ y: [0, 20, 0], x: [0, -16, 0], scale: [1, 1.15, 1] }}
+                transition={{ duration: 12, ease: 'easeInOut', repeat: Infinity }}
+            />
             <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
                 <FadeIn>
-                    <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{settings.title}</h2>
-                    {settings.description && <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-accent/90">{settings.description}</p>}
+                    <h2 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">{settings.title}</h2>
+                    <HtmlText html={settings.description} className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-700 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
                     {settings.cta_url && (
-                        <a href={settings.cta_url} className="mt-10 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-semibold text-primary/90 shadow-lg transition hover:bg-primary/5 hover:shadow-xl">
+                        <a href={settings.cta_url} className="mt-10 inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-4 text-sm font-semibold text-primary shadow-lg shadow-accent/25 transition animate-pulse [animation-duration:2.5s] hover:bg-accent/90 hover:shadow-[0_0_30px_rgba(190,151,78,0.28)] hover:[animation-play-state:paused]">
                             {settings.cta_text || 'Selengkapnya'}
                             <LuArrowRight className="h-4 w-4" />
                         </a>
@@ -967,21 +1358,27 @@ function FAQ({ settings }) {
     return (
         <section className="bg-slate-50 py-24">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <span className="text-sm font-semibold uppercase tracking-widest text-primary">FAQ</span>
                     <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
                     {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
-                </div>
+                </FadeIn>
                 <StaggerChildren className="mt-12 space-y-4">
                     {(settings.items || []).map((item, index) => (
                         <StaggerItem key={index}>
-                            <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition open:shadow-md">
+                            <details className="group rounded-2xl border border-slate-200 border-l-[3px] border-l-transparent bg-white shadow-sm transition-all open:border-l-accent open:shadow-md">
                             <summary className="flex cursor-pointer items-center justify-between p-6 text-base font-semibold text-slate-950">
                                 {item.question}
-                                <span className="ml-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition group-open:rotate-45 group-open:bg-accent/25 group-open:text-primary">+</span>
+                                <span className="ml-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-transform duration-300 group-open:rotate-180 group-open:bg-accent/25 group-open:text-primary">
+                                    <LuChevronDown className="h-4 w-4" />
+                                </span>
                             </summary>
-                            <div className="px-6 pb-6">
-                                <p className="text-sm leading-relaxed text-slate-600">{item.answer}</p>
+                            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open:grid-rows-[1fr]">
+                                <div className="overflow-hidden">
+                                    <div className="px-6 pb-6">
+                                        <p className="text-sm leading-relaxed text-slate-600">{item.answer}</p>
+                                    </div>
+                                </div>
                             </div>
                         </details>
                         </StaggerItem>
@@ -1028,48 +1425,73 @@ function Contact({ settings, data = {} }) {
     }
 
     return (
-        <section id="kontak" className="relative overflow-hidden bg-slate-950 py-16 text-white sm:py-20">
-            <div className="absolute inset-0 opacity-30">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(190,151,78,0.3),transparent_60%)]" />
+        <section id="kontak" className="relative overflow-hidden bg-white py-16 text-primary sm:py-20 lg:py-24">
+            <div className="absolute inset-0 opacity-100">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(190,151,78,0.16),transparent_60%)]" />
             </div>
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid gap-10 lg:grid-cols-2">
-                    <div className="flex flex-col justify-center">
+                    <FadeIn direction="left" className="flex flex-col justify-center">
                         <span className="text-sm font-semibold uppercase tracking-widest text-accent">Kontak</span>
                         <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{settings.title || 'Hubungi Kami'}</h2>
-                        {settings.subtitle && <p className="mt-4 max-w-md leading-relaxed text-slate-400">{settings.subtitle}</p>}
+                        {settings.subtitle && <p className="mt-4 max-w-md leading-relaxed text-slate-600">{settings.subtitle}</p>}
                         <div className="mt-8 space-y-4">
-                            <div className="flex items-center gap-3 text-sm text-slate-300">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20"><LuMail className="h-5 w-5 text-accent" /></div>
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 shadow-lg shadow-accent/10"><LuMail className="h-5 w-5 text-accent" /></div>
                                 Kirim pesan melalui form
                             </div>
-                            <div className="flex items-center gap-3 text-sm text-slate-300">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20"><LuPhone className="h-5 w-5 text-accent" /></div>
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 shadow-lg shadow-accent/10"><LuPhone className="h-5 w-5 text-accent" /></div>
                                 Atau hubungi via WhatsApp
                             </div>
                         </div>
-                    </div>
-                    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
-                        {sent && <p className="rounded-lg bg-green-500/20 px-4 py-2.5 text-sm font-medium text-green-300">✓ Pesan berhasil dikirim!</p>}
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <input className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Nama" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                            <input className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                        </div>
-                        <input className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="No. HP" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                        <textarea className="min-h-32 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Tulis pesan Anda..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
-                        <button className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary/90">Kirim Pesan</button>
-                    </form>
+                    </FadeIn>
+                    <FadeIn direction="right">
+                        <form onSubmit={submit} className="space-y-4 rounded-2xl border border-primary/10 bg-white/90 p-6 shadow-xl shadow-slate-200/70 backdrop-blur-lg sm:p-8">
+                            <AnimatePresence>
+                                {sent && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                        className="flex items-center gap-3 rounded-lg bg-green-50 px-4 py-3"
+                                    >
+                                        <motion.span
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.15 }}
+                                        >
+                                            <LuCheckCircle2 className="h-5 w-5 text-green-600" />
+                                        </motion.span>
+                                        <p className="text-sm font-medium text-green-700">Pesan berhasil dikirim!</p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <input className="rounded-xl border border-primary/10 bg-white px-4 py-3 text-sm text-primary placeholder-slate-400 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" placeholder="Nama" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                                <input className="rounded-xl border border-primary/10 bg-white px-4 py-3 text-sm text-primary placeholder-slate-400 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                            </div>
+                            <input className="w-full rounded-xl border border-primary/10 bg-white px-4 py-3 text-sm text-primary placeholder-slate-400 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" placeholder="No. HP" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                            <textarea className="min-h-32 w-full rounded-xl border border-primary/10 bg-white px-4 py-3 text-sm text-primary placeholder-slate-400 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15" placeholder="Tulis pesan Anda..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+                            <button className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(190,151,78,0.25)]">Kirim Pesan</button>
+                        </form>
+                    </FadeIn>
                 </div>
                 {mapEmbedUrl && (
-                    <div className="mt-12 overflow-hidden rounded-2xl border border-white/10">
-                        <iframe
-                            src={mapEmbedUrl}
-                            title="Map lokasi"
-                            className="h-72 w-full sm:h-80"
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                        />
-                    </div>
+                    <FadeIn delay={0.2}>
+                        <div className="mt-12 overflow-hidden rounded-2xl ring-1 ring-primary/10 shadow-lg shadow-slate-200/70">
+                            <div className="bg-gradient-to-r from-accent/20 via-primary/20 to-accent/20 p-[1px] rounded-2xl">
+                                <iframe
+                                    src={mapEmbedUrl}
+                                    title="Map lokasi"
+                                    className="h-72 w-full rounded-2xl sm:h-80"
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
+                            </div>
+                        </div>
+                    </FadeIn>
                 )}
             </div>
         </section>
@@ -1079,27 +1501,39 @@ function Contact({ settings, data = {} }) {
 /* ─── Blog List ─── */
 function BlogList({ settings, articles }) {
     return (
-        <section className="bg-white py-24">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex items-end justify-between">
-                    <div>
-                        <span className="text-sm font-semibold uppercase tracking-widest text-primary">Blog</span>
-                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title || 'Artikel Terbaru'}</h2>
-                        {settings.subtitle && <p className="mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
+                <FadeIn>
+                    <div className="flex items-end justify-between">
+                        <div>
+                            <span className="text-sm font-semibold uppercase tracking-widest text-primary">Blog</span>
+                            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title || 'Artikel Terbaru'}</h2>
+                            {settings.subtitle && <p className="mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
+                        </div>
+                        <Link href="/blog" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary/90 sm:inline-flex">
+                            Lihat Semua <LuArrowRight className="h-4 w-4" />
+                        </Link>
                     </div>
-                    <Link href="/blog" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary/90 sm:inline-flex">
-                        Lihat Semua <LuArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
+                </FadeIn>
                 <StaggerChildren className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {articles.map((article) => (
                         <StaggerItem key={article.id}>
-                            <Link href={`/blog/${article.slug}`} className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:border-primary/30 hover:shadow-lg block">
-                            {article.thumbnail && <img src={article.thumbnail} alt={article.title} className="mb-5 aspect-video w-full rounded-xl object-cover" loading="lazy" />}
-                            <span className="text-xs font-semibold uppercase tracking-wider text-primary">{article.reading_time} menit baca</span>
-                            <h3 className="mt-3 text-lg font-semibold text-slate-950 transition group-hover:text-primary/90">{article.title}</h3>
-                            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.excerpt}</p>
-                        </Link>
+                            <Link href={`/blog/${article.slug}`} className="group block rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/5">
+                                {article.thumbnail && (
+                                    <div className="relative mb-5 overflow-hidden rounded-xl">
+                                        <img src={article.thumbnail} alt={article.title} className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                    {article.category && (
+                                        <span className="inline-block rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent">{article.category}</span>
+                                    )}
+                                    <span className="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">{article.reading_time} menit baca</span>
+                                </div>
+                                <h3 className="mt-3 text-lg font-semibold text-slate-950 transition group-hover:text-primary/90 sm:text-xl">{article.title}</h3>
+                                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.excerpt}</p>
+                            </Link>
                         </StaggerItem>
                     ))}
                 </StaggerChildren>
@@ -1118,12 +1552,12 @@ function RichText({ settings }) {
         <section className="bg-white py-16 sm:py-20">
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 {settings.title && (
-                    <h2 className="mb-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+                    <h2 className="mb-8 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                         {settings.title}
                     </h2>
                 )}
                 <div
-                    className="prose prose-slate prose-headings:tracking-tight prose-a:text-primary prose-img:rounded-xl max-w-none"
+                    className="border-l-[3px] border-l-accent/30 pl-6 prose prose-slate prose-headings:tracking-tight prose-headings:font-bold prose-headings:mt-8 prose-headings:mb-4 prose-a:text-accent prose-a:underline-offset-2 prose-a:decoration-accent/40 prose-a:hover:decoration-accent prose-img:rounded-xl max-w-none"
                     dangerouslySetInnerHTML={{ __html: settings.content_html }}
                 />
             </div>
@@ -1136,18 +1570,18 @@ function Pricing({ settings }) {
     return (
         <section className="bg-slate-50 py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <span className="text-sm font-semibold uppercase tracking-widest text-primary">Harga</span>
                     <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
                     {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
-                </div>
+                </FadeIn>
                 <StaggerChildren className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {(settings.items || []).map((plan, i) => (
                         <StaggerItem key={i}>
-                            <div className={`relative overflow-hidden rounded-2xl border p-8 transition ${plan.featured ? 'border-primary bg-white shadow-xl shadow-primary/20' : 'border-slate-200 bg-white shadow-sm hover:shadow-md'}`}>
-                            {plan.featured && <div className="absolute right-0 top-0 rounded-bl-xl bg-primary px-4 py-1.5 text-xs font-semibold text-white">Populer</div>}
+                            <div className={`relative overflow-hidden rounded-2xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${plan.featured ? 'ring-2 ring-primary/40 shadow-xl shadow-primary/15 border-primary bg-white' : 'border-slate-200 bg-white shadow-sm'}`}>
+                            {plan.featured && <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-semibold text-white">Populer</div>}
                             <h3 className="text-lg font-semibold text-slate-950">{plan.name}</h3>
-                            {plan.description && <p className="mt-1 text-sm text-slate-500">{plan.description}</p>}
+                            <HtmlText html={plan.description} className="mt-1 text-sm text-slate-500 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />
                             <p className="mt-6 text-4xl font-extrabold tracking-tight text-slate-950">{plan.price}</p>
                             <ul className="mt-8 space-y-3">
                                 {(plan.features || []).map((f, fi) => (
@@ -1176,25 +1610,31 @@ function Team({ settings, data = {} }) {
     return (
         <section className="bg-white py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <span className="text-sm font-semibold uppercase tracking-widest text-primary">Tim</span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
-                    {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
-                </div>
+                <FadeIn>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-primary">Tim</span>
+                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                        {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600">{settings.subtitle}</p>}
+                    </div>
+                </FadeIn>
                 <StaggerChildren className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {members.map((m, i) => (
                         <StaggerItem key={i}>
                             <div className="group text-center">
-                            <div className="relative mx-auto h-32 w-32 overflow-hidden rounded-2xl bg-slate-100">
-                                {m.photo ? (
-                                    <img src={m.photo} alt={m.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-110" loading="lazy" />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-slate-300">{(m.name || '?')[0]}</div>
-                                )}
+                                <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-2xl bg-slate-100">
+                                    {m.photo ? (
+                                        <img src={m.photo} alt={m.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-110" loading="lazy" />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-slate-300">{(m.name || '?')[0]}</div>
+                                    )}
+                                    {/* Hover overlay with subtle gradient */}
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+                                </div>
+                                <div className="mt-5 rounded-xl px-3 py-2 transition duration-300 group-hover:bg-slate-50">
+                                    <h3 className="text-base font-semibold text-slate-950">{m.name}</h3>
+                                    {m.role && <p className="mt-1 text-sm text-slate-500">{m.role}</p>}
+                                </div>
                             </div>
-                            <h3 className="mt-5 text-base font-semibold text-slate-950">{m.name}</h3>
-                            {m.role && <p className="mt-1 text-sm text-slate-500">{m.role}</p>}
-                        </div>
                         </StaggerItem>
                     ))}
                 </StaggerChildren>
@@ -1215,14 +1655,16 @@ function Location({ settings }) {
         <section className="bg-white py-16 sm:py-20">
             <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:px-8">
                 <div>
-                    {settings.eyebrow && <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">{settings.eyebrow}</p>}
-                    <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">{settings.title || 'Lokasi Kami'}</h2>
-                    {settings.subtitle && <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                    <FadeIn>
+                        {settings.eyebrow && <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">{settings.eyebrow}</p>}
+                        <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">{settings.title || 'Lokasi Kami'}</h2>
+                        {settings.subtitle && <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
+                    </FadeIn>
 
                     <div className="mt-10 space-y-6">
                         {address && (
                             <div className="flex gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 shadow-md shadow-red-500/15">
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                 </div>
                                 <div>
@@ -1233,7 +1675,7 @@ function Location({ settings }) {
                         )}
                         {hours && (
                             <div className="flex gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-500">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-500 shadow-md shadow-orange-500/15">
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
                                 <div>
@@ -1248,12 +1690,14 @@ function Location({ settings }) {
 
                 <div className="space-y-4">
                     {mapEmbed && (
-                        <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
-                            <iframe src={mapEmbed} title="Lokasi" className="h-72 w-full sm:h-80" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+                        <div className="bg-gradient-to-br from-accent/30 to-primary/20 p-[1px] rounded-2xl">
+                            <div className="overflow-hidden rounded-2xl">
+                                <iframe src={mapEmbed} title="Lokasi" className="h-72 w-full sm:h-80" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+                            </div>
                         </div>
                     )}
                     {instagramUrl && (
-                        <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-5 py-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                        <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-5 py-3.5 text-sm font-semibold text-white transition hover:opacity-90 hover:scale-[1.02]">
                             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                             Lihat Kami di Instagram
                         </a>
@@ -1282,15 +1726,17 @@ function GoogleReviews({ settings }) {
     }, [settings.embed_code]);
 
     return (
-        <section className="bg-white py-16 sm:py-20">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {settings.title && (
-                    <div className="mb-8 text-center">
+                    <FadeIn className="mb-10 text-center">
                         <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
                         {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                    </div>
+                    </FadeIn>
                 )}
-                <div ref={containerRef} />
+                <div className="rounded-2xl border border-slate-200 p-4">
+                    <div ref={containerRef} />
+                </div>
                 {!settings.embed_code && <p className="text-center text-sm text-slate-400">Paste kode embed Trustindex di pengaturan section ini.</p>}
             </div>
         </section>
@@ -1337,14 +1783,16 @@ function SellLaptop({ settings }) {
         });
     }
 
+    const inputClasses = "h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition-all duration-200 focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/15";
+
     return (
         <section id="jual-laptop" className="bg-slate-50 py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
+                <FadeIn className="text-center">
                     <h2 className="text-3xl font-bold tracking-normal text-slate-950 sm:text-4xl">{settings.title || 'Jual Laptop Anda'}</h2>
                     {settings.subtitle && <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">{settings.subtitle}</p>}
-                </div>
-                <div className="mt-12 grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/80 lg:grid-cols-2 lg:gap-10 lg:p-10">
+                </FadeIn>
+                <div className="relative mt-12 grid overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-200/80 before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-accent before:to-primary before:rounded-t-3xl lg:grid-cols-2 lg:gap-10 lg:p-10">
                     <div className="relative overflow-hidden rounded-2xl bg-slate-900">
                         {settings.image ? (
                             <img src={settings.image} alt={settings.title || 'Jual Laptop'} className="h-full min-h-80 w-full object-cover opacity-90" loading="lazy" />
@@ -1352,28 +1800,47 @@ function SellLaptop({ settings }) {
                             <div className="flex min-h-80 items-center justify-center text-slate-600"><LuLaptop className="h-16 w-16" /></div>
                         )}
                     </div>
-                    <form onSubmit={submit} className="flex flex-col justify-center p-6 lg:p-0">
+                    <form onSubmit={submit} className="mt-8 flex flex-col justify-center lg:mt-0">
                         <h3 className="text-2xl font-bold tracking-normal text-slate-950">Formulir Jual Laptop</h3>
                         <p className="mt-2 text-sm text-slate-500">Isi data laptop Anda, kami akan menghubungi untuk penawaran.</p>
-                        {sent && <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">Data berhasil dikirim! Kami akan segera menghubungi Anda.</p>}
+                        <AnimatePresence>
+                            {sent && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                    className="mt-5 flex items-center gap-3 rounded-lg bg-green-50 px-4 py-3"
+                                >
+                                    <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.15 }}
+                                    >
+                                        <LuCheckCircle2 className="h-5 w-5 text-green-600" />
+                                    </motion.span>
+                                    <p className="text-sm font-medium text-green-700">Data berhasil dikirim! Kami akan segera menghubungi Anda.</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         <div className="mt-6 grid gap-4 sm:grid-cols-2">
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Nama Lengkap
-                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                                <input className={inputClasses} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                             </label>
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Nomor WhatsApp
-                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx-xxxx-xxxx" required />
+                                <input className={inputClasses} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx-xxxx-xxxx" required />
                             </label>
                         </div>
                         <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
                             Merk & Tipe Laptop
-                            <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Misal: ASUS ROG Strix G15 2022" required />
+                            <input className={inputClasses} value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Misal: ASUS ROG Strix G15 2022" required />
                         </label>
                         <div className="mt-4 grid gap-4 sm:grid-cols-2">
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Kondisi
-                                <select className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })} required>
+                                <select className={inputClasses} value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })} required>
                                     <option value="">Pilih kondisi</option>
                                     <option value="Seperti baru">Seperti baru</option>
                                     <option value="Mulus">Mulus</option>
@@ -1383,12 +1850,12 @@ function SellLaptop({ settings }) {
                             </label>
                             <label className="space-y-2 text-xs font-medium text-slate-600">
                                 Harga Harapan
-                                <input className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Rp 5.000.000" />
+                                <input className={inputClasses} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Rp 5.000.000" />
                             </label>
                         </div>
                         <label className="mt-4 space-y-2 text-xs font-medium text-slate-600">
                             Catatan Tambahan
-                            <textarea className="min-h-24 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/20" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Spesifikasi, kelengkapan, kerusakan, dll." />
+                            <textarea className="min-h-24 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition-all duration-200 focus:border-accent/50 focus:bg-white focus:ring-4 focus:ring-accent/15" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Spesifikasi, kelengkapan, kerusakan, dll." />
                         </label>
                         <button className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
                             Kirim Data Laptop
@@ -1404,10 +1871,18 @@ function SellLaptop({ settings }) {
 /* ─── Generic ─── */
 function Generic({ settings }) {
     return (
-        <section className="bg-white py-20">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
             <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-                {settings.title && <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>}
-                {(settings.subtitle || settings.description) && <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600">{settings.subtitle || settings.description}</p>}
+                <FadeIn>
+                    {settings.title && (
+                        <>
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{settings.title}</h2>
+                            <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-accent/40" />
+                        </>
+                    )}
+                    {settings.subtitle && <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600">{settings.subtitle}</p>}
+                    {!settings.subtitle && <HtmlText html={settings.description} className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" />}
+                </FadeIn>
             </div>
         </section>
     );

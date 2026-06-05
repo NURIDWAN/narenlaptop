@@ -36,7 +36,91 @@ export default function SectionEditor({ type, settings, onChange, builderData = 
         sell_laptop: SellLaptopEditor,
     };
     const Editor = editors[type] || GenericEditor;
-    return <Editor settings={settings} onChange={onChange} builderData={builderData} />;
+    return (
+        <div className="space-y-6">
+            <Editor settings={settings} onChange={onChange} builderData={builderData} />
+            <Separator />
+            <SectionAppearanceEditor settings={settings} onChange={onChange} />
+        </div>
+    );
+}
+
+function SectionAppearanceEditor({ settings, onChange }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="space-y-3">
+            <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition"
+            >
+                <span>🎨 Warna Section</span>
+                <span>{open ? '▾' : '▸'}</span>
+            </button>
+            {open && (
+                <div className="grid grid-cols-2 gap-3 rounded-lg border bg-muted/30 p-3">
+                    <ColorField
+                        label="Background"
+                        value={settings.section_bg || ''}
+                        onChange={(v) => onChange({ ...settings, section_bg: v })}
+                        placeholder="Default"
+                    />
+                    <ColorField
+                        label="Warna Teks"
+                        value={settings.section_text || ''}
+                        onChange={(v) => onChange({ ...settings, section_text: v })}
+                        placeholder="Default"
+                    />
+                    <ColorField
+                        label="Warna Aksen"
+                        value={settings.section_accent || ''}
+                        onChange={(v) => onChange({ ...settings, section_accent: v })}
+                        placeholder="Default"
+                    />
+                    <label className="space-y-1">
+                        <span className="text-xs font-medium text-muted-foreground">Tema</span>
+                        <select
+                            className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                            value={settings.section_theme || ''}
+                            onChange={(e) => onChange({ ...settings, section_theme: e.target.value })}
+                        >
+                            <option value="">Default</option>
+                            <option value="light">Terang</option>
+                            <option value="dark">Gelap</option>
+                        </select>
+                    </label>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ColorField({ label, value, onChange, placeholder = '' }) {
+    return (
+        <label className="space-y-1">
+            <span className="text-xs font-medium text-muted-foreground">{label}</span>
+            <div className="flex gap-1.5">
+                <input
+                    type="color"
+                    value={value || '#ffffff'}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="h-8 w-8 shrink-0 cursor-pointer rounded border border-input"
+                />
+                <Input
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder}
+                    className="h-8 text-xs"
+                />
+                {value && (
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => onChange('')}>
+                        <LuX className="size-3" />
+                    </Button>
+                )}
+            </div>
+        </label>
+    );
 }
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', required = false }) {
@@ -60,6 +144,15 @@ function TextareaField({ label, value, onChange, rows = 3, placeholder = '' }) {
                 placeholder={placeholder}
             />
         </label>
+    );
+}
+
+function RichTextField({ label, value, onChange, minHeightClass = 'min-h-44' }) {
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <RichTextEditor value={value || ''} onChange={onChange} minHeightClass={minHeightClass} />
+        </div>
     );
 }
 
@@ -348,7 +441,7 @@ function JourneyEditor({ settings, onChange }) {
             <SectionGroup title="Konten">
                 <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
                 <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} rows={2} />
-                <TextareaField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} rows={4} />
+                <RichTextField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
             </SectionGroup>
             <Separator />
             <SectionGroup title="Statistik">
@@ -408,7 +501,7 @@ function ValuesEditor({ settings, onChange }) {
                             </Button>
                         </div>
                         <Field label="Nama Nilai" value={item.title} onChange={(v) => updateItem(i, 'title', v)} placeholder="Inovasi" />
-                        <TextareaField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} rows={2} />
+                        <RichTextField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} minHeightClass="min-h-32" />
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addItem}>
@@ -504,7 +597,7 @@ function ServicesEditor({ settings, onChange, builderData = {} }) {
                                     </Button>
                                 </div>
                                 <Field label="Nama Layanan" value={item.title} onChange={(v) => updateItem(i, 'title', v)} />
-                                <TextareaField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} rows={2} />
+                                <RichTextField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} minHeightClass="min-h-32" />
                                 <ImageField label="Foto Layanan" value={item.image} onChange={(v) => updateItem(i, 'image', v)} />
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <Field label="Teks Tombol" value={item.cta_text} onChange={(v) => updateItem(i, 'cta_text', v)} placeholder="Selengkapnya" />
@@ -591,7 +684,7 @@ function ProductsEditor({ settings, onChange, builderData = {} }) {
                                     <Field label="Nama Produk" value={item.name} onChange={(v) => updateItem(i, 'name', v)} />
                                     <Field label="Badge" value={item.badge} onChange={(v) => updateItem(i, 'badge', v)} placeholder="Best Seller" />
                                 </div>
-                                <TextareaField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} rows={2} />
+                                <RichTextField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} minHeightClass="min-h-32" />
                                 <div className="grid gap-3 md:grid-cols-2">
                                     <Field label="Harga" value={item.price} onChange={(v) => updateItem(i, 'price', v)} placeholder="Rp 12.000.000" />
                                     <Field label="URL CTA" value={item.cta_url} onChange={(v) => updateItem(i, 'cta_url', v)} placeholder="/kontak" />
@@ -806,7 +899,7 @@ function CtaEditor({ settings, onChange }) {
         <div className="space-y-5">
             <SectionGroup title="Konten">
                 <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
-                <TextareaField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
+                <RichTextField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
                 <Field label="Teks Tombol" value={settings.cta_text} onChange={(v) => set('cta_text', v)} />
                 {(settings.source || 'manual') !== 'database' && (
                     <Field label="URL Tombol" value={settings.cta_url} onChange={(v) => set('cta_url', v)} />
@@ -841,7 +934,7 @@ function AboutEditor({ settings, onChange }) {
             <SectionGroup title="Konten">
                 <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
                 <TextareaField label="Subtitle" value={settings.subtitle} onChange={(v) => set('subtitle', v)} />
-                <TextareaField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
+                <RichTextField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
             </SectionGroup>
             <Separator />
             <SectionGroup title="Gambar">
@@ -1035,7 +1128,7 @@ function PricingEditor({ settings, onChange }) {
                             <Field label="Nama Paket" value={item.name} onChange={(v) => updateItem(i, 'name', v)} />
                             <Field label="Harga" value={item.price} onChange={(v) => updateItem(i, 'price', v)} placeholder="Rp 150.000" />
                         </div>
-                        <Field label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} />
+                        <RichTextField label="Deskripsi" value={item.description} onChange={(v) => updateItem(i, 'description', v)} minHeightClass="min-h-32" />
                         <TextareaField label="Fitur (satu per baris)" value={(item.features || []).join('\n')} onChange={(v) => updateItem(i, 'features', v.split('\n').filter(Boolean))} rows={3} placeholder="Bersih debu&#10;Ganti thermal paste&#10;Cek hardware" />
                         <div className="grid gap-3 md:grid-cols-2">
                             <Field label="Teks Tombol" value={item.cta_text} onChange={(v) => updateItem(i, 'cta_text', v)} placeholder="Pilih Paket" />
@@ -1151,7 +1244,7 @@ function GenericEditor({ settings, onChange }) {
     return (
         <div className="space-y-4">
             <Field label="Judul" value={settings.title} onChange={(v) => set('title', v)} />
-            <TextareaField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
+            <RichTextField label="Deskripsi" value={settings.description} onChange={(v) => set('description', v)} />
         </div>
     );
 }

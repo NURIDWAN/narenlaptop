@@ -7,7 +7,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Naren Laptop';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

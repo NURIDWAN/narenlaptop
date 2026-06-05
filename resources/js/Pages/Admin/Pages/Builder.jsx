@@ -52,7 +52,7 @@ import { useMemo, useState } from 'react';
 const defaults = {
     slider: { title: 'Slider Utama', subtitle: '', source: 'database', limit: 5, items: [{ title: 'Judul Slider', subtitle: 'Deskripsi singkat slider', image: '', cta_text: 'Selengkapnya', cta_url: '/kontak' }] },
     about_hero: {
-        title: 'Tentang Lumina Tech',
+        title: 'Tentang Naren Laptop',
         subtitle: 'Menghadirkan standar baru dalam solusi laptop premium dan layanan teknis terpercaya.',
         image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=80',
     },
@@ -66,7 +66,7 @@ const defaults = {
     },
     values: {
         title: 'Nilai Inti Kami',
-        subtitle: 'Fondasi yang membangun setiap layanan dan produk Lumina Tech.',
+        subtitle: 'Fondasi yang membangun setiap layanan dan produk Naren Laptop.',
         items: [
             { title: 'Inovasi', description: 'Solusi efisien dengan pendekatan modern.' },
             { title: 'Kualitas', description: 'Komponen premium dan pengerjaan yang rapi.' },

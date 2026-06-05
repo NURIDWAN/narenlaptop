@@ -25,7 +25,13 @@ class DatabaseSeeder extends Seeder
         // Settings
         $settings = [
             'site_name' => 'Lumina Tech',
-            'primary_color' => '#2563eb',
+            'primary_color' => '#061329',
+            'navbar_color' => '#061329',
+            'section_bg_light' => '#f8f5ec',
+            'section_bg_dark' => '#061329',
+            'section_text_light' => '#1f2937',
+            'section_text_dark' => '#f1f5f9',
+            'section_accent_color' => '#BE974E',
             'whatsapp_number' => '6281234567890',
             'email' => 'halo@luminatech.id',
             'address' => 'Jl. Margonda Raya No. 100, Depok, Jawa Barat',

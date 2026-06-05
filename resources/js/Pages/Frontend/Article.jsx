@@ -29,7 +29,7 @@ export default function Article({ article, relatedArticles = [], schema, seo, br
                             {article.excerpt && <p className="mx-auto mt-5 max-w-3xl break-words text-base leading-8 text-slate-600 sm:text-lg">{article.excerpt}</p>}
 
                             <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
-                                <MetaItem icon={LuUser} label={article.author?.name || 'Lumina Tech'} />
+                                <MetaItem icon={LuUser} label={article.author?.name || 'Naren Laptop'} />
                                 <MetaItem icon={LuCalendarDays} label={publishedDate} />
                                 <MetaItem icon={LuClock3} label={`${article.reading_time || 1} menit baca`} />
                                 <MetaItem icon={LuEye} label={`${formatNumber(article.view_count || 0)} views`} />
@@ -105,7 +105,7 @@ export default function Article({ article, relatedArticles = [], schema, seo, br
                                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Ringkasan</p>
                                 <div className="mt-4 space-y-3 text-sm text-slate-600">
                                     <SidebarItem label="Kategori" value={article.category?.name || 'Artikel'} />
-                                    <SidebarItem label="Penulis" value={article.author?.name || 'Lumina Tech'} />
+                                    <SidebarItem label="Penulis" value={article.author?.name || 'Naren Laptop'} />
                                     <SidebarItem label="Tanggal" value={publishedDate} />
                                     <SidebarItem label="Durasi baca" value={`${article.reading_time || 1} menit`} />
                                 </div>
