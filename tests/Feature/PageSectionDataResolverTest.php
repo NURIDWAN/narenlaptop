@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Service;
+use App\Models\ServiceSubService;
 use App\Models\Setting;
 use App\Models\Slider;
 use App\Services\PageSectionDataResolver;
@@ -69,7 +70,7 @@ class PageSectionDataResolverTest extends TestCase
     {
         Service::create([
             'title' => 'Service Laptop',
-            'description' => 'Perbaikan laptop.',
+            'description' => '<p>Perbaikan laptop.</p>',
             'image' => '/storage/media/service-laptop.jpg',
             'cta_text' => 'Booking Service',
             'cta_url' => '/kontak',
@@ -81,6 +82,32 @@ class PageSectionDataResolverTest extends TestCase
             'title' => 'Layanan Nonaktif',
             'description' => 'Tidak tampil.',
             'order' => 2,
+            'is_active' => false,
+        ]);
+
+        $service = Service::query()->where('title', 'Service Laptop')->first();
+
+        ServiceSubService::create([
+            'service_id' => $service->id,
+            'name' => 'Ganti LCD',
+            'description' => '<p>Penggantian panel LCD laptop.</p>',
+            'image' => '/storage/media/lcd.jpg',
+            'order' => 2,
+            'is_active' => true,
+        ]);
+
+        ServiceSubService::create([
+            'service_id' => $service->id,
+            'name' => 'Install Ulang',
+            'description' => '<p>Install ulang OS dan driver.</p>',
+            'order' => 1,
+            'is_active' => true,
+        ]);
+
+        ServiceSubService::create([
+            'service_id' => $service->id,
+            'name' => 'Sub-Service Nonaktif',
+            'order' => 3,
             'is_active' => false,
         ]);
 
@@ -97,6 +124,12 @@ class PageSectionDataResolverTest extends TestCase
         $this->assertSame('/storage/media/service-laptop.jpg', $sections[0]['data']['items'][0]['image']);
         $this->assertSame('Booking Service', $sections[0]['data']['items'][0]['cta_text']);
         $this->assertSame('/kontak', $sections[0]['data']['items'][0]['cta_url']);
+        $this->assertCount(2, $sections[0]['data']['items'][0]['sub_services']);
+        $this->assertSame('Install Ulang', $sections[0]['data']['items'][0]['sub_services'][0]['name']);
+        $this->assertSame('Ganti LCD', $sections[0]['data']['items'][0]['sub_services'][1]['name']);
+        $this->assertSame('<p>Penggantian panel LCD laptop.</p>', $sections[0]['data']['items'][0]['sub_services'][1]['description']);
+        $this->assertSame('/storage/media/lcd.jpg', $sections[0]['data']['items'][0]['sub_services'][1]['image']);
+        $this->assertArrayNotHasKey('hyperlink', $sections[0]['data']['items'][0]['sub_services'][1]);
     }
 
     public function test_slider_section_can_resolve_active_slides(): void

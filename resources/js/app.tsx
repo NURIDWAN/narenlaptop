@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Naren Laptop';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

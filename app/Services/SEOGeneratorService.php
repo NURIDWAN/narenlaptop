@@ -97,15 +97,28 @@ class SEOGeneratorService
 
     public function schemaForArticle(Article $article): array
     {
+        $thumbnailUrl = $article->og_image ?: $article->thumbnail;
+
         return [
             '@context' => 'https://schema.org',
             '@type' => $article->schema_type ?: 'Article',
             'headline' => $article->meta_title ?: $article->title,
             'description' => $article->meta_description ?: $article->excerpt,
+            'image' => $thumbnailUrl ?: null,
             'datePublished' => optional($article->published_at ?? $article->created_at)->toIso8601String(),
+            'dateModified' => optional($article->updated_at)->toIso8601String(),
+            'wordCount' => str_word_count(strip_tags($article->content ?? '')),
             'author' => [
                 '@type' => 'Person',
                 'name' => $article->author?->name ?? config('app.name'),
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => config('app.name'),
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => route('blog.show', $article->slug),
             ],
         ];
     }

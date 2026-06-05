@@ -8,6 +8,15 @@ import axios from 'axios';
 import { LuImagePlus, LuSave, LuX } from 'react-icons/lu';
 import { useRef, useState } from 'react';
 
+const GEMINI_FREE_MODELS = [
+    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
+    { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+    { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite' },
+];
+
+const CUSTOM_MODEL = '__custom__';
+
 const groups = [
     {
         title: 'Umum',
@@ -16,7 +25,24 @@ const groups = [
             { key: 'site_name', label: 'Nama Website' },
             { key: 'site_logo', label: 'Logo Website', type: 'image' },
             { key: 'favicon', label: 'Favicon', type: 'image' },
-            { key: 'primary_color', label: 'Warna Utama', placeholder: '#040B20' },
+            { key: 'logo_display_mode', label: 'Mode Tampilan Logo', type: 'select', options: [
+                { value: 'logo_text', label: 'Logo + Nama Website' },
+                { value: 'logo_only', label: 'Logo Saja' },
+                { value: 'text_only', label: 'Nama Website Saja' },
+            ]},
+            { key: 'primary_color', label: 'Warna Utama', placeholder: '#061329' },
+            { key: 'navbar_color', label: 'Warna Navbar', placeholder: '#061329' },
+        ],
+    },
+    {
+        title: 'Warna Section',
+        description: 'Warna default untuk section halaman. Bisa di-override per section di Page Builder.',
+        fields: [
+            { key: 'section_bg_light', label: 'Background Section Terang', placeholder: '#f8f5ec' },
+            { key: 'section_bg_dark', label: 'Background Section Gelap', placeholder: '#061329' },
+            { key: 'section_text_light', label: 'Teks di Background Terang', placeholder: '#1f2937' },
+            { key: 'section_text_dark', label: 'Teks di Background Gelap', placeholder: '#f1f5f9' },
+            { key: 'section_accent_color', label: 'Warna Aksen Section', placeholder: '#BE974E' },
         ],
     },
     {
@@ -38,6 +64,7 @@ const groups = [
             { key: 'social_facebook', label: 'Facebook' },
             { key: 'social_tiktok', label: 'TikTok' },
             { key: 'social_youtube', label: 'YouTube' },
+            { key: 'social_shopee', label: 'Shopee' },
         ],
     },
     {
@@ -60,19 +87,33 @@ const groups = [
         ],
     },
     {
-        title: 'AI Configuration',
-        description: 'Pengaturan API untuk generate artikel otomatis (OpenRouter/OpenAI compatible)',
+        key: 'ai',
+        title: 'Gemini AI',
+        description: 'Pengaturan Gemini API untuk generate artikel otomatis',
         fields: [
-            { key: 'ai_base_url', label: 'Base URL API', placeholder: 'https://openrouter.ai/api/v1' },
-            { key: 'ai_api_key', label: 'API Key', placeholder: 'sk-or-v1-xxxxx' },
-            { key: 'ai_model', label: 'Model', placeholder: 'anthropic/claude-sonnet-4-20250514' },
+            { key: 'ai_base_url', label: 'Base URL API', placeholder: 'https://generativelanguage.googleapis.com/v1beta/openai', defaultValue: 'https://generativelanguage.googleapis.com/v1beta/openai' },
+            { key: 'ai_api_key', label: 'API Key', placeholder: 'Gemini API key dari Google AI Studio' },
+            { key: 'ai_model', label: 'Model', type: 'gemini-model', placeholder: 'gemini-2.5-flash', defaultValue: 'gemini-2.5-flash' },
+        ],
+    },
+    {
+        title: 'AI Article Quality',
+        description: 'Default kualitas konten untuk generate artikel panjang edukatif',
+        fields: [
+            { key: 'ai_article_word_count', label: 'Target Jumlah Kata', type: 'number', placeholder: '1000', defaultValue: '1000' },
+            { key: 'ai_article_tone', label: 'Gaya Bahasa', placeholder: 'edukatif dan mudah dipahami', defaultValue: 'edukatif dan mudah dipahami' },
+            { key: 'ai_article_audience', label: 'Target Pembaca', placeholder: 'pemilik laptop dan gadget non-teknis', defaultValue: 'pemilik laptop dan gadget non-teknis' },
+            { key: 'ai_article_brand_context', label: 'Konteks Brand', multiline: true, placeholder: 'Naren Laptop adalah layanan service laptop dan gadget...', defaultValue: 'Naren Laptop adalah layanan service laptop dan gadget yang membantu pelanggan memahami masalah perangkat, opsi perbaikan, dan cara perawatan dengan bahasa yang jelas.' },
+            { key: 'ai_article_cta', label: 'CTA Artikel', multiline: true, placeholder: 'Ajak pembaca konsultasi atau menghubungi tim service.', defaultValue: 'Ajak pembaca berkonsultasi dengan Naren Laptop jika membutuhkan diagnosis atau bantuan service.' },
+            { key: 'ai_article_internal_links', label: 'Internal Link', multiline: true, placeholder: '/blog\n/produk\n/kontak', defaultValue: '/blog\n/produk\n/kontak' },
+            { key: 'ai_article_prompt_notes', label: 'Instruksi Tambahan', multiline: true, placeholder: 'Contoh: hindari istilah teknis berlebihan, gunakan contoh kasus umum.' },
         ],
     },
 ];
 
 export default function Index({ settings }) {
     const [form, setForm] = useState(
-        Object.fromEntries(groups.flatMap(g => g.fields).map(f => [f.key, settings[f.key] || '']))
+        Object.fromEntries(groups.flatMap(g => g.fields).map(f => [f.key, settings[f.key] || f.defaultValue || '']))
     );
     const [saving, setSaving] = useState(false);
 
@@ -105,6 +146,23 @@ export default function Index({ settings }) {
                                             value={form[field.key] || ''}
                                             onChange={(value) => set(field.key, value)}
                                         />
+                                    ) : field.type === 'select' ? (
+                                        <select
+                                            id={field.key}
+                                            className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                            value={form[field.key] || field.options?.[0]?.value || ''}
+                                            onChange={(e) => set(field.key, e.target.value)}
+                                        >
+                                            {field.options?.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                    ) : field.type === 'gemini-model' ? (
+                                        <GeminiModelField
+                                            id={field.key}
+                                            value={form[field.key] || ''}
+                                            onChange={(value) => set(field.key, value)}
+                                        />
                                     ) : field.multiline ? (
                                         <textarea
                                             id={field.key}
@@ -117,6 +175,7 @@ export default function Index({ settings }) {
                                     ) : (
                                         <Input
                                             id={field.key}
+                                            type={field.type === 'number' ? 'number' : 'text'}
                                             value={form[field.key] || ''}
                                             onChange={(e) => set(field.key, e.target.value)}
                                             placeholder={field.placeholder || ''}
@@ -124,7 +183,7 @@ export default function Index({ settings }) {
                                     )}
                                 </div>
                             ))}
-                            {group.title === 'AI Configuration' && (
+                            {group.key === 'ai' && (
                                 <VerifyAiButton baseUrl={form.ai_base_url} apiKey={form.ai_api_key} model={form.ai_model} />
                             )}
                         </CardContent>
@@ -140,20 +199,55 @@ export default function Index({ settings }) {
     );
 }
 
+function GeminiModelField({ id, value, onChange }) {
+    const isFreeModel = GEMINI_FREE_MODELS.some((model) => model.value === value);
+    const isCustom = value && !isFreeModel;
+
+    return (
+        <div className="space-y-2">
+            <select
+                id={id}
+                className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                value={(isCustom || value === '') ? CUSTOM_MODEL : value}
+                onChange={(e) => onChange(e.target.value === CUSTOM_MODEL ? '' : e.target.value)}
+            >
+                {GEMINI_FREE_MODELS.map((model) => (
+                    <option key={model.value} value={model.value}>{model.label}</option>
+                ))}
+                <option value={CUSTOM_MODEL}>Model custom</option>
+            </select>
+            {(isCustom || value === '') && (
+                <Input
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="Masukkan ID model Gemini"
+                />
+            )}
+        </div>
+    );
+}
+
 function VerifyAiButton({ baseUrl, apiKey, model }) {
     const [status, setStatus] = useState(null); // null | 'loading' | 'ok' | 'error'
     const [message, setMessage] = useState('');
 
     async function verify() {
+        if (!baseUrl || !apiKey || !model) {
+            setStatus('error');
+            setMessage('Isi semua field AI (Base URL, API Key, Model) terlebih dahulu.');
+            return;
+        }
+
         setStatus('loading');
         setMessage('');
         try {
             const { data } = await axios.post('/admin/settings/verify-ai', { base_url: baseUrl, api_key: apiKey, model });
             setStatus(data.ok ? 'ok' : 'error');
             setMessage(data.message);
-        } catch {
+        } catch (err) {
             setStatus('error');
-            setMessage('Gagal menghubungi server.');
+            const errMsg = err.response?.data?.message || err.message || 'Gagal menghubungi server.';
+            setMessage(errMsg);
         }
     }
 
@@ -189,7 +283,7 @@ function ImageSettingField({ id, value, onChange }) {
             const { data } = await axios.post('/admin/media/upload', formData);
             onChange(data.url);
         } catch {
-            setError('Gagal upload gambar. Gunakan file JPG, PNG, WebP, GIF, atau SVG maksimal 5MB.');
+            setError('Gagal upload gambar. Gunakan file JPG, PNG, WebP, GIF, SVG, atau ICO maksimal 5MB.');
         } finally {
             setUploading(false);
             if (inputRef.current) inputRef.current.value = '';
@@ -200,7 +294,9 @@ function ImageSettingField({ id, value, onChange }) {
         <div className="space-y-3">
             {value && (
                 <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3">
-                    <img src={value} alt="" className="h-16 w-16 rounded-md border bg-white object-contain p-1" />
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border bg-white p-1">
+                        <img src={value} alt="Preview" className="max-h-full max-w-full object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+                    </div>
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-xs text-muted-foreground">{value}</p>
                         <Button type="button" variant="ghost" size="sm" className="mt-2 text-destructive hover:text-destructive" onClick={() => onChange('')}>
@@ -224,7 +320,7 @@ function ImageSettingField({ id, value, onChange }) {
                 </Button>
             </div>
 
-            <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={upload} />
+            <input ref={inputRef} type="file" accept="image/*,.ico" className="hidden" onChange={upload} />
             {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
     );

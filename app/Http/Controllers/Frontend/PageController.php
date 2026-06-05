@@ -34,8 +34,9 @@ class PageController extends Controller
                 ]],
                 'latestArticles' => [],
                 'seo' => [
-                    'title' => config('app.name'),
-                    'description' => 'Company profile service laptop dan gadget.',
+                    'title' => config('app.name').' - Service Laptop & Gadget Terpercaya',
+                    'description' => 'Layanan service laptop, gadget, dan solusi IT profesional dengan teknisi berpengalaman. Konsultasi gratis.',
+                    'keywords' => 'service laptop, service gadget, perbaikan laptop, solusi IT, komputer',
                     'canonical' => url('/'),
                     'og_type' => 'website',
                 ],
@@ -67,8 +68,9 @@ class PageController extends Controller
             'sections' => $this->sectionData->resolve($page->visibleSections),
             'latestArticles' => Article::query()->published()->latest('published_at')->take(3)->get(),
             'seo' => [
-                'title' => $page->meta_title ?: $page->title,
-                'description' => $page->meta_description,
+                'title' => $page->meta_title ?: ($isHome ? config('app.name').' - Service Laptop & Gadget Terpercaya' : $page->title),
+                'description' => $page->meta_description ?: ($isHome ? 'Layanan service laptop, gadget, dan solusi IT profesional. Konsultasi gratis dan pengerjaan cepat.' : 'Halaman '.$page->title.' - '.config('app.name')),
+                'keywords' => $isHome ? 'service laptop, service gadget, perbaikan laptop, solusi IT, komputer' : '',
                 'og_image' => $page->meta_og_image,
                 'canonical' => $url,
                 'og_type' => 'website',

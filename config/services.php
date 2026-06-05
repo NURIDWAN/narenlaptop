@@ -35,10 +35,10 @@ return [
         ],
     ],
 
-    'claude' => [
-        'api_key' => env('OPENROUTER_API_KEY'),
-        'model' => env('OPENROUTER_MODEL', 'anthropic/claude-sonnet-4-20250514'),
-        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY', env('OPENROUTER_API_KEY')),
+        'model' => env('GEMINI_MODEL', env('OPENROUTER_MODEL', 'gemini-2.5-flash')),
+        'base_url' => env('GEMINI_BASE_URL', env('OPENROUTER_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/openai')),
     ],
 
 ];

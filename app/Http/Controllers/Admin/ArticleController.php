@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Media;
+use App\Models\Setting;
 use App\Services\SEOGeneratorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,6 +34,7 @@ class ArticleController extends Controller
             'articles' => $articles,
             'filters' => $request->only('search', 'status', 'sort', 'direction', 'category_id'),
             'categories' => ArticleCategory::query()->orderBy('name')->get(['id', 'name']),
+            'aiArticleSettings' => $this->aiArticleSettings(),
         ]);
     }
 
@@ -193,52 +195,133 @@ class ArticleController extends Controller
 
     public function generate(Request $request): \Illuminate\Http\JsonResponse
     {
-        $request->validate(['topic' => 'required|string|max:500']);
-
-        $settings = \App\Models\Setting::query()->whereIn('key', ['ai_api_key', 'ai_base_url', 'ai_model'])->pluck('value', 'key');
-        $apiKey = $settings['ai_api_key'] ?? config('services.claude.api_key');
-        if (! $apiKey) {
-            return response()->json(['error' => 'API key belum dikonfigurasi di Pengaturan.'], 422);
-        }
-
-        $baseUrl = $settings['ai_base_url'] ?? config('services.claude.base_url', 'https://openrouter.ai/api/v1');
-        $model = $settings['ai_model'] ?? config('services.claude.model', 'anthropic/claude-sonnet-4-20250514');
-        $topic = $request->input('topic');
-
-        $response = \Illuminate\Support\Facades\Http::withHeaders([
-            'Authorization' => "Bearer {$apiKey}",
-        ])->timeout(60)->post("{$baseUrl}/chat/completions", [
-            'model' => $model,
-            'max_tokens' => 2048,
-            'messages' => [[
-                'role' => 'user',
-                'content' => "Buat artikel blog SEO-friendly dalam Bahasa Indonesia tentang: \"{$topic}\"\n\nArtikel untuk website service laptop dan gadget.\n\nBalas HANYA dengan JSON valid (tanpa markdown code block) dengan format:\n{\"title\": \"judul artikel menarik\", \"excerpt\": \"ringkasan 1-2 kalimat\", \"content\": \"<p>konten HTML lengkap minimal 500 kata dengan heading h2/h3, paragraf, dan list</p>\", \"meta_title\": \"50-60 karakter\", \"meta_description\": \"150-160 karakter\", \"meta_keywords\": [\"keyword1\", \"keyword2\"]}",
-            ]],
+        $data = $request->validate([
+            'topic' => ['required', 'string', 'max:500'],
+            'main_keyword' => ['nullable', 'string', 'max:180'],
+            'category_id' => ['nullable', 'integer', 'exists:article_categories,id'],
+            'brief' => ['nullable', 'string', 'max:2000'],
+            'word_count' => ['nullable', 'integer', 'min:500', 'max:2500'],
         ]);
 
-        $text = $response->json('choices.0.message.content', '');
-        if (preg_match('/\{[\s\S]*\}/', $text, $m)) {
-            $data = json_decode($m[0], true);
-            if (is_array($data) && ! empty($data['title'])) {
-                $slug = $this->generateUniqueSlug($data['title']);
-                $article = Article::create([
-                    'title' => $data['title'],
-                    'slug' => $slug,
-                    'excerpt' => $data['excerpt'] ?? '',
-                    'content' => $data['content'] ?? '',
-                    'status' => 'draft',
-                    'author_id' => $request->user()->id,
-                    'meta_title' => $data['meta_title'] ?? '',
-                    'meta_description' => $data['meta_description'] ?? '',
-                    'meta_keywords' => $data['meta_keywords'] ?? [],
-                    'schema_type' => 'Article',
-                    'reading_time' => max(1, (int) ceil(str_word_count(strip_tags($data['content'] ?? '')) / 200)),
-                ]);
-
-                return response()->json(['id' => $article->id, 'title' => $article->title]);
-            }
+        $settings = Setting::query()
+            ->whereIn('key', array_merge(['ai_api_key', 'ai_base_url', 'ai_model'], array_keys($this->aiArticleDefaults())))
+            ->pluck('value', 'key');
+        $apiKey = $settings['ai_api_key'] ?? config('services.gemini.api_key');
+        if (! $apiKey) {
+            return response()->json(['error' => 'API key belum dikonfigurasi. Buka Pengaturan > Gemini AI.'], 422);
         }
 
-        return response()->json(['error' => 'Gagal generate artikel. Coba lagi.'], 422);
+        $baseUrl = rtrim($settings['ai_base_url'] ?? config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta/openai'), '/');
+        $model = $settings['ai_model'] ?? config('services.gemini.model', 'gemini-2.5-flash');
+        $articleSettings = array_merge($this->aiArticleDefaults(), $settings->only(array_keys($this->aiArticleDefaults()))->all());
+        $wordCount = (int) ($data['word_count'] ?? $articleSettings['ai_article_word_count']);
+        $wordCount = max(500, min(2500, $wordCount));
+        $category = ! empty($data['category_id'])
+            ? ArticleCategory::query()->find($data['category_id'])
+            : null;
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => "Bearer {$apiKey}",
+                'Content-Type' => 'application/json',
+            ])->timeout(60)->post("{$baseUrl}/chat/completions", [
+                'model' => $model,
+                'max_tokens' => max(2048, min(8192, $wordCount * 3)),
+                'messages' => [[
+                    'role' => 'user',
+                    'content' => $this->buildArticlePrompt($data, $articleSettings, $wordCount, $category),
+                ]],
+            ]);
+
+            if (! $response->successful()) {
+                $errorMsg = $response->json('error.message') ?? $response->json('message') ?? 'HTTP '.$response->status();
+                if (is_array($errorMsg)) {
+                    $errorMsg = json_encode($errorMsg);
+                }
+
+                return response()->json(['error' => 'AI error ('.$response->status().'): '.$errorMsg], 422);
+            }
+
+            $text = $response->json('choices.0.message.content', '');
+            if (preg_match('/\{[\s\S]*\}/', $text, $m)) {
+                $data = json_decode($m[0], true);
+                if (is_array($data) && ! empty($data['title'])) {
+                    $slug = $this->generateUniqueSlug($data['title']);
+                    $article = Article::create([
+                        'title' => $data['title'],
+                        'slug' => $slug,
+                        'excerpt' => $data['excerpt'] ?? '',
+                        'content' => $data['content'] ?? '',
+                        'status' => 'draft',
+                        'category_id' => $category?->id,
+                        'author_id' => $request->user()->id,
+                        'meta_title' => $data['meta_title'] ?? '',
+                        'meta_description' => $data['meta_description'] ?? '',
+                        'meta_keywords' => $data['meta_keywords'] ?? [],
+                        'schema_type' => 'Article',
+                        'reading_time' => max(1, (int) ceil(str_word_count(strip_tags($data['content'] ?? '')) / 200)),
+                    ]);
+
+                    return response()->json(['id' => $article->id, 'title' => $article->title]);
+                }
+            }
+
+            return response()->json(['error' => 'Gagal parse response AI. Coba lagi.'], 422);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return response()->json(['error' => 'Tidak dapat terhubung ke server AI. Periksa Base URL: '.$e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Error: '.$e->getMessage()], 422);
+        }
+    }
+
+    private function aiArticleDefaults(): array
+    {
+        return [
+            'ai_article_word_count' => '1000',
+            'ai_article_tone' => 'edukatif dan mudah dipahami',
+            'ai_article_audience' => 'pemilik laptop dan gadget non-teknis',
+            'ai_article_brand_context' => 'Naren Laptop adalah layanan service laptop dan gadget yang membantu pelanggan memahami masalah perangkat, opsi perbaikan, dan cara perawatan dengan bahasa yang jelas.',
+            'ai_article_cta' => 'Ajak pembaca berkonsultasi dengan Naren Laptop jika membutuhkan diagnosis atau bantuan service.',
+            'ai_article_internal_links' => "/blog\n/produk\n/kontak",
+            'ai_article_prompt_notes' => '',
+        ];
+    }
+
+    private function aiArticleSettings(): array
+    {
+        $settings = Setting::query()
+            ->whereIn('key', array_keys($this->aiArticleDefaults()))
+            ->pluck('value', 'key')
+            ->all();
+
+        return array_merge($this->aiArticleDefaults(), $settings);
+    }
+
+    private function buildArticlePrompt(array $data, array $settings, int $wordCount, ?ArticleCategory $category): string
+    {
+        $internalLinks = collect(preg_split('/\r\n|\r|\n/', (string) $settings['ai_article_internal_links']))
+            ->map(fn ($link) => trim($link))
+            ->filter()
+            ->values()
+            ->implode(', ');
+
+        return implode("\n\n", array_filter([
+            'Kamu adalah penulis artikel edukatif dan SEO specialist untuk website service laptop dan gadget berbahasa Indonesia.',
+            'Buat artikel blog panjang dan informatif tentang: "'.$data['topic'].'".',
+            ! empty($data['main_keyword']) ? 'Keyword utama: '.$data['main_keyword'].'. Gunakan secara natural di judul, pembuka, beberapa heading, dan meta.' : null,
+            $category ? 'Kategori artikel: '.$category->name.'.' : null,
+            ! empty($data['brief']) ? 'Brief/catatan khusus dari admin: '.$data['brief'] : null,
+            'Target panjang artikel sekitar '.$wordCount.' kata.',
+            'Target pembaca: '.$settings['ai_article_audience'].'.',
+            'Gaya bahasa: '.$settings['ai_article_tone'].'. Jangan terlalu promosi, jangan clickbait, dan jelaskan istilah teknis dengan sederhana.',
+            'Konteks brand: '.$settings['ai_article_brand_context'],
+            'Struktur konten: gunakan HTML bersih berisi paragraf, h2, h3, ul/ol bila relevan, dan FAQ singkat bila membantu pembaca.',
+            'SEO: buat meta_title 50-60 karakter, meta_description 150-160 karakter, dan 5-8 meta_keywords relevan.',
+            $internalLinks ? 'Tambahkan minimal 1 internal link natural dari daftar berikut: '.$internalLinks.'.' : null,
+            'CTA akhir artikel: '.$settings['ai_article_cta'],
+            ! empty($settings['ai_article_prompt_notes']) ? 'Instruksi tambahan: '.$settings['ai_article_prompt_notes'] : null,
+            'Hindari klaim garansi, harga, estimasi pasti, atau diagnosis final jika tidak ada data. Sarankan pemeriksaan teknisi untuk kasus yang tidak pasti.',
+            'Balas HANYA dengan JSON valid tanpa markdown code block, dengan format: {"title": "judul artikel menarik", "excerpt": "ringkasan 1-2 kalimat", "content": "<p>konten HTML lengkap</p>", "meta_title": "50-60 karakter", "meta_description": "150-160 karakter", "meta_keywords": ["keyword1", "keyword2"]}',
+        ]));
     }
 }

@@ -9,7 +9,7 @@ import { LuArrowUpDown, LuFilePlus2, LuPencil, LuSearch, LuSparkles, LuTrash2 } 
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function ArticlesIndex({ articles, filters = {}, categories = [] }) {
+export default function ArticlesIndex({ articles, filters = {}, categories = [], aiArticleSettings = {} }) {
     const [search, setSearch] = useState(filters.search || '');
 
     function applyFilters(patch) {
@@ -57,7 +57,7 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
                     <Button asChild variant="outline">
                         <Link href="/admin/article-categories">Kelola Kategori</Link>
                     </Button>
-                    <GenerateArticleModal />
+                    <GenerateArticleModal categories={categories} aiArticleSettings={aiArticleSettings} />
                     <Button asChild>
                         <Link href="/admin/articles/create"><LuFilePlus2 className="size-4" /> Buat Artikel</Link>
                     </Button>
@@ -115,9 +115,13 @@ export default function ArticlesIndex({ articles, filters = {}, categories = [] 
     );
 }
 
-function GenerateArticleModal() {
+function GenerateArticleModal({ categories = [], aiArticleSettings = {} }) {
     const [open, setOpen] = useState(false);
     const [topic, setTopic] = useState('');
+    const [mainKeyword, setMainKeyword] = useState('');
+    const [categoryId, setCategoryId] = useState('');
+    const [brief, setBrief] = useState('');
+    const [wordCount, setWordCount] = useState(aiArticleSettings.ai_article_word_count || '1000');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -127,9 +131,19 @@ function GenerateArticleModal() {
         setLoading(true);
         setError('');
         try {
-            const { data } = await axios.post('/admin/articles/generate', { topic: topic.trim() });
+            const { data } = await axios.post('/admin/articles/generate', {
+                topic: topic.trim(),
+                main_keyword: mainKeyword.trim() || null,
+                category_id: categoryId || null,
+                brief: brief.trim() || null,
+                word_count: wordCount ? Number(wordCount) : null,
+            });
             setOpen(false);
             setTopic('');
+            setMainKeyword('');
+            setCategoryId('');
+            setBrief('');
+            setWordCount(aiArticleSettings.ai_article_word_count || '1000');
             router.visit(`/admin/articles/${data.id}/edit`);
         } catch (err) {
             setError(err.response?.data?.error || 'Gagal generate. Coba lagi.');
@@ -153,9 +167,47 @@ function GenerateArticleModal() {
                         <Input
                             value={topic}
                             onChange={(e) => setTopic(e.target.value)}
-                            placeholder="Contoh: Cara merawat baterai laptop agar awet"
+                            placeholder="Topik: Cara merawat baterai laptop agar awet"
                             disabled={loading}
                             autoFocus
+                        />
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <Input
+                                value={mainKeyword}
+                                onChange={(e) => setMainKeyword(e.target.value)}
+                                placeholder="Keyword utama"
+                                disabled={loading}
+                            />
+                            <Input
+                                type="number"
+                                min="500"
+                                max="2500"
+                                value={wordCount}
+                                onChange={(e) => setWordCount(e.target.value)}
+                                placeholder="Target kata"
+                                disabled={loading}
+                            />
+                        </div>
+                        {categories.length > 0 && (
+                            <select
+                                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                value={categoryId}
+                                onChange={(e) => setCategoryId(e.target.value)}
+                                disabled={loading}
+                            >
+                                <option value="">Tanpa kategori</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                ))}
+                            </select>
+                        )}
+                        <textarea
+                            rows={4}
+                            className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            value={brief}
+                            onChange={(e) => setBrief(e.target.value)}
+                            placeholder="Brief tambahan: poin yang wajib dibahas, sudut pandang artikel, atau hal yang perlu dihindari"
+                            disabled={loading}
                         />
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </div>

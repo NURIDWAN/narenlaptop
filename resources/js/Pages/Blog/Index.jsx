@@ -4,7 +4,7 @@ import { useState } from 'react';
 import FrontendLayout from '@/Layouts/FrontendLayout';
 import SEOHead from '@/Components/SEO/SEOHead';
 
-export default function BlogIndex({ articles, categories = [], selectedCategory = '', seo, breadcrumbs, filters = {} }) {
+export default function BlogIndex({ articles, categories = [], selectedCategory = '', selectedCategoryDescription = '', seo, breadcrumbs, filters = {} }) {
     const items = articles.data || [];
     const featured = items[0];
     const rest = items.slice(1);
@@ -27,9 +27,16 @@ export default function BlogIndex({ articles, categories = [], selectedCategory 
                         <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
                             {activeCategory?.name || 'Artikel'}
                         </h1>
-                        <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
-                            {seo?.description || 'Artikel terbaru seputar teknologi, service laptop, dan tips perawatan perangkat.'}
-                        </p>
+                        {selectedCategoryDescription ? (
+                            <div
+                                className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                                dangerouslySetInnerHTML={{ __html: selectedCategoryDescription }}
+                            />
+                        ) : (
+                            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
+                                {seo?.description || 'Artikel terbaru seputar teknologi, service laptop, dan tips perawatan perangkat.'}
+                            </p>
+                        )}
                     </div>
 
                     {categories.length > 0 && (

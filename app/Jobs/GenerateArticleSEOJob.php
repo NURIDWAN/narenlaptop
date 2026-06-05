@@ -25,7 +25,7 @@ class GenerateArticleSEOJob implements ShouldQueue
         $plainText = trim(strip_tags($this->article->content ?? ''));
 
         $settings = \App\Models\Setting::query()->whereIn('key', ['ai_api_key', 'ai_base_url', 'ai_model'])->pluck('value', 'key');
-        $apiKey = $settings['ai_api_key'] ?? config('services.claude.api_key');
+        $apiKey = $settings['ai_api_key'] ?? config('services.gemini.api_key');
 
         if (! $apiKey || strlen($plainText) < 100) {
             $this->article->update($seoGenerator->generateForArticle($this->article));
@@ -33,7 +33,7 @@ class GenerateArticleSEOJob implements ShouldQueue
         }
 
         try {
-            $generated = $this->generateWithAI($apiKey, $settings['ai_base_url'] ?? config('services.claude.base_url', 'https://openrouter.ai/api/v1'), $settings['ai_model'] ?? config('services.claude.model', 'anthropic/claude-sonnet-4-20250514'), $plainText);
+            $generated = $this->generateWithAI($apiKey, $settings['ai_base_url'] ?? config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta/openai'), $settings['ai_model'] ?? config('services.gemini.model', 'gemini-2.5-flash'), $plainText);
             $this->article->update(array_filter([
                 'meta_title' => $generated['meta_title'] ?? null,
                 'meta_description' => $generated['meta_description'] ?? null,
@@ -70,6 +70,6 @@ class GenerateArticleSEOJob implements ShouldQueue
             }
         }
 
-        throw new \RuntimeException('Invalid OpenRouter response');
+        throw new \RuntimeException('Invalid Gemini response');
     }
 }

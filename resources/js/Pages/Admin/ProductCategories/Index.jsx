@@ -3,6 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import RichTextEditor from '@/Components/Editor/RichTextEditor';
 import { LuPencil, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useState } from 'react';
 
@@ -70,7 +71,7 @@ export default function ProductCategoriesIndex({ categories, filters = {} }) {
 
                     <Field label="Nama" value={data.name} onChange={(value) => setData('name', value)} required />
                     <Field label="Slug (opsional)" value={data.slug} onChange={(value) => setData('slug', value)} placeholder="otomatis-dari-nama" />
-                    <Textarea label="Deskripsi" value={data.description} onChange={(value) => setData('description', value)} rows={3} />
+                    <RichTextField label="Deskripsi" value={data.description} onChange={(value) => setData('description', value)} />
                     <Field label="Meta title" value={data.meta_title} onChange={(value) => setData('meta_title', value)} />
                     <Textarea label="Meta description" value={data.meta_description} onChange={(value) => setData('meta_description', value)} rows={3} />
 
@@ -107,7 +108,7 @@ export default function ProductCategoriesIndex({ categories, filters = {} }) {
                                     <tr key={category.id}>
                                         <td className="px-4 py-3">
                                             <p className="font-medium text-slate-950">{category.name}</p>
-                                            <p className="mt-1 text-xs text-slate-500">{category.description || '-'}</p>
+                                            <p className="mt-1 text-xs text-slate-500">{stripHtml(category.description) || '-'}</p>
                                         </td>
                                         <td className="px-4 py-3 text-slate-600">{category.slug}</td>
                                         <td className="px-4 py-3 text-center text-slate-600">{category.products_count}</td>
@@ -174,4 +175,17 @@ function Textarea({ label, value, onChange, rows = 4 }) {
             />
         </label>
     );
+}
+
+function RichTextField({ label, value, onChange }) {
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <RichTextEditor value={value || ''} onChange={onChange} minHeightClass="min-h-44" />
+        </div>
+    );
+}
+
+function stripHtml(content = '') {
+    return String(content).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }

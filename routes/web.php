@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\ArticleCategoryController as AdminArticleCategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\ProductCategoryController as AdminProductCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\SliderController as AdminSliderController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ContactSubmissionController;
 use App\Http\Controllers\Frontend\ArticleController;
 use App\Http\Controllers\Frontend\PageController;
@@ -95,17 +97,7 @@ Route::get('/robots.txt', function () {
     return response($content, 200)->header('Content-Type', 'text/plain');
 })->name('robots');
 
-Route::get('/dashboard', fn () => Inertia::render('Dashboard', [
-    'stats' => [
-        'pages' => Page::query()->count(),
-        'publishedPages' => Page::query()->published()->count(),
-        'articles' => Article::query()->count(),
-        'publishedArticles' => Article::query()->published()->count(),
-        'messages' => ContactSubmission::query()->count(),
-    ],
-    'recentPages' => Page::query()->latest()->take(5)->get(['id', 'title', 'slug', 'status', 'updated_at']),
-    'recentArticles' => Article::query()->latest()->take(5)->get(['id', 'title', 'slug', 'status', 'updated_at']),
-]))
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -132,6 +124,7 @@ Route::middleware(['auth', 'verified'])
         Route::post('navigation/reorder', [\App\Http\Controllers\Admin\NavigationController::class, 'reorder'])->name('navigation.reorder');
         Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('team', \App\Http\Controllers\Admin\TeamMemberController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('users', AdminUserController::class)->except(['show']);
     });
 
 Route::middleware('auth')->group(function () {

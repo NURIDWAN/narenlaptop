@@ -149,6 +149,7 @@ class PageSectionDataResolver
 
         return [
             'items' => Service::active()
+                ->with('activeSubServices')
                 ->take($limit)
                 ->get(['id', 'title', 'description', 'icon', 'image', 'cta_text', 'cta_url'])
                 ->map(fn (Service $service) => [
@@ -159,6 +160,12 @@ class PageSectionDataResolver
                     'image' => $service->image,
                     'cta_text' => $service->cta_text,
                     'cta_url' => $service->cta_url,
+                    'sub_services' => $service->activeSubServices->map(fn ($subService) => [
+                        'id' => $subService->id,
+                        'name' => $subService->name,
+                        'description' => $subService->description,
+                        'image' => $subService->image,
+                    ])->all(),
                 ])
                 ->all(),
         ];

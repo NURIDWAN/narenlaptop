@@ -21,6 +21,7 @@ class ServiceController extends Controller
 
         return Inertia::render('Admin/Services/Index', [
             'services' => Service::query()
+                ->with('subServices')
                 ->when($request->search, fn ($query, $search) => $query
                     ->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%"))
@@ -34,14 +35,24 @@ class ServiceController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        Service::create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $subServices = $data['sub_services'] ?? [];
+        unset($data['sub_services']);
+
+        $service = Service::create($data);
+        $this->syncSubServices($service, $subServices);
 
         return back()->with('success', 'Layanan berhasil ditambahkan.');
     }
 
     public function update(Request $request, Service $service): RedirectResponse
     {
-        $service->update($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $subServices = $data['sub_services'] ?? [];
+        unset($data['sub_services']);
+
+        $service->update($data);
+        $this->syncSubServices($service, $subServices);
 
         return back()->with('success', 'Layanan berhasil diperbarui.');
     }
@@ -57,13 +68,47 @@ class ServiceController extends Controller
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:180'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'description' => ['nullable', 'string', 'max:20000'],
             'icon' => ['nullable', 'string', 'max:80'],
             'image' => ['nullable', 'string', 'max:255'],
             'cta_text' => ['nullable', 'string', 'max:80'],
             'cta_url' => ['nullable', 'string', 'max:255'],
             'order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'sub_services' => ['array'],
+            'sub_services.*.id' => ['nullable', 'integer'],
+            'sub_services.*.name' => ['required', 'string', 'max:180'],
+            'sub_services.*.description' => ['nullable', 'string', 'max:20000'],
+            'sub_services.*.image' => ['nullable', 'string', 'max:255'],
+            'sub_services.*.order' => ['nullable', 'integer', 'min:0'],
+            'sub_services.*.is_active' => ['boolean'],
         ]);
+    }
+
+    private function syncSubServices(Service $service, array $subServices): void
+    {
+        $existingIds = $service->subServices()->pluck('id')->all();
+        $incomingIds = collect($subServices)->pluck('id')->filter()->map(fn ($id) => (int) $id)->all();
+
+        $service->subServices()->whereIn('id', array_diff($existingIds, $incomingIds))->delete();
+
+        foreach (array_values($subServices) as $index => $subService) {
+            $payload = [
+                'name' => $subService['name'],
+                'description' => $subService['description'] ?? null,
+                'image' => $subService['image'] ?? null,
+                'order' => $subService['order'] ?? $index,
+                'is_active' => (bool) ($subService['is_active'] ?? true),
+            ];
+
+            $subServiceId = ! empty($subService['id']) ? (int) $subService['id'] : null;
+
+            if ($subServiceId && in_array($subServiceId, $existingIds, true)) {
+                $service->subServices()->whereKey($subServiceId)->update($payload);
+                continue;
+            }
+
+            $service->subServices()->create($payload);
+        }
     }
 }

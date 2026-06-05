@@ -5,6 +5,7 @@ import LinkExtension from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import axios from 'axios';
+import { useEffect } from 'react';
 import {
     LuBold,
     LuCode,
@@ -46,6 +47,15 @@ export default function RichTextEditor({
         content: value,
         onUpdate: ({ editor: currentEditor }) => onChange?.(currentEditor.getHTML()),
     });
+
+    useEffect(() => {
+        if (!editor) return;
+
+        const nextValue = value || '';
+        if (nextValue !== editor.getHTML()) {
+            editor.commands.setContent(nextValue, false);
+        }
+    }, [editor, value]);
 
     async function uploadImage() {
         const input = document.createElement('input');

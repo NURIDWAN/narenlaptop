@@ -30,8 +30,9 @@ class ProductController extends Controller
                 ->through(fn (Product $product) => $this->productPayload($product)),
             'filters' => ['search' => $search],
             'seo' => [
-                'title' => 'Produk',
-                'description' => 'Pilihan laptop dan perangkat unggulan yang tersedia.',
+                'title' => 'Produk Laptop & Perangkat IT Terbaik',
+                'description' => 'Pilihan laptop dan perangkat IT unggulan dengan harga terbaik. Tersedia laptop baru, bekas berkualitas, dan aksesoris komputer.',
+                'keywords' => 'laptop, perangkat IT, komputer, aksesoris laptop, laptop bekas, laptop baru',
                 'canonical' => route('products.index'),
                 'og_type' => 'website',
             ],
@@ -62,8 +63,9 @@ class ProductController extends Controller
             'product' => $this->productPayload($product),
             'relatedProducts' => $relatedProducts,
             'seo' => [
-                'title' => $product->name,
-                'description' => str($product->description ?? '')->stripTags()->limit(155)->toString(),
+                'title' => $product->name.' - Produk Laptop & IT',
+                'description' => str($product->description ?? '')->stripTags()->limit(155)->toString() ?: 'Detail produk '.$product->name.' dengan harga terbaik.',
+                'keywords' => $product->name.', laptop, perangkat IT, beli laptop',
                 'og_image' => $images[0] ?? null,
                 'canonical' => route('products.show', $product->slug),
                 'og_type' => 'product',
@@ -74,11 +76,16 @@ class ProductController extends Controller
                 'name' => $product->name,
                 'description' => str($product->description ?? '')->stripTags()->limit(200)->toString(),
                 'image' => $images[0] ?? null,
+                'brand' => [
+                    '@type' => 'Brand',
+                    'name' => config('app.name'),
+                ],
                 'offers' => [
                     '@type' => 'Offer',
                     'price' => $product->discount_price ?: $product->price,
                     'priceCurrency' => 'IDR',
                     'availability' => 'https://schema.org/InStock',
+                    'url' => route('products.show', $product->slug),
                 ],
             ],
             'breadcrumbs' => [

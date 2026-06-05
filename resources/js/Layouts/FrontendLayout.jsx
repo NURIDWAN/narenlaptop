@@ -1,13 +1,14 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 import { LuChevronUp, LuMenu, LuSearch, LuX } from 'react-icons/lu';
+import { SiShopee } from 'react-icons/si';
 import { useState } from 'react';
 
 function useOrganizationSchema(settings) {
     const schema = {
         '@context': 'https://schema.org',
         '@type': 'LocalBusiness',
-        'name': settings.site_name || 'Fenta Computer',
+        'name': settings.site_name || 'Naren Laptop',
         'url': window?.location?.origin || '',
         ...(settings.email && { email: settings.email }),
         ...(settings.whatsapp_number && { telephone: `+${settings.whatsapp_number}` }),
@@ -19,7 +20,7 @@ function useOrganizationSchema(settings) {
         schema.openingHours = settings.business_hours;
     }
 
-    const sameAs = [settings.social_instagram, settings.social_facebook, settings.social_tiktok, settings.social_youtube].filter(Boolean);
+    const sameAs = [settings.social_instagram, settings.social_facebook, settings.social_tiktok, settings.social_youtube, settings.social_shopee].filter(Boolean);
     if (sameAs.length) schema.sameAs = sameAs;
 
     return schema;
@@ -47,7 +48,7 @@ export default function FrontendLayout({ children }) {
     const { settings = {}, navigation = {} } = usePage().props;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [whatsappOpen, setWhatsappOpen] = useState(false);
-    const siteName = settings.site_name || 'Fenta Computer';
+    const siteName = settings.site_name || 'Naren Laptop';
     const whatsapp = String(settings.whatsapp_number || '6281234567890').replace(/\D/g, '');
     const whatsappMessage = String(settings.whatsapp_message_default || 'Halo, saya ingin konsultasi.');
     const whatsappUrl = `https://wa.me/${whatsapp}${whatsappMessage ? `?text=${encodeURIComponent(whatsappMessage)}` : ''}`;
@@ -55,26 +56,55 @@ export default function FrontendLayout({ children }) {
     const footerMenus = navigation.footer || [];
     const orgSchema = useOrganizationSchema(settings);
     const mapEmbedUrl = normalizeGoogleMapsEmbedUrl(settings.google_maps_embed);
+    const socialLinks = [
+        { key: 'instagram', label: 'Instagram', url: settings.social_instagram, icon: FaInstagram },
+        { key: 'facebook', label: 'Facebook', url: settings.social_facebook, icon: FaFacebookF },
+        { key: 'tiktok', label: 'TikTok', url: settings.social_tiktok, icon: FaTiktok },
+        { key: 'youtube', label: 'YouTube', url: settings.social_youtube, icon: FaYoutube },
+        { key: 'shopee', label: 'Shopee', url: settings.social_shopee, icon: SiShopee },
+    ].filter((item) => item.url);
+
+    const navbarColor = settings.navbar_color || '#061329';
+
+    const rootStyle = {
+        '--primary': settings.primary_color || '#061329',
+        '--accent': settings.section_accent_color || '#BE974E',
+        '--ring': settings.section_accent_color || '#BE974E',
+        '--navbar-color': navbarColor,
+        '--section-bg-light': settings.section_bg_light || '#f8f5ec',
+        '--section-bg-dark': settings.section_bg_dark || '#061329',
+        '--section-text-light': settings.section_text_light || '#1f2937',
+        '--section-text-dark': settings.section_text_dark || '#f1f5f9',
+        '--section-accent': settings.section_accent_color || '#BE974E',
+    };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-950">
+        <div className="min-h-screen bg-slate-50 text-slate-950" style={rootStyle}>
             <Head>
                 <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
             </Head>
-            <header className="sticky top-0 z-40 border-b border-white/10 bg-[#000411]/95 backdrop-blur">
+            <header className="sticky top-0 z-40 border-b border-primary/10 bg-white/90 shadow-sm shadow-slate-200/50 backdrop-blur">
                 <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center text-lg font-bold tracking-normal text-white lg:text-xl">
-                        {settings.site_logo ? <img src={settings.site_logo} alt={siteName} className="h-auto max-h-14 w-40 object-contain sm:w-48 lg:w-56" /> : siteName}
+                    <Link href="/" className="flex items-center gap-3 text-lg font-bold tracking-normal text-primary lg:text-xl">
+                        {settings.site_logo && (settings.logo_display_mode || 'logo_text') !== 'text_only' && (
+                            <img src={settings.site_logo} alt={siteName} className="h-10 w-10 rounded-lg object-cover sm:h-12 sm:w-12" />
+                        )}
+                        {(settings.logo_display_mode || 'logo_text') !== 'logo_only' && (
+                            <span>{siteName}</span>
+                        )}
+                        {!settings.site_logo && (settings.logo_display_mode || 'logo_text') === 'logo_only' && (
+                            <span>{siteName}</span>
+                        )}
                     </Link>
-                    <nav className="hidden items-center gap-9 text-sm font-medium text-slate-100 md:flex">
+                    <nav className="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
                         {headerMenus.map((item) => (
                             <NavItem key={item.id} item={item} />
                         ))}
                     </nav>
-                    <div className="flex items-center text-white">
+                    <div className="flex items-center text-primary">
                         <button
                             type="button"
-                            className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/10 md:hidden"
+                            className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-primary/5 md:hidden"
                             aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
                             onClick={() => setMobileMenuOpen((open) => !open)}
                         >
@@ -83,7 +113,7 @@ export default function FrontendLayout({ children }) {
                     </div>
                 </div>
                 {mobileMenuOpen && (
-                    <div className="border-t border-white/10 bg-[#000411] px-4 py-3 md:hidden">
+                    <div className="border-t border-primary/10 bg-white px-4 py-3 shadow-lg shadow-slate-200/50 md:hidden">
                         <nav className="space-y-1">
                             {headerMenus.map((item) => (
                                 <MobileNavItem key={item.id} item={item} onNavigate={() => setMobileMenuOpen(false)} />
@@ -138,11 +168,32 @@ export default function FrontendLayout({ children }) {
                 </button>
             </div>
 
-            <footer className="border-t border-white/10 bg-[#000411] text-slate-300">
+            <footer className="border-t border-white/10 text-slate-300" style={{ backgroundColor: navbarColor }}>
                 <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 text-sm sm:px-6 md:grid-cols-4 lg:px-8">
                     <div>
                         <p className="text-base font-bold text-white">{siteName}</p>
                         <p className="mt-3 max-w-xs text-xs leading-6 text-slate-400">{settings.footer_tagline || 'Premium laptop solutions.'}</p>
+                        {socialLinks.length > 0 && (
+                            <div className="mt-5 flex flex-wrap gap-2">
+                                {socialLinks.map((item) => {
+                                    const Icon = item.icon;
+
+                                    return (
+                                        <a
+                                            key={item.key}
+                                            href={item.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={item.label}
+                                            title={item.label}
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-accent hover:bg-accent hover:text-white"
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        )}
                         <p className="mt-8 text-xs text-slate-500">© {new Date().getFullYear()} {siteName}</p>
                     </div>
                     <div>
@@ -212,9 +263,9 @@ function NavItem({ item }) {
                 {item.label}
                 {item.badge && <span className="ml-1 rounded bg-accent/30 px-1.5 py-0.5 text-[10px] font-semibold text-accent">{item.badge}</span>}
             </a>
-            <div className="invisible absolute left-0 top-full z-50 min-w-44 rounded-xl border border-white/10 bg-[#000411] py-2 opacity-0 shadow-2xl shadow-black/30 transition group-hover:visible group-hover:opacity-100">
+            <div className="invisible absolute left-0 top-full z-50 min-w-44 rounded-xl border border-primary/10 bg-white py-2 opacity-0 shadow-2xl shadow-slate-300/40 transition group-hover:visible group-hover:opacity-100">
                 {item.children.map((child) => (
-                    <a key={child.id} href={child.url} className="block px-4 py-2 text-sm text-slate-100 transition hover:bg-white/5 hover:text-accent" target={child.open_in_new_tab ? '_blank' : undefined}>
+                    <a key={child.id} href={child.url} className="block px-4 py-2 text-sm text-slate-700 transition hover:bg-accent/10 hover:text-primary" target={child.open_in_new_tab ? '_blank' : undefined}>
                         {child.label}
                     </a>
                 ))}
@@ -231,7 +282,7 @@ function MobileNavItem({ item, onNavigate }) {
         return (
             <a
                 href={item.url}
-                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-slate-100 transition hover:bg-white/5 hover:text-accent"
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-slate-700 transition hover:bg-accent/10 hover:text-primary"
                 onClick={onNavigate}
                 {...props}
             >
@@ -242,8 +293,8 @@ function MobileNavItem({ item, onNavigate }) {
     }
 
     return (
-        <details className="rounded-lg border border-white/10 bg-white/5">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium text-slate-100">
+        <details className="rounded-lg border border-primary/10 bg-white">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium text-slate-700">
                 <span>
                     {item.label}
                     {item.badge && <span className="ml-2 rounded bg-accent/30 px-1.5 py-0.5 text-[10px] font-semibold text-accent">{item.badge}</span>}
@@ -255,7 +306,7 @@ function MobileNavItem({ item, onNavigate }) {
                     <a
                         key={child.id}
                         href={child.url}
-                        className="flex min-h-10 items-center rounded-md px-3 text-sm text-slate-100 transition hover:bg-white/5 hover:text-accent"
+                        className="flex min-h-10 items-center rounded-md px-3 text-sm text-slate-700 transition hover:bg-accent/10 hover:text-primary"
                         target={child.open_in_new_tab ? '_blank' : undefined}
                         onClick={onNavigate}
                     >

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImageField from '@/components/admin/ImageField';
+import RichTextEditor from '@/Components/Editor/RichTextEditor';
 import { LuArrowUpDown, LuPenLine, LuPlus, LuSearch, LuTrash2 } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 
@@ -74,7 +75,12 @@ export default function ServicesIndex({ services, filters = {} }) {
                                     <tr key={service.id} className="transition hover:bg-muted/30">
                                         <td className="px-4 py-3">
                                             <span className="font-medium text-foreground">{service.title}</span>
-                                            <span className="text-muted-foreground mt-1 block max-w-xl text-xs leading-5">{service.description || '-'}</span>
+                                            <span className="text-muted-foreground mt-1 block max-w-xl text-xs leading-5">{stripHtml(service.description) || '-'}</span>
+                                            {service.sub_services?.length > 0 && (
+                                                <span className="text-muted-foreground mt-1 block text-xs">
+                                                    {service.sub_services.length} sub-service
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
@@ -133,6 +139,7 @@ function ServiceFormModal({ open, onOpenChange, data }) {
         cta_url: data?.cta_url || '',
         order: data?.order || 0,
         is_active: data?.is_active ?? true,
+        sub_services: normalizeSubServices(data?.sub_services),
     });
 
     useEffect(() => {
@@ -146,8 +153,26 @@ function ServiceFormModal({ open, onOpenChange, data }) {
             cta_url: data?.cta_url || '',
             order: data?.order || 0,
             is_active: data?.is_active ?? true,
+            sub_services: normalizeSubServices(data?.sub_services),
         });
     }, [open, data?.id]);
+
+    const subServices = form.data.sub_services || [];
+
+    function updateSubService(index, key, value) {
+        form.setData('sub_services', subServices.map((item, i) => i === index ? { ...item, [key]: value } : item));
+    }
+
+    function addSubService() {
+        form.setData('sub_services', [
+            ...subServices,
+            { name: '', description: '', image: '', order: subServices.length, is_active: true },
+        ]);
+    }
+
+    function removeSubService(index) {
+        form.setData('sub_services', subServices.filter((_, i) => i !== index));
+    }
 
     function close() {
         onOpenChange(false);
@@ -184,7 +209,7 @@ function ServiceFormModal({ open, onOpenChange, data }) {
 
                 <form onSubmit={submit} className="space-y-4">
                     <Field label="Nama Layanan" value={form.data.title} onChange={(value) => form.setData('title', value)} required />
-                    <Textarea label="Deskripsi" value={form.data.description} onChange={(value) => form.setData('description', value)} />
+                    <RichTextField label="Deskripsi" value={form.data.description} onChange={(value) => form.setData('description', value)} />
                     <ImageField label="Foto Layanan" value={form.data.image} onChange={(value) => form.setData('image', value)} placeholder="/storage/media/service.jpg" />
 
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -202,6 +227,42 @@ function ServiceFormModal({ open, onOpenChange, data }) {
                         Aktif
                     </label>
 
+                    <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-sm font-semibold">Sub-Service</h3>
+                                <p className="text-xs text-muted-foreground">Item layanan turunan yang tampil di kartu layanan.</p>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={addSubService}>
+                                <LuPlus className="size-4" />
+                                Tambah Sub-Service
+                            </Button>
+                        </div>
+
+                        {subServices.length === 0 && (
+                            <p className="rounded-md bg-background px-3 py-3 text-sm text-muted-foreground">Belum ada sub-service.</p>
+                        )}
+
+                        {subServices.map((item, index) => (
+                            <div key={item.id || index} className="space-y-3 rounded-md border bg-background p-3">
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-xs font-semibold text-muted-foreground">Sub-Service #{index + 1}</span>
+                                    <Button type="button" variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => removeSubService(index)}>
+                                        <LuTrash2 className="size-4" />
+                                    </Button>
+                                </div>
+                                <Field label="Nama Sub-Service" value={item.name} onChange={(value) => updateSubService(index, 'name', value)} required />
+                                <RichTextField label="Deskripsi Sub-Service" value={item.description} onChange={(value) => updateSubService(index, 'description', value)} minHeightClass="min-h-32" />
+                                <ImageField label="Gambar Sub-Service" value={item.image} onChange={(value) => updateSubService(index, 'image', value)} placeholder="/storage/media/sub-service.jpg" />
+                                <Field label="Urutan" type="number" value={item.order} onChange={(value) => updateSubService(index, 'order', Number(value) || 0)} />
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" checked={item.is_active ?? true} onChange={(event) => updateSubService(index, 'is_active', event.target.checked)} />
+                                    Aktif
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className="flex gap-2">
                         <Button type="submit" size="sm" disabled={form.processing}>{isEdit ? 'Simpan' : 'Tambah'}</Button>
                         <Button type="button" variant="ghost" size="sm" onClick={close}>Batal</Button>
@@ -210,6 +271,30 @@ function ServiceFormModal({ open, onOpenChange, data }) {
             </DialogContent>
         </Dialog>
     );
+}
+
+function normalizeSubServices(items = []) {
+    return (items || []).map((item, index) => ({
+        id: item.id,
+        name: item.name || '',
+        description: item.description || '',
+        image: item.image || '',
+        order: item.order ?? index,
+        is_active: item.is_active ?? true,
+    }));
+}
+
+function RichTextField({ label, value, onChange, minHeightClass = 'min-h-44' }) {
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <RichTextEditor value={value || ''} onChange={onChange} minHeightClass={minHeightClass} />
+        </div>
+    );
+}
+
+function stripHtml(content = '') {
+    return String(content).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function SortHeader({ label, col, current, onSort }) {

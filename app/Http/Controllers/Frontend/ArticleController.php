@@ -25,6 +25,7 @@ class ArticleController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug']),
             'selectedCategory' => $selectedCategory?->slug,
+            'selectedCategoryDescription' => $selectedCategory?->description,
             'articles' => Article::query()
                 ->published()
                 ->when($selectedCategory, fn ($query) => $query->where('category_id', $selectedCategory->id))
@@ -38,8 +39,9 @@ class ArticleController extends Controller
                 ->withQueryString(),
             'filters' => ['search' => $search],
             'seo' => [
-                'title' => $selectedCategory?->meta_title ?: ($selectedCategory?->name ?: 'Blog'),
-                'description' => $selectedCategory?->meta_description ?: ($selectedCategory?->description ?: 'Artikel terbaru seputar service laptop, gadget, dan solusi IT.'),
+                'title' => $selectedCategory?->meta_title ?: ($selectedCategory?->name ? $selectedCategory->name.' - Blog' : 'Blog - Artikel Service Laptop & Gadget'),
+                'description' => $selectedCategory?->meta_description ?: ($selectedCategory?->description ? strip_tags($selectedCategory->description) : 'Artikel terbaru seputar service laptop, gadget, tips perawatan, dan solusi IT terpercaya.'),
+                'keywords' => 'service laptop, gadget, tips perawatan laptop, perbaikan laptop, teknologi',
                 'canonical' => $selectedCategory ? route('blog.index', ['category' => $selectedCategory->slug]) : route('blog.index'),
                 'og_type' => 'website',
             ],
@@ -72,16 +74,22 @@ class ArticleController extends Controller
             ->take(3)
             ->get();
 
+        $keywords = is_array($article->meta_keywords) ? implode(', ', $article->meta_keywords) : ($article->meta_keywords ?? '');
+
         return Inertia::render('Frontend/Article', [
             'article' => $article,
             'relatedArticles' => $relatedArticles,
             'schema' => $seoGenerator->schemaForArticle($article),
             'seo' => [
                 'title' => $article->meta_title ?: $article->title,
-                'description' => $article->meta_description ?: $article->excerpt,
+                'description' => $article->meta_description ?: ($article->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($article->content ?? ''), 155)),
+                'keywords' => $keywords,
                 'og_image' => $article->og_image ?: $article->thumbnail,
                 'canonical' => route('blog.show', $article->slug),
                 'og_type' => 'article',
+                'published_time' => optional($article->published_at ?? $article->created_at)->toIso8601String(),
+                'modified_time' => optional($article->updated_at)->toIso8601String(),
+                'author' => $article->author?->name ?? config('app.name'),
             ],
             'breadcrumbs' => [
                 ['name' => 'Home', 'url' => url('/')],
